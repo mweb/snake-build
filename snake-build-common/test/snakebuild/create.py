@@ -3,11 +3,11 @@
 
 import unittest
 
-from test_common import TestCommon
+import communication
 
 
 def suite():
     ''' Get the test suite for the common snakebuild classes. '''
-    common = unittest.TestLoader().loadTestsFromTestCase(TestCommon)
+    communication_test = communication.suite()
 
-    return unittest.TestSuite([common])
+    return unittest.TestSuite([communication_test])

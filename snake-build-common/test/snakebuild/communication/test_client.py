@@ -4,8 +4,8 @@
 import unittest
 
 
-class TestCommon(unittest.TestCase):
-    ''' The unit test for the snake build common classes. '''
+class TestClient(unittest.TestCase):
+    ''' The unit test for the snake build communication Client class. '''
     def setUp(self):
         pass
 

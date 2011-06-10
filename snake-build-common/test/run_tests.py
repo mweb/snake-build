@@ -5,10 +5,10 @@ import unittest
 import sys
 import os
 
+import snakebuild
+
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(
         os.path.realpath(sys.argv[0])), '..')))
-
-import snakebuild
 
 
 if __name__ == '__main__':
