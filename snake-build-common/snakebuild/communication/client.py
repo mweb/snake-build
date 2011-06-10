@@ -98,7 +98,18 @@ def Client(object):
         ''' Wait for a messag from the server and parse it acording to the
             message type.
         '''
-        pass
+        mtype = sock.recv(1)
+        if len(mtype) != 1:
+            sock.close()
+            raise ClientCommunicationException('Could not receive the message '
+                    'type from the server.')
+
+        if ord(mtype) == 0x61:
+            return self._parse_sjson_data(sock)
+        else:
+            sock.close()
+            raise ClientCommunicationException('Received an unsuported '
+                    'communication type. Got: %2x' % ord(mtype))
 
     def _prepare_sjson_data(self, msg):
         ''' Prepare the data for a sjson request.
@@ -109,12 +120,12 @@ def Client(object):
         '''
         pass
 
-    def _parse_sjson_data(self, msg):
-        ''' Parse the given string as a sjson data string. The message given
-            must be with the full header.
+    def _parse_sjson_data(self, sock):
+        ''' Read the sjson object from the given socket. Only the message type
+            must be read from the sock object.
 
-            @param msg: The message string including the full header of the
-                    message
+            @param sock: The socket to read the rest of the message only the 
+                    message type should be read from the socket.
             @return: the dictionary/list or other basic type parsed with the
                     json parser.
         '''
