@@ -43,6 +43,10 @@ class Client(object):
             multiple nexted dicts and list but it should be kept as simple
             as possible.
 
+            The answer of this command returns the command and the paramers 
+            as a python type. This might be dictionary or a list or any other 
+            python basic type and as with the send param it can be nested.
+
             @param mtype: The type of the message to send. Use the defined
                 types of this class (SJSON)
             @param cmd: The command to send to the server.
@@ -52,9 +56,7 @@ class Client(object):
             @param no_answer: If set to true no answer expected so don't wait
                     for it.
 
-            @return: The answer from the server as a touple (type, answer) The
-                    type specifies the answer type and the answer is the
-                    rest of the message as a string.
+            @return: The answer from the server as a tuple (cmd, parameters)
         '''
         if mtype >= self.UNKNWON:
             raise ClientCommunicationException('The given message type is not '
@@ -83,6 +85,9 @@ class Client(object):
     def _receive(self, sock):
         ''' Wait for a messag from the server and parse it acording to the
             message type.
+
+            @param sock: The socket to use for receiving the data
+            @return: the command param tuple (cmd, parameters)
         '''
         mtype = sock.recv(1)
         if len(mtype) != 1:
