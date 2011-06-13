@@ -34,3 +34,7 @@ class DummySocket(object):
         msg = self.data[:length]
         self.data = self.data[length:]
         return msg
+
+    def close(self):
+        ''' Simulate the close method of the socket. Clear the data buffer. '''
+        self.data = ''

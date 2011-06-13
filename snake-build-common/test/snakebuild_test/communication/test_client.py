@@ -113,17 +113,45 @@ class TestClient(unittest.TestCase):
         dummy_sock.add_data(message_string)
         self.assertIsNone(cli._parse_sjson_data(dummy_sock))
 
-    def _test_receive(self):
-        ''' Test the private method _receive. This method expects a socket to
-            receive the data. With this test we provide a dummy socket that
-            provides the expected data.
+    def test_receive_sjson(self):
+        ''' Test the private method _receive. Receive a sjson message.
+
+            This method expects a socket to receive the data. With this test
+            we provide a dummy socket that provides the expected data.
         '''
         data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
             'others': 'Elephant'}}
-        orig = copy.deepcopy(data)
 
-#        cli = Client('', 22222)
-        # TODO
-#        dummy_sock = DummySocket()
-#        dummy_sock.add_data(message_string)
-#        message = cli._receive(dummy_sock)
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = ('a' + chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        cli = Client('', 22222)
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        answer = cli._receive(dummy_sock)
+
+        self.assertTrue(answer == data)
+
+    def test_receive_unknown(self):
+        ''' Test the private method _receive. Receive a unknown type.
+
+            This method expects a socket to receive the data. With this test
+            we provide a dummy socket that provides the expected data.
+        '''
+        data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
+            'others': 'Elephant'}}
+
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = ('.' + chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        cli = Client('', 22222)
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        with self.assertRaises(ClientCommunicationException):
+            cli._receive(dummy_sock)
