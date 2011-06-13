@@ -1,6 +1,11 @@
 == Communication
 
 === Server
+There is a simple server implementation available for usage to implement a 
+server which provides services to a client. The message handling is completely
+implemented and nothing the user has to take care of. See the python doc of 
+the server to see how to use it.
+
 TODO
 
 === Client

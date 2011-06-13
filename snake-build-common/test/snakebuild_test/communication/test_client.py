@@ -2,7 +2,6 @@
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
 
 import unittest
-import copy
 import json
 
 from snakebuild.communication.client import Client, \
