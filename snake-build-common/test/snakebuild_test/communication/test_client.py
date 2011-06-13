@@ -61,9 +61,9 @@ class TestClient(unittest.TestCase):
         cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
-        answer = cli._parse_sjson_data(dummy_sock)
-
-        self.assertTrue(answer == data)
+        cmd, param = cli._parse_sjson_data(dummy_sock)
+        self.assertTrue(cmd == data['cmd'])
+        self.assertTrue(param == data['parameters'])
 
     def test_parse_sjson_illegal_data(self):
         ''' Test the private method _parse_sjson_data illegal data.
@@ -130,9 +130,9 @@ class TestClient(unittest.TestCase):
         cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
-        answer = cli._receive(dummy_sock)
-
-        self.assertTrue(answer == data)
+        cmd, param = cli._receive(dummy_sock)
+        self.assertTrue(cmd == data['cmd'])
+        self.assertTrue(param == data['parameters'])
 
     def test_receive_unknown(self):
         ''' Test the private method _receive. Receive a unknown type.

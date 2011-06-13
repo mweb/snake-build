@@ -16,28 +16,9 @@ class Client(object):
         The message send and receive implmented within this class is a simple
         protocoll where the first byte sent defines the type of the message
         currently only one type is supported.
-        The communication is always with a TCP/IP socket. Nothing else is
-        curently supported.
 
-        Message Types:
-
-        sjson
-        -----
-        Identifier byte = 'a' or 0x61
-          | |    | ... |
-           |   |    \----> The data bytes as a json string (must be complete)
-           |   |           the length must comply with the length given in the
-           |   |           length field.
-           |   \---------> The length field (4 bytes) specifying the length of
-           |               the message. Must be encoded as big-endian.
-           \-------------> The idenifier byte (must be 'a' or as value 0x61)
-
-        The data type to provide for sending a SJSON request must be a
-        dictionary/list or other basic type that can be transformed to a json
-        string without special handling. The answer for a sjson message is
-        a dictionary/list or other basic type as well.
-
-        No other types are currently supported but others might follow.
+        See the Snake-Build Dev documentation for more information about the
+        protocol.
     '''
     # this defines the known message types
     SJSON, UNKNWON = range(2)
@@ -53,16 +34,21 @@ class Client(object):
         self.host = host
         self.port = port
 
-    def send(self, mtype, msg, no_answer=False):
+    def send(self, mtype, cmd, param, no_answer=False):
         ''' Send a message to the server ans try to receive an answer if this
-            isn't disabled. The message type must be specified and the message
-            data must be provided as the expected type for the given type.
+            isn't disabled.
+
+            The param can be anything from a dictionary, list to an int, float
+            or any other basic type. Even None. It is possible to have
+            multiple nexted dicts and list but it should be kept as simple
+            as possible.
 
             @param mtype: The type of the message to send. Use the defined
                 types of this class (SJSON)
-            @param msg: The message to send. Must be of the right type for
-                    the given message type (SJSON for example takes a
-                    dictionary which can be transformed to json).
+            @param cmd: The command to send to the server.
+            @param param: The message parameters to send. Must be a python
+                    basic type (dictionary, list, int, float, boolean, string,
+                    None)
             @param no_answer: If set to true no answer expected so don't wait
                     for it.
 
@@ -70,12 +56,12 @@ class Client(object):
                     type specifies the answer type and the answer is the
                     rest of the message as a string.
         '''
-        if mtype >= UNKNWON:
+        if mtype >= self.UNKNWON:
             raise ClientCommunicationException('The given message type is not '
                     'supported.')
 
-        if mtype == SJSON:
-            data = self._prepare_sjson_data(msg)
+        if mtype == self.SJSON:
+            data = self._prepare_sjson_data({'cmd': cmd, 'parameters': param})
 #        elif mytype == OTHER:
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -130,10 +116,13 @@ class Client(object):
         ''' Read the sjson object from the given socket. Only the message type
             must be read from the sock object.
 
+            The answer of this command returns the command from the json
+            string and the paramers as a python type might be dictionary or
+            a list or any other python basic type.
+
             @param sock: The socket to read the rest of the message only the
                     message type should be read from the socket.
-            @return: the dictionary/list or other basic type parsed with the
-                    json parser.
+            @return: a tuple (command, parameters)
         '''
         size_data = sock.recv(4)
         if not len(size_data) == 4:
@@ -150,4 +139,12 @@ class Client(object):
                     ' from the client. Expected %d bytes but got: %d' %
                     (length, len(data)))
 
-        return json.loads(data)
+        answer = json.loads(data)
+        if not 'cmd' in answer:
+            raise ClientCommunicationException('The answer received did not '
+                    "have a 'cmd' key.")
+        if not 'parameters' in answer:
+            raise ClientCommunicationException('The answer received did not '
+                    "have a 'parameters' key.")
+
+        return answer['cmd'], answer['parameters']
