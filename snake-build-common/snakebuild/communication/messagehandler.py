@@ -22,7 +22,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             self._parse_sjson_request()
         else:
             log.error('The message type received is not supported. got: %x' %
-                    data[0])
+                    ord(data[0]))
             return
 
     def _parse_sjson_request(self):
@@ -33,11 +33,12 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             log.error('The message received did not return 4 bytes for the '
                     'length of th message: Only got: %d' % len(length_data))
             return
-        length = ((ord(data[0]) << 24) + (ord(data[1]) << 16) +
-                (ord(data[2]) << 8) + ord(data[3]))
+        length = ((ord(length_data[0]) << 24) + (ord(length_data[1]) << 16) +
+                (ord(length_data[2]) << 8) + ord(length_data[3]))
 
         data = self.request.recv(length)
         if not len(data) == length:
+            print "HERE %d / %d" % (len(data), length)
             log.error('Wrong length of data received: Expected %d but got %d' %
                     (length, len(data)))
             return
