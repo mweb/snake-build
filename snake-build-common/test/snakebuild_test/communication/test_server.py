@@ -3,7 +3,7 @@
 
 import unittest
 
-from snakebuild.communication.client import Server, \
+from snakebuild.communication.server import Server, \
         ServerCommunicationException
 
 #from test_helpers.dummysocket import DummySocket
