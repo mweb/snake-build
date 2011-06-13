@@ -2,6 +2,7 @@
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
 
 import socket
+import json
 
 
 def ClientCommunicationException(Exception):
@@ -11,7 +12,7 @@ def ClientCommunicationException(Exception):
     pass
 
 
-def Client(object):
+class Client(object):
     ''' This class is simple wrapper class for communication with a server.
         The message send and receive implmented within this class is a simple
         protocoll where the first byte sent defines the type of the message
@@ -118,13 +119,19 @@ def Client(object):
                     server as a json string.
             @return: the message as a string including the header.
         '''
-        pass
+        message = json.dumps(msg)
+        length = len(message)
+        data = ('a' + chr((length >> 24) % 256) + chr((length >> 16) % 256) +
+                chr((length >> 8) % 256) + chr(length % 256))
+
+        data += message
+        return data
 
     def _parse_sjson_data(self, sock):
         ''' Read the sjson object from the given socket. Only the message type
             must be read from the sock object.
 
-            @param sock: The socket to read the rest of the message only the 
+            @param sock: The socket to read the rest of the message only the
                     message type should be read from the socket.
             @return: the dictionary/list or other basic type parsed with the
                     json parser.
