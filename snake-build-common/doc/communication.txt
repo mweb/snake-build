@@ -1,0 +1,51 @@
+== Communication
+
+=== Server
+TODO
+
+=== Client
+TODO
+
+=== Protocols
+The server and client provide the possibilety to communicate with different 
+protocols. Currently only the sjson protocol is supported. The content of the 
+data must always be the same.
+Each message command or answer consist always out of two parts the first is the
+command identifier which is a simple string (no distinction between upper and 
+lower case characters) and the parameters for the command which is a structure
+that can be represented with the python standard elements such as dictionary, 
+list or simple types like: int, float, string or boolean.
+
+==== Message Types
+Currently only the sjson message type is supported but other might follow if
+required.
+
+===== sjson
+
+The following shows the message structure of a simple request.
+
+.Message Structure
+----
+| |    | ... |
+ |   |    \----> The data bytes as a json string (must be complete)
+ |   |           the length must comply with the length given in the
+ |   |           length field.
+ |   \---------> The length field (4 bytes) specifying the length of
+ |               the message. Must be encoded as big-endian.
+ \-------------> The idenifier byte (must be 'a' or as value 0x61)
+----
+
+The first 5 bytes are used for the header of the message. The data of the 
+message must be a normal json string with the right encoding. (UTF-8)
+
+Since the data are encoded as json the must be stored as a dictionary with at
+least two keys: "cmd" and "parameters" all other keys will be ignored.
+
+.Data Example
+----
+{
+  "cmd" : "test",
+  "parameters" : { "value1" : 1, "value2" : 2 }
+}
+----
+
