@@ -6,8 +6,6 @@ import unittest
 from snakebuild.communication.server import Server, \
         ServerCommunicationException
 
-#from test_helpers.dummysocket import DummySocket
-
 
 class TestServer(unittest.TestCase):
     ''' The unit test for the snake build communication Server class. '''

@@ -7,7 +7,7 @@ import time
 import logging
 import SocketServer
 
-from snakebuilder.communication import MessageHandler
+from snakebuild.communication.messagehandler import MessageHandler
 
 log = logging.getLogger('snakebuild.communication.messagehandler')
 
