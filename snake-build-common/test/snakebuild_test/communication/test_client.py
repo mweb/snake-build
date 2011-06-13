@@ -5,7 +5,10 @@ import unittest
 import copy
 import json
 
-from snakebuild.communication.client import Client
+from snakebuild.communication.client import Client, \
+        ClientCommunicationException
+
+from test_helpers.dummysocket import DummySocket
 
 
 class TestClient(unittest.TestCase):
@@ -49,13 +52,66 @@ class TestClient(unittest.TestCase):
         '''
         data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
             'others': 'Elephant'}}
-        orig = copy.deepcopy(data)
 
-#        cli = Client('', 22222)
-        # TODO
-#        dummy_sock = DummySocket()
-#        dummy_sock.add_data(message_string)
-#        message = cli._parse_sjson_data(dummy_sock)
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        cli = Client('', 22222)
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        answer = cli._parse_sjson_data(dummy_sock)
+
+        self.assertTrue(answer == data)
+
+    def test_parse_sjson_illegal_data(self):
+        ''' Test the private method _parse_sjson_data illegal data.
+
+            This method expectes to receive a socket and reads from this a
+            sjson data string. This tests creates a mockup of a socket to
+            provide the data.
+        '''
+        data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
+            'others': 'Elephant'}}
+
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg[:-12]
+
+        cli = Client('', 22222)
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        # got wrong length of message (not all data available)
+        with self.assertRaises(ClientCommunicationException):
+            cli._parse_sjson_data(dummy_sock)
+
+        length = len(msg) - 12
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg[:-12]
+        dummy_sock.add_data(message_string)
+
+        # got complete message but can't be pared as json
+        with self.assertRaises(ValueError):
+            cli._parse_sjson_data(dummy_sock)
+
+    def test_parse_sjson_no_data(self):
+        ''' Test the private method _parse_sjson_data empty message.
+
+            This method expectes to receive a socket and reads from this a
+            sjson data string. This tests creates a mockup of a socket to
+            provide the data.
+        '''
+        message_string = chr(0) + chr(0) + chr(0) + chr(0)
+
+        cli = Client('', 22222)
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        self.assertIsNone(cli._parse_sjson_data(dummy_sock))
 
     def _test_receive(self):
         ''' Test the private method _receive. This method expects a socket to

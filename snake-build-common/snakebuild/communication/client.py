@@ -5,11 +5,10 @@ import socket
 import json
 
 
-def ClientCommunicationException(Exception):
+class ClientCommunicationException(BaseException):
     ''' The exception that gets trown on an error during the communication with
         the server.
     '''
-    pass
 
 
 class Client(object):
@@ -27,8 +26,8 @@ class Client(object):
         Identifier byte = 'a' or 0x61
           | |    | ... |
            |   |    \----> The data bytes as a json string (must be complete)
-           |   |           the lenght must comply with the length given in the
-           |   |           lenght field.
+           |   |           the length must comply with the length given in the
+           |   |           length field.
            |   \---------> The length field (4 bytes) specifying the length of
            |               the message. Must be encoded as big-endian.
            \-------------> The idenifier byte (must be 'a' or as value 0x61)
@@ -136,4 +135,19 @@ class Client(object):
             @return: the dictionary/list or other basic type parsed with the
                     json parser.
         '''
-        pass
+        size_data = sock.recv(4)
+        if not len(size_data) == 4:
+            raise ClientCommunicationException('Could not receive the message'
+                    "header. Expected 4 bytes but got: %d" % len(size_data))
+        length = ((ord(size_data[0]) << 24) + (ord(size_data[1]) << 16) +
+                (ord(size_data[2]) << 8) + ord(size_data[3]))
+        if length == 0:
+            return None
+
+        data = sock.recv(length)
+        if not len(data) == length:
+            raise ClientCommunicationException('Could not receive all the data'
+                    ' from the client. Expected %d bytes but got: %d' %
+                    (length, len(data)))
+
+        return json.loads(data)
