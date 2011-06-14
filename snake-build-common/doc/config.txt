@@ -1,0 +1,89 @@
+== Configuration
+
+The configuration can be done with ini file but for the default values and the
+description of the configuration values a json default configuration is
+required. The Config class from the snakebuild.common package provides a method
+'init_default_config' to load such a json file. 
+
+=== Configure the Config
+
+The json file to configure the config object must have the following structure
+and must be provided before any value gets accessed and before all other config
+files are loaded.
+
+.Example JSON File
+----
+{
+    "application_name" : "SnakeBuild",
+    "SnakeBuild": {
+        "logging": {
+            "default": "stdout",
+            "type": "str",
+            "description": "Set the output directory for logging information"
+        },
+        "answer": {
+            "default": 42,
+            "type": int,
+            "description": "Ultimate Answer to the Ultimate Question of Life, The Universe and Everything."
+        }
+    },
+    "client": {
+        "user_id": {
+            "default": "Arther Dent",
+            "type": "unicode",
+            "description": "The name of the user."
+        }
+    }
+}
+----
+
+IMPORTANT: The keys are all transfered to lower case since the ini format does
+not support differentiation of upper and lower case letters.
+
+Each key within a section must have the three keys: `default`, `type` and
+`description`. The only key that must be defined is the `application_name` it 
+requires a string as the value and this is the name that is used to load the 
+default config files (`etc/${APPLICATION_NAME}/${APPLICATION_NAME}.conf`)
+It is not necessary that a section with the application_name is defined but it
+can be defined.
+
+The types of the values is used for the `get_s` method of the Config object.
+All the values will always be translated to the specified type if possible
+otherwise an `ConfigValueException` is thrown. The following types are 
+supported:
+
+* *str* A simple 7bit encoded string (python `string`)
+* *unicode* A unicode encoded string (python `unicode`)
+* *int* A integer value (python `int`)
+* *float* A floating point value (python `float`)
+* *bool* A boolean value (python 'bool')
+
+=== Usage of the Config Object
+
+The Config object is implemented as a singleton and thefore can be used from
+any place within your code. But it is important that the init_default_config
+method was called before any other request.
+
+After this call it is possible to load the default config files which are 
+searched in the following order on Linux:
+
+. `/etc/${APPLICATION_NAME}/${APPLICATION_NAME}.conf`
+. `~/.${APPLICATION_NAME}/${APPLICATION_NAME}.conf`
+. specified with the `--config-file parameter`
+
+On Windows this order is slightly differnt:
+
+. *NOT YET DEFINED OR IMPLEMENTED*
+
+After this the config values can be access with the section and key.
+
+.Example
+[source,python]
+----
+from snakebuild.common import Config
+
+Config().init_default_config('/usr/share/applicatin_name/config.json')
+Config().load_default()
+userid = Config().get_s('client', 'user_id')
+----
+

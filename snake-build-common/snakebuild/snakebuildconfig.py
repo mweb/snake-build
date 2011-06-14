@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
 
-# THIS IS snakebuild-common CONFIGURATION FILE
-# YOU CAN PUT THERE SOME GLOBAL VALUE
-# Do not touch unless you know what you're doing.
-# you're warned :)
+''' THIS IS snakebuild-common CONFIGURATION FILE
+    YOU CAN PUT THERE SOME GLOBAL VALUE
+    Do not touch unless you know what you're doing.
+    you're warned :)
+'''
 
 __all__ = [
-    'project_path_not_found',
+    'ProjectPathNotFound',
     'get_data_file',
     'get_config_file',
     'get_data_path',
@@ -23,11 +24,11 @@ __license__ = 'Mathias Weber, 2006-2011'
 import os
 
 import gettext
-from gettext import gettext as _
+#from gettext import gettext as _
 gettext.textdomain('snakebuild')
 
 
-class project_path_not_found(Exception):
+class ProjectPathNotFound(Exception):
     """Raised when we can't find the project directory."""
     pass
 
@@ -69,7 +70,7 @@ def get_data_path():
 
     abs_data_path = os.path.abspath(path)
     if not os.path.exists(abs_data_path):
-        raise project_path_not_found
+        raise ProjectPathNotFound
 
     return abs_data_path
 
@@ -91,5 +92,5 @@ def get_config_path():
 
     abs_data_path = os.path.abspath(path)
     if not os.path.exists(abs_data_path):
-        raise project_path_not_found
+        raise ProjectPathNotFound
     return abs_data_path

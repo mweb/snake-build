@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+''' The Server object proovides a server instance which runs forever or until
+    the shutdown method is called. It will listen for clients and forward
+    all connections to the MessageHandler. The Server requires a dictionary
+    with all supported commands with a function to call.
+'''
 
 import threading
 import socket
@@ -9,7 +14,7 @@ import SocketServer
 
 from snakebuild.communication.messagehandler import MessageHandler
 
-log = logging.getLogger('snakebuild.communication.messagehandler')
+LOG = logging.getLogger('snakebuild.communication.messagehandler')
 
 
 class ServerCommunicationException(BaseException):
@@ -80,13 +85,13 @@ class Server(object):
                 self.server = ThreadedTCPServer((self.host, self.port),
                         MessageHandler)
             except socket.error:
-                log.warning('Could not open network connection, will try again'
+                LOG.warning('Could not open network connection, will try again'
                         ' within a few seconds.')
                 time.sleep(2)
-        log.info('Server started.')
+        LOG.info('Server started.')
 
         self.server.commands = self.commands
         if self.server_running:
             self.server.serve_forever()
 
-        log.info('Shutdown the server.')
+        LOG.info('Shutdown the server.')

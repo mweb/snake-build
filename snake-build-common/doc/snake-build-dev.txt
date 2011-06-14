@@ -13,5 +13,7 @@ Snake-Build is not one server that can be run and then everything is ready to
 use. It is seperated into several sub modules. 
 TODO give overview over the different modules
 
+include::config.txt[]
+
 include::communication.txt[]
 

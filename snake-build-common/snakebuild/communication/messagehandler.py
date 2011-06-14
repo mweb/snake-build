@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+''' The MessageHandler gets created from the server and does the handling of
+    messages received from the client. The supported commands are specified
+    within the server instance (commands)
+'''
 
 import SocketServer
 import json
 import logging
 
-log = logging.getLogger('snakebuild.communication.messagehandler')
+LOG = logging.getLogger('snakebuild.communication.messagehandler')
 
 
 class MessageHandler(SocketServer.BaseRequestHandler):
@@ -21,7 +25,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         if ord(data[0]) == 0x61:
             self._parse_sjson_request()
         else:
-            log.error('The message type received is not supported. got: %x' %
+            LOG.error('The message type received is not supported. got: %x' %
                     ord(data[0]))
             return
 
@@ -30,7 +34,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         '''
         length_data = self.request.recv(4)
         if not len(length_data) == 4:
-            log.error('The message received did not return 4 bytes for the '
+            LOG.error('The message received did not return 4 bytes for the '
                     'length of th message: Only got: %d' % len(length_data))
             return
         length = ((ord(length_data[0]) << 24) + (ord(length_data[1]) << 16) +
@@ -39,40 +43,40 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         data = self.request.recv(length)
         if not len(data) == length:
             print "HERE %d / %d" % (len(data), length)
-            log.error('Wrong length of data received: Expected %d but got %d' %
+            LOG.error('Wrong length of data received: Expected %d but got %d' %
                     (length, len(data)))
             return
         try:
             cmd = json.loads(data)
         except ValueError:
-            log.error('Could not parse the received data. Not a valid json '
+            LOG.error('Could not parse the received data. Not a valid json '
                     'string.')
             return
         if not 'cmd' in cmd:
-            log.error("The message received did not have a 'cmd' key.")
+            LOG.error("The message received did not have a 'cmd' key.")
             return
         if not 'parameters' in cmd:
-            log.error("The message received did not have a 'parameters' key.")
+            LOG.error("The message received did not have a 'parameters' key.")
             return
 
-        self._handle_cmd(cmd['cmd'], cmd['parameters'],
+        _handle_cmd(cmd['cmd'], cmd['parameters'],
                 self.request.server.commands)
 
-    def _handle_cmd(self, cmd, parameters, commands):
-        ''' Handle the given command if it is specified within the commands.
+def _handle_cmd(cmd, parameters, commands):
+    ''' Handle the given command if it is specified within the commands.
 
-            @param cmd: The command as a string
-            @param parameters: The paramters for the command
-            @param commands: The dictionary with the suported commands
-        '''
-        cmd = cmd.lower()
-        if cmd in commands:
-            return commands[cmd][0](cmd, parameters)
+        @param cmd: The command as a string
+        @param parameters: The paramters for the command
+        @param commands: The dictionary with the suported commands
+    '''
+    cmd = cmd.lower()
+    if cmd in commands:
+        return commands[cmd][0](cmd, parameters)
+    else:
+        cmd_list = dict((k.lower(), v) for k, v in commands.iteritems())
+        if cmd.lower() in cmd_list:
+            return cmd_list[cmd][0](cmd, parameters)
         else:
-            cmd_list = dict((k.lower(), v) for k, v in commands.iteritems())
-            if cmd.lower() in cmd_list:
-                return cmd_list[cmd][0](cmd, parameters)
-            else:
-                log.error("The requested command '%d' is not supported by the "
-                        "given server implementation." % cmd)
-                return
+            LOG.error("The requested command '%d' is not supported by the "
+                    "given server implementation." % cmd)
+            return

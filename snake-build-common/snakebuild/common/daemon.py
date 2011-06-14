@@ -30,21 +30,6 @@ History:
     2003/02/24 by Clark Evans
     2006/01/25 by Robert Niederreiter
     2008/06/06 by Mathias Weber
-
-Class Daemon is used to run any routine in the background on unix environments
-as daemon.
-
-There are several things to consider:
-
-*The instance object given to the constructor MUST provide a run method with
-represents the main routine of the deamon
-
-*The instance object MUST provide global file descriptors for (and named as):
-    -stdin
-    -stdout
-    -stderr
-
-*The instance object MUST provide a global (and named as) pidfile.
 """
 
 __author__ = """Robert Niederreiter <office@squarewave.at>"""
@@ -60,10 +45,26 @@ import logging
 
 from signal import SIGTERM
 
-log = logging.getLogger('resourcehandler.common.Daemon')
+LOG = logging.getLogger('snakebuild.common.Daemon')
 
 
 class Daemon(object):
+    ''' Class Daemon is used to run any routine in the background on unix
+        environments as daemon.
+
+        There are several things to consider:
+
+        * The instance object given to the constructor MUST provide a run
+            method with represents the main routine of the deamon
+
+        * The instance object MUST provide global file descriptors for (and 
+            named as):
+            - stdin
+            - stdout
+            - stderr
+
+        * The instance object MUST provide a global (and named as) pidfile.
+    '''
     START, STOP, RESTART, UNKNOWN = range(4)
     UMASK = 0
     WORKDIR = "."
@@ -98,8 +99,8 @@ class Daemon(object):
             pid = os.fork()
             if pid > 0:
                 sys.exit(0)
-        except OSError, e:
-            log.error("fork #1 failed: (%d) %s\n" % (e.errno, e.strerror))
+        except OSError, err:
+            LOG.error("fork #1 failed: (%d) %s\n" % (err.errno, err.strerror))
             sys.exit(1)
 
         os.chdir(self.WORKDIR)
@@ -110,28 +111,28 @@ class Daemon(object):
             pid = os.fork()
             if pid > 0:
                 sys.exit(0)
-        except OSError, e:
-            log.error("fork #2 failed: (%d) %s\n" % (e.errno, e.strerror))
+        except OSError, err:
+            LOG.error("fork #2 failed: (%d) %s\n" % (err.errno, err.strerror))
             sys.exit(1)
 
         if not self.instance.stderr:
             self.instance.stderr = self.instance.stdout
 
-        si = file(self.instance.stdin, 'r')
-        so = file(self.instance.stdout, 'a+')
-        se = file(self.instance.stderr, 'a+', 0)
+        stdi = file(self.instance.stdin, 'r')
+        stdo = file(self.instance.stdout, 'a+')
+        stde = file(self.instance.stderr, 'a+', 0)
 
         pid = str(os.getpid())
 
-        log.info("\n%s\n" % self.startmsg % pid)
+        LOG.info("\n%s\n" % self.startmsg % pid)
         sys.stderr.flush()
 
         if self.instance.pidfile:
             file(self.instance.pidfile, 'w+').write("%s\n" % pid)
 
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
+        os.dup2(stdi.fileno(), sys.stdin.fileno())
+        os.dup2(stdo.fileno(), sys.stdout.fileno())
+        os.dup2(stde.fileno(), sys.stderr.fileno())
 
     def startstop(self, action):
         """Start/stop/restart behaviour.
@@ -139,14 +140,14 @@ class Daemon(object):
             @param action: this defines if the action for the application.
         """
         try:
-            pf = file(self.instance.pidfile, 'r')
-            pid = int(pf.read().strip())
-            pf.close()
+            pidf = file(self.instance.pidfile, 'r')
+            pid = int(pidf.read().strip())
+            pidf.close()
         except IOError:
             pid = None
         if action == self.STOP or action == self.RESTART:
             if not pid:
-                log.error("Could not stop, pid file '%s' missing.\n" %
+                LOG.error("Could not stop, pid file '%s' missing.\n" %
                         self.instance.pidfile)
                 sys.exit(1)
             try:
@@ -166,7 +167,7 @@ class Daemon(object):
                     sys.exit(1)
         if action == self.START:
             if pid:
-                log.error("Start aborded since pid file '%s' exists.\n" % \
+                LOG.error("Start aborded since pid file '%s' exists.\n" % \
                         self.instance.pidfile)
                 sys.exit(1)
             self.deamonize()
