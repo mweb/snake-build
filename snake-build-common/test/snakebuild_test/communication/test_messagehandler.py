@@ -4,7 +4,7 @@
 import unittest
 import json
 
-from snakebuild.communication.messagehandler import MessageHandler
+from snakebuild.communication.messagehandler import MessageHandler, _handle_cmd
 
 from test_helpers.dummysocket import DummySocket
 from test_helpers.dummycontainer import DummyContainer
@@ -58,10 +58,8 @@ class TestMessageHandler(unittest.TestCase):
 
     def test_handle_cmd(self):
         ''' Test the private method of the message handler class. '''
-        dummy = DummySocket()
-        hdlr = MessageHandler(dummy, None, None)
         self.got_handled = {'cmd': None, 'parameters': None}
-        hdlr._handle_cmd('test', [1, 2, 3],
+        _handle_cmd('test', [1, 2, 3],
                 {'test': (self._handle_call_back,)})
         self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['parameters'] == [1, 2, 3])

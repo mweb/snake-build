@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+''' The unit tests for the Client object and its methods. '''
 
 import unittest
 import json
 
-from snakebuild.communication.client import Client, \
-        ClientCommunicationException
+from snakebuild.communication.client import Client, _receive, \
+        ClientCommunicationException, _prepare_sjson_data, _parse_sjson_data
 
 from test_helpers.dummysocket import DummySocket
 
@@ -24,8 +25,7 @@ class TestClient(unittest.TestCase):
         data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
             'others': 'Elephant'}}
 
-        cli = Client('', 22222)
-        message = cli._prepare_sjson_data(data)
+        message = _prepare_sjson_data(data)
 
         # check if messgae identifier is sjson 0x61 or 'a'
         self.assertTrue(ord(message[0]) == 0x61)
@@ -58,10 +58,9 @@ class TestClient(unittest.TestCase):
                 chr((length >> 16) % 256) + chr((length >> 8) % 256) +
                 chr(length % 256)) + msg
 
-        cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
-        cmd, param = cli._parse_sjson_data(dummy_sock)
+        cmd, param = _parse_sjson_data(dummy_sock)
         self.assertTrue(cmd == data['cmd'])
         self.assertTrue(param == data['parameters'])
 
@@ -81,12 +80,11 @@ class TestClient(unittest.TestCase):
                 chr((length >> 16) % 256) + chr((length >> 8) % 256) +
                 chr(length % 256)) + msg[:-12]
 
-        cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
         # got wrong length of message (not all data available)
         with self.assertRaises(ClientCommunicationException):
-            cli._parse_sjson_data(dummy_sock)
+            _parse_sjson_data(dummy_sock)
 
         length = len(msg) - 12
         message_string = (chr((length >> 24) % 256) +
@@ -96,7 +94,7 @@ class TestClient(unittest.TestCase):
 
         # got complete message but can't be pared as json
         with self.assertRaises(ValueError):
-            cli._parse_sjson_data(dummy_sock)
+            _parse_sjson_data(dummy_sock)
 
     def test_parse_sjson_no_data(self):
         ''' Test the private method _parse_sjson_data empty message.
@@ -107,10 +105,9 @@ class TestClient(unittest.TestCase):
         '''
         message_string = chr(0) + chr(0) + chr(0) + chr(0)
 
-        cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
-        self.assertIsNone(cli._parse_sjson_data(dummy_sock))
+        self.assertIsNone(_parse_sjson_data(dummy_sock))
 
     def test_receive_sjson(self):
         ''' Test the private method _receive. Receive a sjson message.
@@ -127,10 +124,9 @@ class TestClient(unittest.TestCase):
                 chr((length >> 16) % 256) + chr((length >> 8) % 256) +
                 chr(length % 256)) + msg
 
-        cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
-        cmd, param = cli._receive(dummy_sock)
+        cmd, param = _receive(dummy_sock)
         self.assertTrue(cmd == data['cmd'])
         self.assertTrue(param == data['parameters'])
 
@@ -149,8 +145,7 @@ class TestClient(unittest.TestCase):
                 chr((length >> 16) % 256) + chr((length >> 8) % 256) +
                 chr(length % 256)) + msg
 
-        cli = Client('', 22222)
         dummy_sock = DummySocket()
         dummy_sock.add_data(message_string)
         with self.assertRaises(ClientCommunicationException):
-            cli._receive(dummy_sock)
+            _receive(dummy_sock)
