@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+''' The unit test for the Config object '''
 
 import unittest
 import json
@@ -57,14 +58,45 @@ class TestConfig(unittest.TestCase):
                 12.2)
         self._check_value('client', 'fifth', 'Belcerebons', bool, True, True)
 
-        self._check_value('server', 'first', 'Betelgeusians', str, 'End', 
+        self._check_value('server', 'first', 'Betelgeusians', str, 'End',
                 'End')
-        self._check_value('server', 'second', 'Blagulon Kappans', unicode, 
+        self._check_value('server', 'second', 'Blagulon Kappans', unicode,
                 'Accelerate', 'Accelerate')
         self._check_value('server', 'third', 'Dentrassis', int, -12, -12)
         self._check_value('server', 'forth', 'Dolphins', float, 3.3333, 3.3333)
         self._check_value('server', 'fifth', "G'Gugvunnts and Vl'hurgs", bool,
                 False, False)
+
+    def test_set_config(self):
+        ''' Test seting and getting values from the config object '''
+        config = Config()
+        config.set('client', 'first', 12)
+        self._check_value('client', 'first', 'Aldebarans', str, 'Start', "12")
+        config.set('client', 'second', 12.45)
+        self._check_value('client', 'second', 'Altairians', unicode, 'Stop',
+                '12.45')
+        config.set('client', 'third', -16)
+        self._check_value('client', 'third', 'Amoeboid Zingatularians', int,
+                12, -16)
+        config.set('client', 'forth', 11)
+        self._check_value('client', 'forth', 'Bartledanians', float, 12.2,
+                11.0)
+        config.set('client', 'fifth', False)
+        self._check_value('client', 'fifth', 'Belcerebons', bool, True, False)
+
+        config.set('server', 'first', True)
+        self._check_value('server', 'first', 'Betelgeusians', str, 'End',
+                'True')
+        config.set('server', 'second', "Arther Dent")
+        self._check_value('server', 'second', 'Blagulon Kappans', unicode,
+                'Accelerate', 'Arther Dent')
+        config.set('server', 'third', 42)
+        self._check_value('server', 'third', 'Dentrassis', int, -12, 42)
+        config.set('server', 'forth', 42.43)
+        self._check_value('server', 'forth', 'Dolphins', float, 3.3333, 42.43)
+        config.set('server', 'fifth', True)
+        self._check_value('server', 'fifth', "G'Gugvunnts and Vl'hurgs", bool,
+                False, True)
 
     def _check_value(self, section, key, edesc, etype, edefault, evalue):
         ''' Check if the given config value has the expected values.

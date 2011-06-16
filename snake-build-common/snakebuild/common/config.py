@@ -74,6 +74,7 @@ class Config(object, ConfigParser.SafeConfigParser):
 
             @param section: the section where the key is stored.
             @param key:     the key to get the description for.
+            @return: A tuple with three elements First
         '''
         if section in self.config_description:
             if key in self.config_description[section]:
@@ -94,7 +95,8 @@ class Config(object, ConfigParser.SafeConfigParser):
                 # config values but is not initialized.
                 return "", str, ""
             else:
-                raise ConfigValueException('Section does not exist [%s]' % section)
+                raise ConfigValueException('Section does not exist [%s]' %
+                        section)
 
     def load_default(self):
         ''' Load the default config files.
@@ -186,14 +188,23 @@ class Config(object, ConfigParser.SafeConfigParser):
         if filename is None:
             if (not self.has_section(self.application_name) or
                     not self.has_option(self.application_name, 'config_file')):
-                self.set_default_parameters(self.application_name,
-                        {'config_file': (os.path.join(os.path.expanduser('~'),
-                                '.%s' % self.application_name, '%s.conf' %
-                                self.application_name),
-                                'The config file to overwrite on change of'
-                                'the config values. [$HOME/.%s/%s.conf]' %
-                                (self.application_name, self.application_name),
-                                str)})
+                if not self.has_section(self.application_name):
+                    self.add_section(self.application_name)
+                if not self.application_name in self.config_description:
+                    self.config_description[self.application_name] = {}
+                value = os.path.join(os.path.expanduser('~'),
+                        '.%s' % self.application_name, '%s.conf' %
+                        self.application_name)
+                if not self.has_option(self.application_name, 'config_file'):
+                    self.set(self.application_name, 'config_file', value)
+                if not ('config_file' in
+                        self.config_description[self.application_name]):
+                    self.config_description[self.application_name]\
+                            ['config_file'] = ('The config file to overwrite '
+                                'on change of the config values. '
+                                '[$HOME/.%s/%s.conf]' % (self.application_name,
+                                self.application_name), str, value)
+
             filename = self.get(self.application_name, 'config_file')
 
         if not os.path.exists(os.path.dirname(filename)):
@@ -238,7 +249,6 @@ class Config(object, ConfigParser.SafeConfigParser):
             vtype = _get_type(value['type'])
             self.config_description[section][key] = (value['description'],
                     vtype, value['default'])
-
 
 
 def _get_type(stype):
