@@ -13,7 +13,7 @@ import logging
 import ConfigParser
 
 # common imports
-from snakebuild.common import singleton
+from snakebuild.common import singleton, output
 from snakebuild.snakebuildconfig import get_config_file
 
 LOG = logging.getLogger('snakebuild.common.config')
@@ -179,12 +179,13 @@ class Config(object, ConfigParser.SafeConfigParser):
 
         ConfigParser.SafeConfigParser.set(self, section, key, str(value))
 
-    def save(self, filename=None):
+    def save(self, filename=None, verbose=False):
         ''' Save the config to the given file or the set default location.
 
             @param filename: the file to write the config
+            @param verbose: If set to true the config file will have all values
+                    and all descriptions
         '''
-        # TODO only write values that differ from the default values
         if filename is None:
             if (not self.has_section(self.application_name) or
                     not self.has_option(self.application_name, 'config_file')):
@@ -221,6 +222,31 @@ class Config(object, ConfigParser.SafeConfigParser):
         if hidden is not None:
             for key, value in hidden:
                 self.set('hidden', key, value)
+
+    def _write_config(self, filedesc, verbose=False):
+        ''' Write the current config to the given filedescriptor which has must
+            be opened for writing.
+            Only the config values different from the default value are written
+
+            If the verbose switch is turned on the config file generated will
+            have all values including the default values shown but they will
+            be commented out. In addition the description of each paramters
+            is stored before the value.
+
+            @param filedesc: The file to write the config into
+            @param verbose: The switch between the minimalistic and the more
+                    verbose config file.
+        '''
+        for section in self.sections():
+            filedesc.write('[%s]\n' % section)
+            for key in self.options(section):
+                descr, value_type, default = self.get_description(section, key)
+                if verbose:
+                    filedesc.write(output.format_message(descr, "# ", 78))
+                    filedesc.write("# Type: [%s]" % str(value_type))
+                    filedesc.write("# %s=%s" % (key, default))
+                if not self.get_s(section, key) == default:
+                    filedesc.write('%s=%s' % (key, self.get_s(section, key)))
 
     def _add_section_default(self, section, parameters):
         ''' Add the given section with the given paramters to the config. The
