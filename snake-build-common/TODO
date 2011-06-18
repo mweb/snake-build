@@ -1,4 +1,6 @@
-Next: 02
+Next: 03
 
 TODO:
 -----
+02 - Implement a check of the resulting save files (low prio) 
+        -> currently check by hand
