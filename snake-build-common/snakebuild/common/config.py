@@ -41,9 +41,7 @@ class Config(object, ConfigParser.SafeConfigParser):
     __metaclass__ = singleton.Singleton
 
     def __init__(self):
-        default_parameters = {
-                'HOME': os.path.expanduser('~/')}
-        ConfigParser.SafeConfigParser.__init__(self, default_parameters)
+        ConfigParser.SafeConfigParser.__init__(self)
         self.config_description = {}
         self.application_name = ""
 
@@ -217,7 +215,8 @@ class Config(object, ConfigParser.SafeConfigParser):
             self.remove_section('hidden')
 
         cfp = open(filename, 'w')
-        self.write(cfp)
+#        self.write(cfp)
+        self._write_config(cfp, verbose)
 
         if hidden is not None:
             for key, value in hidden:
@@ -237,16 +236,24 @@ class Config(object, ConfigParser.SafeConfigParser):
             @param verbose: The switch between the minimalistic and the more
                     verbose config file.
         '''
+        desc = []
         for section in self.sections():
-            filedesc.write('[%s]\n' % section)
+            if section.lower() == '' or section.lower() == 'hidden':
+                continue
+            desc.append("")
+            desc.append('[%s]' % section)
             for key in self.options(section):
                 descr, value_type, default = self.get_description(section, key)
                 if verbose:
-                    filedesc.write(output.format_message(descr, "# ", 78))
-                    filedesc.write("# Type: [%s]" % str(value_type))
-                    filedesc.write("# %s=%s" % (key, default))
+                    desc.append(output.format_message(descr, "# ", 78))
+                    desc.append("# Type: [%s]" % str(value_type))
+                    desc.append("# %s=%s" % (key, default))
                 if not self.get_s(section, key) == default:
-                    filedesc.write('%s=%s' % (key, self.get_s(section, key)))
+                    desc.append('%s=%s' % (key, self.get_s(section, key)))
+                if verbose:
+                    desc.append("")
+
+        filedesc.write("%s\n" % ("\n".join(desc[1:])))
 
     def _add_section_default(self, section, parameters):
         ''' Add the given section with the given paramters to the config. The

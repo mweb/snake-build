@@ -67,6 +67,19 @@ class TestConfig(unittest.TestCase):
         self._check_value('server', 'fifth', "G'Gugvunnts and Vl'hurgs", bool,
                 False, False)
 
+    def test_save_default_config(self):
+        ''' Test the save functionality of the config module '''
+        config = Config()
+        config.save('data/test_default_output.txt')
+        config.save('data/test_default_output_verbose.txt', True)
+        config.set('client', 'first', 42)
+        config.set('client', 'second', 42)
+        config.set('server', 'first', 42)
+        config.set('server', 'second', 42)
+        config.save('data/test_save_output.txt')
+        config.save('data/test_save_output_verbose.txt', True)
+
+
     def test_set_config(self):
         ''' Test seting and getting values from the config object '''
         config = Config()
