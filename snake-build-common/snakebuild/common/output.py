@@ -9,7 +9,7 @@ import os
 __LINE_LENGTH = None
 
 
-def format_message(value, indent="", line_length=None, first_ident=None):
+def format_message(value, indent="", line_length=None, first_indent=None):
     ''' Return a string with newlines so that the given string fits into this
         line length. At the start of the line the indent is added. This can
         be used for commenting the message out within a file or to indent your
@@ -20,35 +20,35 @@ def format_message(value, indent="", line_length=None, first_ident=None):
         All \\t will be replaced with 4 spaces.
 
         @param value: The string to get as a commented multiline comment.
-        @param ident: The ident to use for printing or charcter to put in front
+        @param indent: The indent to use for printing or charcter to put in 
+                front
         @param line_length: The length of the line to fill. (default None)
-        @param first_ident: The first ident might be shorter. If None then the
-                first line uses the normal ident as the rest of the string.
+        @param first_indent: The first indent might be shorter. If None then 
+                the first line uses the normal indent as the rest of the 
+                string.
 
         @return: The string with newlines
     '''
     if indent.find('\t'):
         indent = indent.replace('\t', '    ')
-    line_length = get_line_lengt(line_length) - len(indent)
+    line_length = get_line_lengt(line_length)
 
     result = []
-    if first_ident is None:
-        first_ident = indent
-    tmp = first_ident
-    first = True
+    if first_indent is None:
+        first_indent = indent
+    cindent = first_indent
+    tmp = "*" * line_length
     for ele in value.split(' '):
-        if ele.find('\t'):
+        if ele.find('\t') >= 0:
             ele = ele.replace('\t', '    ')
-        if len(ele) + len(tmp) > line_length:
+        if (len(ele) + len(tmp)) >= line_length:
             result.append(tmp)
-            tmp = '%s%s' % (indent, ele)
+            tmp = '%s%s' % (cindent, ele)
+            cindent = indent
         else:
-            if first:
-                tmp = "%s%s" % (tmp, ele)
-                first = False
-            else:
-                tmp = "%s %s" % (tmp, ele)
-
+            tmp = "%s %s" % (tmp, ele)
+    result.append(tmp)
+    result = result[1:]
     return "\n".join(result)
 
 
