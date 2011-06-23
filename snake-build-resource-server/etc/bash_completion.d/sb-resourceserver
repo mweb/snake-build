@@ -1,0 +1,34 @@
+_sbresourceserver()
+{
+    local cur prev params base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    params="--help -h -f --configfile -v --version"
+
+    if [ ${COMP_CWORD} -eq 0 ]; then
+        COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
+        return 0
+    fi
+
+    case "${prev}" in
+        --help | -h)
+            return 0
+            ;;
+        --configfile | -f)
+            COMPREPLY=( $(compgen -o nospace -f -- ${cur}) )
+            return 0
+            ;;
+    esac
+
+    COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
+    return 0
+}
+
+complete -F _sbresourceserver sb-resourceserver
