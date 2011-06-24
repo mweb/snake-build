@@ -11,23 +11,16 @@ PROJECT_ROOT_DIRECTORY = os.path.abspath(
     os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
 
 if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY,
-        'snakebuild_resourceserver')) and
-        PROJECT_ROOT_DIRECTORY not in sys.path):
+        'snakebuild')) and PROJECT_ROOT_DIRECTORY not in sys.path):
     sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
     # add the common library from the dev path
-    COMMON_PATH = os.path.abspath(os.path.join(PROJECT_ROOT_DIRECTORY, '..',
-        'snake-build-common'))
-    sys.path.insert(0, COMMON_PATH)
-    os.putenv('PYTHONPATH', os.pathsep.join([PROJECT_ROOT_DIRECTORY,
-            COMMON_PATH]))  # for subprocesses
+    os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY)  # for subprocesses
 
-#import csmbuilder
 from snakebuild.common import create_logger, Config, \
         set_logging_to_config_values
-from snakebuild_resourceserver import __version__, parse_command_line, \
-        start_server
-from snakebuild_resourceserver.snakebuild_resourceserverconfig import \
-        get_data_file
+from snakebuild import __version__
+from snakebuild.resourceserver import parse_command_line, start_server
+from snakebuild.snakebuildconfig import get_data_file
 
 LOG = logging.getLogger('snakebuild.resourceserver')
 
@@ -54,8 +47,8 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # this is a linux only solution this should be fixed for windows
-    if not os.path.exists('/tmp/snakebuild-resourceserver'):
-        os.mkdir('/tmp/snakebuild-resourceserver')
+    if not os.path.exists('/tmp/snakebuild'):
+        os.mkdir('/tmp/snakebuild')
 
     start_server(options, args)
 
