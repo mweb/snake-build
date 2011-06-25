@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
 
-#from resourcehandler.common import output, Config
-
+from snakebuild.common import Daemon
+from snakebuild.resourceserver import ResourceServer
 
 def start_server(options,  arguments):
     ''' Start the resource server.
@@ -15,7 +15,13 @@ def start_server(options,  arguments):
     if not len(arguments) == 0:
         # TODO
         return False
-#    conf = Config()
+
+    if options.foreground:
+        Daemon(ResourceServer(), Daemon.FOREGROUND)
+    elif options.stop:
+        Daemon(ResourceServer(), Daemon.STOP)
+    else:
+        Daemon(ResourceServer(), Daemon.START)
     try:
         print "START HERE"
     except KeyboardInterrupt:

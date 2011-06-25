@@ -41,9 +41,9 @@ import os
 import sys
 import time
 import logging
-
-
 from signal import SIGTERM
+
+from snakebuild.common import output
 
 LOG = logging.getLogger('snakebuild.common.Daemon')
 
@@ -57,7 +57,7 @@ class Daemon(object):
         * The instance object given to the constructor MUST provide a run
             method with represents the main routine of the deamon
 
-        * The instance object MUST provide global file descriptors for (and 
+        * The instance object MUST provide global file descriptors for (and
             named as):
             - stdin
             - stdout
@@ -65,7 +65,7 @@ class Daemon(object):
 
         * The instance object MUST provide a global (and named as) pidfile.
     '''
-    START, STOP, RESTART, UNKNOWN = range(4)
+    START, STOP, RESTART, FOREGROUND, UNKNOWN = range(5)
     UMASK = 0
     WORKDIR = "."
     instance = None
@@ -134,6 +134,15 @@ class Daemon(object):
         os.dup2(stdo.fileno(), sys.stdout.fileno())
         os.dup2(stde.fileno(), sys.stderr.fileno())
 
+    def createpid(self):
+        """ Create the pid file for running the application (run in
+            foreground).
+        """
+        pid = str(os.getpid())
+
+        if self.instance.pidfile:
+            file(self.instance.pidfile, 'w+').write("%s\n" % pid)
+
     def startstop(self, action):
         """Start/stop/restart behaviour.
 
@@ -147,7 +156,7 @@ class Daemon(object):
             pid = None
         if action == self.STOP or action == self.RESTART:
             if not pid:
-                LOG.error("Could not stop, pid file '%s' missing.\n" %
+                LOG.error("Could not stop, pid file '%s' missing." %
                         self.instance.pidfile)
                 sys.exit(1)
             try:
@@ -167,8 +176,15 @@ class Daemon(object):
                     sys.exit(1)
         if action == self.START:
             if pid:
-                LOG.error("Start aborded since pid file '%s' exists.\n" % \
+                LOG.error("Start aborted since pid file '%s' exists." %
                         self.instance.pidfile)
                 sys.exit(1)
             self.deamonize()
+            return
+        if action == self.FOREGROUND:
+            if pid:
+                print >> sys.stderr, output.format_message("Start aborted "
+                        "since pid file '%s' exists." % self.instance.pidfile)
+                sys.exit(1)
+            self.createpid()
             return
