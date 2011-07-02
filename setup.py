@@ -110,7 +110,7 @@ class InstallAndUpdateDataDirectory(install):
 setup(
     name='snakebuild-common',
     version='0.01.00',
-    license='Copyright: (C) 2006-2011 Mathias Weber',
+    license='GPL v3.0',
     author='Mathias Weber',
     author_email='mathew.weber@gmail.com',
     description='The common libraries for the snake build build server '
