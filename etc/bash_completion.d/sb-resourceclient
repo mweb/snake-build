@@ -1,11 +1,11 @@
-_sbresourceserver()
+_sbresourceclient()
 {
     local cur prev params base
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    params="--help -h -f --configfile --foreground -v --version"
+    params="--help -h -f --configfile -v --version"
 
     if [ ${COMP_CWORD} -eq 0 ]; then
         COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
@@ -31,4 +31,4 @@ _sbresourceserver()
     return 0
 }
 
-complete -F _sbresourceserver sb-resourceserver
+complete -F _sbresourceclient sb-resourceclient
