@@ -1,0 +1,24 @@
+Snake Build
+-----------
+
+Snake Build has the goal to provide a build server for C/C++ projects including
+embedded projects. It should not be limited to C/C++ but this should be the
+main focus.
+
+The main difference between this Build server and the other build servers is
+that all the configuration and build instructions for a project should be
+stored within a version control system. This could be http://git-scm.com/[GIT]
+or http://mercurial.selenic.com/[Mercurial] but should not be limited to those.
+
+Overviews
+~~~~~~~~~
+
+The build server it self should consists out of several seperated modules. By 
+dividing it into several seperate applications it is possible to have this 
+modules running on seperate servers which helps to reduce the load and should
+get a better scalabilety since not everything depends on a single instance.
+
+image::application_overview.png[]
+
+The image above shows the different components.
+
