@@ -1,9 +1,9 @@
 Snake Build
 -----------
 
-Snake Build has the goal to provide a build server for C/C++ projects including
-embedded projects. It should not be limited to C/C++ but this should be the
-main focus.
+Snake Build has the goal to provide a build server for C/C\++ projects
+including embedded projects. It should not be limited to C/C++ but this
+should be the main focus.
 
 The main difference between this Build server and the other build servers is
 that all the configuration and build instructions for a project should be
@@ -22,3 +22,70 @@ image::application_overview.png[]
 
 The image above shows the different components.
 
+There are 4 different servers available, one client application and one agent
+application. Each of those have one distinct job.
+
+Control Server;;
+    The Control Server is the server most users will use directly
+    since this server will provide a webfrontend to controll and read the
+    status of the other servers. (This is the frontend of snake build)
+
+Reporting Server;;
+    The reporting server is the server instance which receives
+    all the build reports from all the build jobs, from the resource server and
+    from the build server. It will collect all the data and provides the
+    interface to query this informations.
+
+Resource Server;;
+    The resource server is the server which provides all the resources which
+    can be used for building testing or anything else we can imaging that need
+    to have a regulated access. The resources which he provides do not need to
+    be connected the the resource server they might be fully indipendend or
+    maybe they are not even capable to talk with a server. The server just
+    assumes that the configured resources are available as configured.
+
+Resource Client;;
+    The resource client is not a resource it self it is a simple binary to
+    request and release resources from the resource server. This binary will
+    provide other commands to control the resource server.
+
+Build Server;;
+    The build server is the server which handles the build action. It does
+    the triggering of the builds and tests. All the builds are configured via
+    the build server he knows when to call what. It supports using different
+    versions of the build scripts which are available and lets a build client
+    run the right version of the scripts.
+
+Build Client;;
+    The build client is a simple worker client which gets the commands from the
+    server to run. Each client will be able to run one task at a time but it is
+    possible to have multiple clients running on one server to have mutiple
+    jobs at the same time on one server. The build clients get handled via the
+    resource server and therfore each build client is a resource as well but
+    the client will not talk directly to the resource server since this is not
+    necessary. The build clients sends the build results to the reporting
+    server.
+
+Build Scripts
+~~~~~~~~~~~~~
+
+The build scripts are stored within a source repository this allows to develop
+new build steps without affecting current builds which are still running on the
+existing server.
+
+Most other build system advise you to put your build scripts to the source of
+your project. This might be ok if you have different build scripts for each
+project but if you have an environment where you would like to control the
+buildsteps in one place then this is not very practical to have them within
+each project. It is possible to store the build scripts in one place and only
+link to the scripts from the projects. This would work much better but if you
+intend to use it relieable you still need to change each project just to test
+the build steps.
+
+By having the build scripts stored on the buildserver it is possible to change
+the buildscripts for a project without chaning the repository of the original
+project and within the build results we can store the revision of the build
+scripts which where used to build the project. This way it is possible to
+change the build scripts in one place and you still now which version was used
+but the developers it self do not need to know which version of the build
+scripts they should use.
