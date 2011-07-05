@@ -13,10 +13,10 @@ or http://mercurial.selenic.com/[Mercurial] but should not be limited to those.
 Overviews
 ~~~~~~~~~
 
-The build server it self should consists out of several seperated modules. By 
-dividing it into several seperate applications it is possible to have this 
-modules running on seperate servers which helps to reduce the load and should
-get a better scalabilety since not everything depends on a single instance.
+The build server it self should consists out of several separated modules. By 
+dividing it into several separate applications it is possible to have this 
+modules running on separate servers which helps to reduce the load and should
+get a better scalability since not everything depends on a single instance.
 
 image::application_overview.png[]
 
@@ -27,7 +27,7 @@ application. Each of those have one distinct job.
 
 Control Server;;
     The Control Server is the server most users will use directly
-    since this server will provide a webfrontend to controll and read the
+    since this server will provide a webfrontend to control and read the
     status of the other servers. (This is the frontend of snake build)
 
 Reporting Server;;
@@ -40,7 +40,7 @@ Resource Server;;
     The resource server is the server which provides all the resources which
     can be used for building testing or anything else we can imaging that need
     to have a regulated access. The resources which he provides do not need to
-    be connected the the resource server they might be fully indipendend or
+    be connected the the resource server they might be fully independent or
     maybe they are not even capable to talk with a server. The server just
     assumes that the configured resources are available as configured.
 
@@ -59,9 +59,9 @@ Build Server;;
 Build Client;;
     The build client is a simple worker client which gets the commands from the
     server to run. Each client will be able to run one task at a time but it is
-    possible to have multiple clients running on one server to have mutiple
+    possible to have multiple clients running on one server to have multiple
     jobs at the same time on one server. The build clients get handled via the
-    resource server and therfore each build client is a resource as well but
+    resource server and therefore each build client is a resource as well but
     the client will not talk directly to the resource server since this is not
     necessary. The build clients sends the build results to the reporting
     server.
@@ -79,11 +79,11 @@ project but if you have an environment where you would like to control the
 buildsteps in one place then this is not very practical to have them within
 each project. It is possible to store the build scripts in one place and only
 link to the scripts from the projects. This would work much better but if you
-intend to use it relieable you still need to change each project just to test
+intend to use it reliable you still need to change each project just to test
 the build steps.
 
 By having the build scripts stored on the buildserver it is possible to change
-the buildscripts for a project without chaning the repository of the original
+the buildscripts for a project without changing the repository of the original
 project and within the build results we can store the revision of the build
 scripts which where used to build the project. This way it is possible to
 change the build scripts in one place and you still now which version was used

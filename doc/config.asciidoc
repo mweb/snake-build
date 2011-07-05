@@ -29,7 +29,7 @@ files are loaded.
     },
     "client": {
         "user_id": {
-            "default": "Arther Dent",
+            "default": "Arthur Dent",
             "type": "unicode",
             "description": "The name of the user."
         }
@@ -37,7 +37,7 @@ files are loaded.
 }
 ----
 
-IMPORTANT: The keys are all transfered to lower case since the ini format does
+IMPORTANT: The keys are all transferred to lower case since the ini format does
 not support differentiation of upper and lower case letters.
 
 Each key within a section must have the three keys: `default`, `type` and
@@ -60,7 +60,7 @@ supported:
 
 === Usage of the Config Object
 
-The Config object is implemented as a singleton and thefore can be used from
+The Config object is implemented as a singleton and therefore can be used from
 any place within your code. But it is important that the init_default_config
 method was called before any other request.
 
@@ -71,7 +71,7 @@ searched in the following order on Linux:
 . `~/.${APPLICATION_NAME}/${APPLICATION_NAME}.conf`
 . specified with the `--config-file parameter`
 
-On Windows this order is slightly differnt:
+On Windows this order is slightly different:
 
 . *NOT YET DEFINED OR IMPLEMENTED*
 
