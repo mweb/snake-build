@@ -22,10 +22,10 @@ that can be represented with the python standard elements such as dictionary,
 list or simple types like: int, float, string or boolean.
 
 ==== Message Types
-Currently only the json message type is supported but other might follow if
-required.
+Currently only the sjson (snake build json) message type is supported but 
+other might follow if required.
 
-===== json
+===== sjson
 
 The following shows the message structure of a simple request.
 
