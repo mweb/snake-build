@@ -24,3 +24,4 @@ from snakebuild.common.singleton import Singleton
 from config import Config
 from logger import create_logger, set_logging_to_config_values
 import output
+from daemon import Daemon
