@@ -55,6 +55,11 @@ class Server(object):
     # this defines the known message types
     SJSON, UNKNWON = range(2)
 
+    pidfile = '/tmp/sb-resourceserver/server.pid'
+    stdin = '/tmp/sb-resourceserver/serverstdin'
+    stdout = '/tmp/sb-resourceserver/serverstdout'
+    stderr = '/tmp/sb-resourceserver/serversterr'
+
     def __init__(self, host, port, commands):
         ''' Create a server object with the given host and port. The server
             does not start listening until the run method is called.

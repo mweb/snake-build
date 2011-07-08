@@ -44,8 +44,8 @@ if __name__ == '__main__':
     options, args = parse_command_line()
     config = Config()
     config.init_default_config(get_data_file('all.conf'))
-    create_logger()
-    set_logging_to_config_values()
+    create_logger('resourceserver')
+    set_logging_to_config_values('resourceserver')
 
     if options.configfile is not None:
         if os.path.isfile(options.configfile):
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             print(options.configfile)
             exit(-1)
 
-    set_logging_to_config_values()
+    set_logging_to_config_values('resourceserver')
     LOG.debug('Config file loaded start the server.')
 
     if options.version:

@@ -26,8 +26,10 @@ from snakebuild.common import config
 #from snakebuild.common import filetools
 
 
-def create_logger():
+def create_logger(appname):
     ''' Create a default logging information and set the default values.
+
+        @param appname: The name of the application to load the config from
     '''
     # change this to WARNING but at the moment DEBUG is ok
     # do regreate the logger with the settings in the config
@@ -36,40 +38,19 @@ def create_logger():
                 '%(message)s',
         filemode='w')
 
-    __set_logger_default_parameters()
-    set_logging_to_config_values()
+    set_logging_to_config_values(appname)
 
 
-def set_logging_to_config_values():
+def set_logging_to_config_values(appname):
     ''' Set the logging to the values specified within the config.
+
+        @param appname: The name of the application to load the config from
     '''
-    __set_log_level_config()
-    __set_log_output_config()
+    __set_log_level_config(appname)
+    __set_log_output_config(appname)
 
 
-def __set_logger_default_parameters():
-    ''' Set the default parameters for the logger, it will be added to the main
-        application parameters. (application_name)
-    '''
-    conf = config.Config()
-    defaultParameters = {
-        'logging_level': ('warning', 'The level of logging messages. '
-                                'Possible values are: fatal, critical, '
-                                'error, warning, info, debug.',
-                    str),
-        'logging': ('stdout', 'The output for the logging. Possible values '
-                                'are stdout (for console output) file (for '
-                                'logging into a file). To use both split the'
-                                ' names with a semicolon.',
-                    str),
-        'logging_dir': ('/var/log/%s' % conf.application_name, 'The directory'
-                                ' where to store the logging file. ',
-                    str)}
-
-    #conf.set_default_parameters(conf.application_name, defaultParameters)
-
-
-def __set_log_level_config():
+def __set_log_level_config(appname):
     ''' Set the log level to the current configured value. Possible values are
         fatal    (show only the fatal messages)
         critical (show only the cirtical and the fatal messages)
@@ -77,11 +58,13 @@ def __set_log_level_config():
         warning  (show the warnings and all above messages)
         info     (show the general information and all above messages)
         debug    (show all messages)
+
+        @param appname: The name of the application to load the config from
     '''
     conf = config.Config()
     logger = logging.getLogger()
     # set the logging level correct
-    level = conf.get(conf.application_name, 'logging_level').lower()
+    level = conf.get_s(appname, 'logging_level').lower()
     if level == 'critical':
         logger.setLevel(logging.CRITICAL)
     elif level == 'debug':
@@ -96,8 +79,10 @@ def __set_log_level_config():
         logger.setLevel(logging.INFO)
 
 
-def __set_log_output_config():
+def __set_log_output_config(appname):
     ''' Set the log output config to the configured value.
+
+        @param appname: The name of the application to load the config from
     '''
     conf = config.Config()
     formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - '
@@ -106,7 +91,7 @@ def __set_log_output_config():
     # set the logging output
     for handler in logger.handlers:
         logger.removeHandler(handler)
-    logtype = conf.get(conf.application_name, 'logging').split(';')
+    logtype = conf.get_s(appname, 'logging').split(';')
     for output in logtype:
         output = output.strip().lower()
         if output == 'stdout':
@@ -114,10 +99,10 @@ def __set_log_output_config():
             handler = logging.StreamHandler()
         elif output == 'file':
             # TODO change this
-            filetools.check_dir(conf.get(conf.application_name, 'logging_dir'))
+            #filetools.check_dir(conf.get_s(appname, 'logging_dir'))
             handler = logging.FileHandler(
-                    os.path.join(conf.get(conf.application_name, 'logging_dir'),
-                                '%s.log' % conf.application_name))
+                    os.path.join(conf.get_s(appname, 'logging_dir'),
+                                '%s.log' % appname))
         elif output == '':
             continue
         else:

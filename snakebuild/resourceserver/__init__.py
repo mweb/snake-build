@@ -20,5 +20,5 @@
     resource server.
 '''
 
-from server import start_server
+from resourceserver import start_server
 from commandlineparser import parse_command_line

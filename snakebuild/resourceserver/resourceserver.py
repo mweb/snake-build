@@ -16,9 +16,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
+''' This file provides a start_server method to start the ResourceServer.
+'''
 
-from snakebuild.common import Daemon
-from snakebuild.resourceserver import ResourceServer
+from snakebuild.common import Daemon, Config
+from snakebuild.communication import Server
 
 def start_server(options,  arguments):
     ''' Start the resource server.
@@ -43,3 +45,16 @@ def start_server(options,  arguments):
     except KeyboardInterrupt:
         print('Abort by Keyboard Interrupt.')
         return False
+
+
+class ResourceServer(Server):
+    ''' The resource server class is the service listening for clients to 
+        ask for resources.
+    '''
+    def __init__(self):
+        ''' Create the Server instance '''
+        host = Config().get_s('resourceserver', 'hostname')
+        port = Config().get_s('resourceserver', 'port')
+        commands = {}
+
+        Server.__init__(self, host, port, commands)
