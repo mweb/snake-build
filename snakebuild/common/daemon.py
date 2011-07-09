@@ -30,6 +30,10 @@ History:
     2003/02/24 by Clark Evans
     2006/01/25 by Robert Niederreiter
     2008/06/06 by Mathias Weber
+    2011/07/09 by Mathias Weber
+
+Included it into the snake-build project and made some project specific 
+changes.
 """
 
 __author__ = """Robert Niederreiter <office@squarewave.at>"""
@@ -117,7 +121,10 @@ class Daemon(object):
 
         if not self.instance.stderr:
             self.instance.stderr = self.instance.stdout
-
+        # create stdin file if it doesn't exist already
+        if not os.path.isfile(self.instance.stdin):
+            stdi = file(self.instance.stdin, 'w')
+            stdi.close()
         stdi = file(self.instance.stdin, 'r')
         stdo = file(self.instance.stdout, 'a+')
         stde = file(self.instance.stderr, 'a+', 0)

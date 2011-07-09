@@ -55,12 +55,7 @@ class Server(object):
     # this defines the known message types
     SJSON, UNKNWON = range(2)
 
-    pidfile = '/tmp/sb-resourceserver/server.pid'
-    stdin = '/tmp/sb-resourceserver/serverstdin'
-    stdout = '/tmp/sb-resourceserver/serverstdout'
-    stderr = '/tmp/sb-resourceserver/serversterr'
-
-    def __init__(self, host, port, commands):
+    def __init__(self, host, port, commands, name):
         ''' Create a server object with the given host and port. The server
             does not start listening until the run method is called.
 
@@ -72,12 +67,19 @@ class Server(object):
             @param port: The network port to use for the connection (as int)
             @param commands: A dictionary with all the supported commands and
                     the methods to call if such a command get received.
+            @param name: This name is used for the identifier for the pid, 
+                    stdin, stdout and stederr files.
         '''
         self.host = host
         self.port = port
         self.commands = commands
         self.server = None
         self.server_running = True
+
+        self.pidfile = '/tmp/snakebuild/%s.pid' % name
+        self.stdin = '/tmp/snakebuild/%sstdin' % name
+        self.stdout = '/tmp/snakebuild/%sstdout' % name
+        self.stderr = '/tmp/snakebuild/%sstderr' % name
 
     def run(self):
         ''' Start the server. This method will not return until the server

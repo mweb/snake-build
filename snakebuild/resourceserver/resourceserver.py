@@ -30,31 +30,30 @@ def start_server(options,  arguments):
                 within this list is always the command it self.
         @return true or false depends on success or failure
     '''
-    if not len(arguments) == 0:
-        # TODO
+    stop = False
+    if not (len(arguments) == 0 or len(arguments) == 1):
+        print "Could not start the resource server illeagel arguments."
         return False
+
+    if len(arguments) == 1:
+        cmd = arguments[0].lower()
+        if cmd == 'stop':
+            stop = True
+        elif cmd == 'start':
+            stop=False
+        else:
+            print "Command not supported for starting: %s" % arguments[0]
+
+    host = Config().get_s('resourceserver', 'hostname')
+    port = Config().get_s('resourceserver', 'port')
+    commands = {}
+    name = 'resourceserver'
 
     if options.foreground:
-        Daemon(ResourceServer(), Daemon.FOREGROUND)
-    elif options.stop:
-        Daemon(ResourceServer(), Daemon.STOP)
+        Daemon(Server(host, port, commands, name), Daemon.FOREGROUND)
+    elif stop:
+        Daemon(Server(host, port, commands, name), Daemon.STOP)
     else:
-        Daemon(ResourceServer(), Daemon.START)
-    try:
-        print "START HERE"
-    except KeyboardInterrupt:
-        print('Abort by Keyboard Interrupt.')
-        return False
+        Daemon(Server(host, port, commands, name), Daemon.START)
 
-
-class ResourceServer(Server):
-    ''' The resource server class is the service listening for clients to 
-        ask for resources.
-    '''
-    def __init__(self):
-        ''' Create the Server instance '''
-        host = Config().get_s('resourceserver', 'hostname')
-        port = Config().get_s('resourceserver', 'port')
-        commands = {}
-
-        Server.__init__(self, host, port, commands)
+    return True
