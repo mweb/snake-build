@@ -33,3 +33,36 @@ def user_data_dir(appname, appauthor=None, version=None, roaming=False):
     ''' Get the path to the user specific data directory for this application.
 
     '''
+    pass
+
+
+def shared_data_dir(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the path to the shared data of the application.
+
+    '''
+    pass
+
+
+def config_dir(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the global config file for this application
+    '''
+    pass
+
+
+def user_config_dir(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the user config directory for this application
+    '''
+    pass
+
+
+def tmp_data_dir(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the path to the directory to store temporary data.
+    '''
+    pass
+
+
+def log_dir(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the path to the log directory for this application.
+    '''
+    pass
+
