@@ -49,6 +49,8 @@
 import sys
 import os
 
+from snakebuild.snakebuildconfig import DATA_DIRECTORY, CONFIG_DIRECTORY
+
 
 class AppDirsException(BaseException):
     ''' This exception gets thrown if one of the app dirs functions have
@@ -56,9 +58,8 @@ class AppDirsException(BaseException):
     '''
 
 
-def user_data_dir(appname, appauthor=None, version=None, roaming=False):
-    ''' Get the path to the user specific data and config directory for this
-        application.
+def get_user_config_path(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the path to the user specific config path for this application.
 
         @appname: The name of the application (this is used for the directory
                 within the data directory.
@@ -91,7 +92,39 @@ def user_data_dir(appname, appauthor=None, version=None, roaming=False):
     return path
 
 
-def shared_data_dir(appname, appauthor=None, version=None):
+def get_config_path(appname, appauthor=None, version=None, roaming=False):
+    ''' Get the path to the global config path for this application.
+
+        @appname: The name of the application (this is used for the directory
+                within the data directory.
+        @appauthor: The name of the author (this is used on windows for getting
+                the right directory within the data dir.
+        @version: The version of app. This is only used if required. For
+                example if the application should allow multiple installation
+                on one system.
+        @roaming: Boolean value set to true if the roaming profile should be
+                used on windows.
+
+        @return: the path to the data/config directory for the given
+                application
+    '''
+    if CONFIG_DIRECTORY is not None:
+        return os.path.join(os.path.dirname(__file__), '..' ,CONFIG_DIRECTORY)
+
+    if sys.platform.startswith('win'):
+        path = get_user_config_path(appname, appauthor, version, roaming)
+    elif sys.platform == 'darwin':
+        path = get_user_config_path(appname, appauthor, version, roaming)
+    else:
+        path = os.path.join('etc', appname.lower())
+
+    if version:
+        path = os.path.join(path, version)
+
+    return path
+
+
+def get_data_path(appname, appauthor=None, version=None):
     ''' Get the path to the shared data of the application. This data are
         readonly and should not be changed and they are installed by the
         application.
@@ -110,28 +143,7 @@ def shared_data_dir(appname, appauthor=None, version=None):
     pass
 
 
-def shared_config_dir(appname, appauthor=None, version=None, roaming=False):
-    ''' Get the global config file for this application. On windows this is
-        the same as the normal config directory. On linux this is
-        /etc/APPNAME
-
-        @appname: The name of the application (this is used for the directory
-                within the data directory.
-        @appauthor: The name of the author (this is used on windows for getting
-                the right directory within the data dir.
-        @version: The version of app. This is only used if required. For
-                example if the application should allow multiple installation
-                on one system.
-        @roaming: Boolean value set to true if the roaming profile should be
-                used on windows.
-
-        @return: the path to the shared config directory for the given
-                application
-    '''
-    pass
-
-
-def tmp_data_dir():
+def tmp_data_path():
     ''' Get the path to the directory to store temporary data.
 
         @return: the path to the tmp data directory
@@ -139,7 +151,7 @@ def tmp_data_dir():
     pass
 
 
-def log_dir(appname, appauthor=None, version=None):
+def log_path(appname, appauthor=None, version=None):
     ''' Get the path to the log directory for this application.
 
         @appname: The name of the application (this is used for the directory
