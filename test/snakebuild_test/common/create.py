@@ -22,11 +22,13 @@ import unittest
 
 from test_config import TestConfig
 from test_output import TestOutput
+from test_appdirs import TestAppdirs
 
 
 def suite():
     ''' Get the test suite for the communication snakebuild classes. '''
     conf = unittest.TestLoader().loadTestsFromTestCase(TestConfig)
     out = unittest.TestLoader().loadTestsFromTestCase(TestOutput)
+    app = unittest.TestLoader().loadTestsFromTestCase(TestAppdirs)
 
-    return unittest.TestSuite([conf, out])
+    return unittest.TestSuite([conf, out, app])
