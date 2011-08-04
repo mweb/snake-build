@@ -23,14 +23,10 @@
     you're warned :)
 '''
 
-__all__ = [
-    'INSTALLED'
-    ]
-
 # Where your project will look for your data (for instance, images and ui
 # files). By default, this is ../data, relative your trunk layout
 __license__ = 'Mathias Weber, 2006-2011'
-INSTALLED = False
+__license__ = 'GPL'
 
 import gettext
 #from gettext import gettext as _
