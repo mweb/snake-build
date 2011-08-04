@@ -16,13 +16,25 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The common package from the snakebuild provide common classes which might
-    be used from all kind other packages.
+''' A simple function to get the current running platform. This is necessary
+    for several parts of the application.
 '''
 
-from snakebuild.common.singleton import Singleton
-from config import Config
-from logger import create_logger, set_logging_to_config_values
-import output
-from daemon import Daemon
-import platform
+import sys
+
+
+WINDOWS, MACOS, LINUX, UNKNOWN = range(4)
+
+
+def get_platform():
+    ''' Get the platform type for the current running system. '''
+    if sys.platform.startswith('win'):
+        return WINDOWS
+    elif sys.platform == 'darwin':
+        return MACOS
+    elif sys.platform.startswith('linux'):
+        return LINUX
+    else:
+        print ("OS type could not be found. We try the Linux configuration if "
+            "this doesn't work switch to a supported platform.")
+        return LINUX
