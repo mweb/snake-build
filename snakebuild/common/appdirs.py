@@ -46,8 +46,10 @@
     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 '''
 
-import sys
 import os
+import tempfile
+
+from snakebuild.common import platform, singleton
 
 
 class AppDirsException(BaseException):
@@ -56,7 +58,84 @@ class AppDirsException(BaseException):
     '''
 
 
-def user_data_dir(appname, appauthor=None, version=None, roaming=False):
+class AppDirs(object):
+    ''' A simple singleton class to simplify usage of the functios bellow. '''
+    __metaclass__ = singleton.Singleton
+
+    def __init__(self):
+        self.appname = None
+        self.appauthor = None
+        self.version = None
+        self.roaming = True
+
+    def init(self, appname, appauthor=None, version=None, roaming=True):
+        ''' Initialize the app dirs class for later usage. The appname must be
+            set all other variables are optional (at least on linux and mac os
+            on windows app author must be set.
+            If the version is provided then a version will be added to the
+            directories.
+
+            @param appname: The application name for getting the directories
+                    for
+            @param appauthor: The name of the author of the application
+                    (company) Only used on windows.
+            @param version: The version of the application only used if set
+            @param roaming: If set to false then the normal windows profile is
+                    used instead of the roaming profile.
+        '''
+        self.appname = appname
+        self.appauthor = appauthor
+        self.version = version
+        self.roaming = roaming
+
+    def get_user_file(self, filename):
+        ''' Get a file within the user data directory.
+
+            @param filename: The name of the file to load.
+        '''
+        return os.path.join(self.user_data_dir, filename)
+
+    def get_shared_data_file(self, filename):
+        ''' Get a file within the shared data directory.
+
+            @param filename: The name of the file to load.
+        '''
+        return os.path.join(self.shared_data_dir, filename)
+
+    def get_shared_config_file(self, filename):
+        ''' Get a file within the shared config directory.
+
+            @param filename: The name of the file to load.
+        '''
+        return os.path.join(self.shared_config_dir, filename)
+
+    def user_data_dir(self):
+        ''' Get the user data directory. The appname must be initialized. '''
+        if self.appname is None:
+            raise AppDirsException('AppDirs object not yet initialized')
+        return user_data_dir(self.appname, self.appauthor, self.version,
+                self.roaming)
+
+    def shared_data_dir(self):
+        ''' Get the user data directory. The appname must be initialized. '''
+        if self.appname is None:
+            raise AppDirsException('AppDirs object not yet initialized')
+        return shared_data_dir(self.appname, self.appauthor, self.version)
+
+    def shared_config_dir(self):
+        ''' Get the user data directory. The appname must be initialized. '''
+        if self.appname is None:
+            raise AppDirsException('AppDirs object not yet initialized')
+        return shared_config_dir(self.appname, self.appauthor, self.version)
+
+    def log_dir(self):
+        ''' Get the user data directory. The appname must be initialized. '''
+        if self.appname is None:
+            raise AppDirsException('AppDirs object not yet initialized')
+        return log_dir(self.appname, self.appauthor, self.version)
+
+
+def user_data_dir(appname, appauthor=None, version=None, roaming=True):
     ''' Get the path to the user specific data and config directory for this
         application.
 
@@ -68,20 +147,22 @@ def user_data_dir(appname, appauthor=None, version=None, roaming=False):
                 example if the application should allow multiple installation
                 on one system.
         @roaming: Boolean value set to true if the roaming profile should be
-                used on windows.
+                used on windows. (default True)
 
         @return: the path to the data/config directory for the given
                 application
     '''
-    if sys.platform.startswith('win'):
+    if platform.get_platform == platform.WINDOWS:
         if appauthor is None:
             raise AppDirsException("On windows the 'appauthor' must be "
                     "specified")
         const = roaming and "CSIDL_APPDATA" or "CSIDL_LOCAL_APPDATA"
         path = os.path.join(_get_win_folder(const), appauthor, appname)
-    elif sys.platform == 'darwin':
+
+    elif platform.get_platform == platform.MACOS:
         path = os.path.join(
                 os.path.expanduser('~/Library/Application Support/'), appname)
+
     else:
         path = os.path.join(os.path.expanduser('~/.config'), appname.lower())
 
@@ -107,10 +188,29 @@ def shared_data_dir(appname, appauthor=None, version=None):
         @return: the path to the shared data directory for the given
                 application
     '''
-    pass
+    if not platform.is_installed:
+        # during development
+        return os.path.join(__file__, '..', '..', 'data')
+
+    elif platform.get_platform == platform.WINDOWS:
+        if appauthor is None:
+            raise AppDirsException("On windows the 'appauthor' must be "
+                    "specified")
+        path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
+                appname)
+
+    elif platform.get_platform == platform.MACOS:
+        path = os.path.join('/Library/Application Support', appname)
+    else:
+        path = os.path.join('/usr', 'share', appname.lower())
+
+    if version:
+        path = os.path.join(path, version)
+
+    return path
 
 
-def shared_config_dir(appname, appauthor=None, version=None, roaming=False):
+def shared_config_dir(appname, appauthor=None, version=None):
     ''' Get the global config file for this application. On windows this is
         the same as the normal config directory. On linux this is
         /etc/APPNAME
@@ -122,13 +222,29 @@ def shared_config_dir(appname, appauthor=None, version=None, roaming=False):
         @version: The version of app. This is only used if required. For
                 example if the application should allow multiple installation
                 on one system.
-        @roaming: Boolean value set to true if the roaming profile should be
-                used on windows.
 
         @return: the path to the shared config directory for the given
                 application
     '''
-    pass
+    if not platform.is_installed:
+        # during development
+        return os.path.join(__file__, '..', '..', 'config')
+
+    elif platform.get_platform == platform.WINDOWS:
+        if appauthor is None:
+            raise AppDirsException("On windows the 'appauthor' must be "
+                    "specified")
+        path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
+                appname)
+    elif platform.get_platform == platform.MACOS:
+        path = os.path.join('/Library/Application Support', appname)
+    else:
+        path = os.path.join('/etc', appname.lower())
+
+    if version:
+        path = os.path.join(path, version)
+
+    return path
 
 
 def tmp_data_dir():
@@ -136,7 +252,7 @@ def tmp_data_dir():
 
         @return: the path to the tmp data directory
     '''
-    pass
+    return tempfile.gettempdir()
 
 
 def log_dir(appname, appauthor=None, version=None):
@@ -152,7 +268,23 @@ def log_dir(appname, appauthor=None, version=None):
 
         @return: the path to the log directory for the given application
     '''
-    pass
+    if not platform.is_installed:
+        # during development
+        return os.path.join(__file__, '..', '..', 'config')
+
+    elif platform.get_platform == platform.WINDOWS:
+        path = user_data_dir(appname, appauthor, version)
+        path = os.path.join(path, 'Logs')
+        version = False
+    elif platform.get_platform == platform.MACOS:
+        path = os.path.join(os.path.expanduser('~/Library/Logs'), appname)
+    else:
+        path = os.path.join('/var/log/', appname.lower())
+
+    if version:
+        path = os.path.join(path, version)
+
+    return path
 
 
 def _get_win_folder_from_registry(csidl_name):
@@ -201,6 +333,7 @@ def _get_win_folder_with_pywin32(csidl_name):
         pass
     return directory
 
+
 def _get_win_folder_with_ctypes(csidl_name):
     ''' Get the folder on windows with the help of ctypes. '''
     import ctypes
@@ -229,7 +362,7 @@ def _get_win_folder_with_ctypes(csidl_name):
     return buf.value
 
 
-if sys.platform == "win32":
+if platform.get_platform == platform.WINDOWS:
     try:
         import win32com.shell
         _get_win_folder = _get_win_folder_with_pywin32

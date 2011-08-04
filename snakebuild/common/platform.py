@@ -22,6 +22,7 @@
 
 import sys
 
+__installed__ = False
 
 WINDOWS, MACOS, LINUX, UNKNOWN = range(4)
 
@@ -38,3 +39,12 @@ def get_platform():
         print ("OS type could not be found. We try the Linux configuration if "
             "this doesn't work switch to a supported platform.")
         return LINUX
+
+
+def is_installed():
+    ''' Check if the application is installed or if it is running directly from
+        the source code.
+        @return True if it is installed and False if it is running from the
+                source
+    '''
+    return __installed__

@@ -23,14 +23,13 @@
 
 # python imports
 import os
-import sys
 import json
 import logging
 import ConfigParser
 
 # common imports
 from snakebuild.common import singleton, output
-from snakebuild.snakebuildconfig import get_config_file
+from snakebuild.common.appdirs import AppDirs
 
 LOG = logging.getLogger('snakebuild.common.config')
 
@@ -114,19 +113,17 @@ class Config(object, ConfigParser.SafeConfigParser):
 
     def load_default(self):
         ''' Load the default config files.
-            /etc/${applicationName}/${applicationName}.conf
-            ~/.${applicationName}/${applicationName}.conf'''
-        if not sys.platform == 'win32':
-            self.load(get_config_file("%s.conf" % self.application_name))
-            if os.getuid() > 0:
-                config_path = os.path.expanduser('~/.%s' %
-                        self.application_name)
-                config_file = os.path.join(config_path, "%s.conf" % \
-                                self.application_name)
-                if os.path.exists(config_file):
-                    self.load(config_file)
-        else:
-            LOG.error('Win32 currently not supported')
+            First the global config file then the user config file.
+        '''
+        self.load(AppDirs().get_shared_config_file("%s.conf" % 
+                self.application_name.lower()))
+        if os.getuid() > 0:
+            config_path = AppDirs().get_user_file('.%s' %
+                    self.application_name.lower())
+            config_file = os.path.join(config_path, "%s.conf" % \
+                            self.application_name)
+            if os.path.exists(config_file):
+                self.load(config_file)
 
     def load(self, filename):
         ''' Load the given config file.

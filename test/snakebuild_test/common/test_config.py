@@ -23,11 +23,13 @@ import json
 
 from snakebuild.common import Config
 from snakebuild.common.config import ConfigValueException
+from snakebuild.common.appdirs import AppDirs
 
 
 class TestConfig(unittest.TestCase):
     ''' The unit test for the snake build common Config class. '''
     def setUp(self):
+        AppDirs().init('snakebuile_test')
         data = {"application_name": 'snakebuile_test',
                 "Client": {
                     "first": {"default": "Start", "type": "str",

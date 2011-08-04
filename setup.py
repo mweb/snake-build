@@ -14,6 +14,10 @@ from distutils.command.install import install
 
 
 def find_packages(path='.'):
+    ''' Find all python packate to install them.
+
+        @param path: The path to start search for the packages.
+    '''
     walker = os.walk(path)
     result = []
     for path, directories, filenames in walker:
@@ -24,6 +28,13 @@ def find_packages(path='.'):
 
 
 def find_data(search_path, install_path='share/snakebuild_common'):
+    ''' find all data files and create a list with the install targets.
+
+        @param search_path: The path to search for files
+        @param install_path: The default path to install the files
+
+        TODO: add support for other platforms then Linux
+    '''
     walker = os.walk(search_path, topdown=True)
     result = []
     for path, directories, filenames in walker:
@@ -38,44 +49,12 @@ def find_data(search_path, install_path='share/snakebuild_common'):
     return result
 
 
-def update_data_path(prefixdata, prefixconfig, olddatavalue=None,
-        oldconfigvalue=None):
-
-    try:
-        fin = file('snakebuild/snakebuildconfig.py', 'r')
-        fout = file(fin.name + '.new', 'w')
-
-        for line in fin:
-            fields = line.split(' = ')  # Separate variable from value
-            if fields[0] == '__snakebuild_data_directory__':
-                # update to prefix, store oldvalue
-                if not olddatavalue:
-                    olddatavalue = fields[1]
-                    line = "%s = '%s'\n" % (fields[0], prefixdata)
-                else:  # restore oldvalue
-                    line = "%s = %s" % (fields[0], olddatavalue)
-            if fields[0] == '__snakebuild_config_directory__':
-                # update to prefix, store oldvalue
-                if not oldconfigvalue:
-                    oldconfigvalue = fields[1]
-                    line = "%s = '%s'\n" % (fields[0], prefixconfig)
-                else:  # restore oldvalue
-                    line = "%s = %s" % (fields[0], oldconfigvalue)
-
-            fout.write(line)
-
-        fout.flush()
-        fout.close()
-        fin.close()
-        os.rename(fout.name, fin.name)
-    except (OSError, IOError):
-        print ("ERROR: Can't find snakebuild/snakebuildconfig.py")
-        sys.exit(1)
-    return olddatavalue, oldconfigvalue
-
-
 def update_version_file(version):
+    ''' Set the version within snakebuild/__init__.py to the current installed
+        version.
 
+        @param version: The version string to set
+    '''
     try:
         fin = file('snakebuild/__init__.py', 'r')
         fout = file(fin.name + '.new', 'w')
@@ -93,14 +72,33 @@ def update_version_file(version):
         sys.exit(1)
 
 
+def update_installed_flag(installed):
+    ''' update the installed flag within the common/platform module 
+        @param installed: set the __installed__ flag to this value (boolean)
+    '''
+    try:
+        fin = file('snakebuild/common/platform.py', 'r')
+        fout = file(fin.name + '.new', 'w')
+
+        for line in fin:
+            if '__installed__ =' in line:
+                line = "__installed__ = %s\n" % (installed)
+            fout.write(line)
+        fout.flush()
+        fout.close()
+        fin.close()
+        os.rename(fout.name, fin.name)
+    except (OSError, IOError):
+        print ("ERROR: Can't find snakebuild/common/platform.py")
+        sys.exit(1)
+
+
 class InstallAndUpdateDataDirectory(install):
     def run(self):
-        previous_values = update_data_path(self.prefix +
-            '/share/snakebuild/',
-            '/etc/snakebuild')
+        update_installed_flag(True)
         update_version_file(self.distribution.get_version())
         install.run(self)
-        update_data_path(self.prefix, self.prefix, *previous_values)
+        update_installed_flag(False)
 
 
 ##############################################################################
