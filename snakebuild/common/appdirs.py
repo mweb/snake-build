@@ -93,21 +93,21 @@ class AppDirs(object):
 
             @param filename: The name of the file to load.
         '''
-        return os.path.join(self.user_data_dir, filename)
+        return os.path.join(self.user_data_dir(), filename)
 
     def get_shared_data_file(self, filename):
         ''' Get a file within the shared data directory.
 
             @param filename: The name of the file to load.
         '''
-        return os.path.join(self.shared_data_dir, filename)
+        return os.path.join(self.shared_data_dir(), filename)
 
     def get_shared_config_file(self, filename):
         ''' Get a file within the shared config directory.
 
             @param filename: The name of the file to load.
         '''
-        return os.path.join(self.shared_config_dir, filename)
+        return os.path.join(self.shared_config_dir(), filename)
 
     def user_data_dir(self):
         ''' Get the user data directory. The appname must be initialized. '''
@@ -188,9 +188,9 @@ def shared_data_dir(appname, appauthor=None, version=None, roaming=False):
         @return: the path to the data/config directory for the given
                 application
     '''
-    if not platform.is_installed:
+    if not platform.is_installed():
         # during development
-        return os.path.join(__file__, '..', '..', 'data')
+        return os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
     elif platform.get_platform == platform.WINDOWS:
         if appauthor is None:
@@ -225,9 +225,9 @@ def shared_config_dir(appname, appauthor=None, version=None):
         @return: the path to the shared data directory for the given
                 application
     '''
-    if not platform.is_installed:
+    if not platform.is_installed():
         # during development
-        return os.path.join(__file__, '..', '..', 'config')
+        return os.path.join(os.path.dirname(__file__), '..', '..', 'config')
 
     elif platform.get_platform == platform.WINDOWS:
         if appauthor is None:
@@ -267,9 +267,9 @@ def log_dir(appname, appauthor=None, version=None):
 
         @return: the path to the log directory for the given application
     '''
-    if not platform.is_installed:
+    if not platform.is_installed():
         # during development
-        return os.path.join(__file__, '..', '..', 'config')
+        return os.path.join(os.path.dirname(__file__), '..', '..', 'config')
 
     elif platform.get_platform == platform.WINDOWS:
         path = user_data_dir(appname, appauthor, version)

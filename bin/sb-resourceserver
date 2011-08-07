@@ -33,17 +33,17 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY,
     os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY)  # for subprocesses
 
 from snakebuild.common import create_logger, Config, \
-        set_logging_to_config_values
+        set_logging_to_config_values, AppDirs
 from snakebuild import __version__
 from snakebuild.resourceserver import parse_command_line, start_server
-from snakebuild.snakebuildconfig import get_data_file
 
 LOG = logging.getLogger('snakebuild.resourceserver')
 
 if __name__ == '__main__':
     options, args = parse_command_line()
+    AppDirs().init('snakebuild')
     config = Config()
-    config.init_default_config(get_data_file('all.conf'))
+    config.init_default_config(AppDirs().get_shared_data_file('all.conf'))
     create_logger('resourceserver')
     set_logging_to_config_values('resourceserver')
 

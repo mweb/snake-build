@@ -25,12 +25,15 @@ import tempfile
 
 from snakebuild.common.appdirs import user_data_dir, shared_data_dir, \
         shared_config_dir, tmp_data_dir, log_dir
+from snakebuild.common import platform
 
 
 class TestAppdirs(unittest.TestCase):
     ''' The unit test for the snake build appdirs functions. '''
     def setUp(self):
-        pass
+        # fake that the application is installed to get the different file 
+        # outputs
+        platform.__installed__ = True
 
     def test_user_data_dir(self):
         ''' Test if the user data directory is correct. '''

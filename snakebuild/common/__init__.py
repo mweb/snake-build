@@ -26,4 +26,5 @@ from logger import create_logger, set_logging_to_config_values
 import output
 from daemon import Daemon
 import appdirs
+from appdirs import AppDirs
 import platform
