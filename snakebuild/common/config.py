@@ -70,9 +70,8 @@ class Config(object, ConfigParser.SafeConfigParser):
             @param path: The path to the config config file.
         '''
         if not (os.path.exists(path) and os.path.isfile(path)):
-            print "path %s" % path
             raise ConfigValueException('The given config config file does not '
-                    'exist.')
+                    'exist. (%s)' % path)
         cfl = open(path, 'r')
         data = json.load(cfl)
         for key in data.iterkeys():
