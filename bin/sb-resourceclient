@@ -33,19 +33,19 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY,
     os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY)  # for subprocesses
 
 from snakebuild.common import create_logger, Config, \
-        set_logging_to_config_values
+        set_logging_to_config_values, AppDirs
 from snakebuild import __version__
 from snakebuild.resourceclient import parse_command_line, run_client
-from snakebuild.snakebuildconfig import get_data_file
 
 LOG = logging.getLogger('snakebuild.resourceclient')
 
 if __name__ == '__main__':
     options, args = parse_command_line()
+    AppDirs().init('snakebuild')
     config = Config()
-    config.init_default_config(get_data_file('all.conf'))
-    create_logger()
-    set_logging_to_config_values()
+    config.init_default_config(AppDirs().get_shared_data_file('all.conf'))
+    create_logger('resourceclient')
+    set_logging_to_config_values('resourceclient')
 
     if options.configfile is not None:
         if os.path.isfile(options.configfile):
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             print(options.configfile)
             exit(-1)
 
-    set_logging_to_config_values()
+    set_logging_to_config_values('resourceclient')
     LOG.debug('Config file loaded start the server.')
 
     if options.version:
