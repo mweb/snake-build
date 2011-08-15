@@ -24,6 +24,25 @@ import os
 
 __LINE_LENGTH = None
 
+def message(value, indent="", line_length=None, first_indent=None):
+    ''' print a message to the standard out. It uses thes format message to
+        format the message see the format_message function for the detailed
+        description of the parameters.
+    '''
+    print format_message(value, indent, line_length, first_indent)
+
+
+def error(value, line_length=None):
+    ''' print a error message io the standard out. '''
+    print format_message("Error: %s" % value, indent=4, 
+            line_length=line_length, first_indent=0)
+
+
+def warning(value, line_length=None):
+    ''' print a error message io the standard out. '''
+    print format_message("Warning: %s" % value, indent=4, 
+            line_length=line_length, first_indent=0)
+
 
 def format_message(value, indent="", line_length=None, first_indent=None):
     ''' Return a string with newlines so that the given string fits into this

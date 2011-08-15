@@ -35,7 +35,7 @@ LOG = logging.getLogger('snakebuild.common.config')
 
 
 class ConfigValueException(BaseException):
-    ''' The exception trown if a problem within the Config object occures. '''
+    ''' The exception thrown if a problem within the Config object occures. '''
 
 
 class Config(object, ConfigParser.SafeConfigParser):

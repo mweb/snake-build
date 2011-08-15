@@ -28,8 +28,8 @@ def run_client(options,  arguments):
                 within this list is always the command it self.
         @return true or false depends on success or failure
     '''
-    if not len(arguments) == 0:
-        # TODO
+    if len(arguments) == 0:
+        print "Snake Build Resource Client"
         return False
 
     try:
