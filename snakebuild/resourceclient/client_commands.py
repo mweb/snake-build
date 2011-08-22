@@ -20,5 +20,14 @@
     supported by the resource client command.
 '''
 
-COMMANDS = {'acquire': (None, 'example', ['test'], {'test': 'bla bla'})}
+def _test(cmd, options, example, example2=None):
+    ' This is a test command only used for testing new commands. '''
+    print "CMD: %s" % cmd
+    print "options: %s" % options
+    print "Examples: %s" % example
+    print "Example2: %s" % example2
 
+
+COMMANDS = {'acquire': (_test, 'example', ['test', '[test2]'],
+                {'test': 'bla bla',
+                '[test2]': 'Ihaaaa'})}

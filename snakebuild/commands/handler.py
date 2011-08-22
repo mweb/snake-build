@@ -75,35 +75,34 @@ def handle_cmd(cmd_args, options, cmd_list):
         @return: True if everything went fine False on error
     '''
     if len(cmd_args) == 0:
-        _print_overview(cmd_list)
+        return _print_overview(cmd_list)
 
     cmd = cmd_args[0].lower()
     if cmd in cmd_list:
-        pass
+        return _call_command(cmd, cmd_args[1:], options, cmd_list[cmd])
     elif cmd == 'help':
-        _help(cmd, cmd_args[1:], options, cmd_list)
+        return _help(cmd, cmd_args[1:], cmd_list)
     else:
         raise HandleCmdException('Unknown Command %s' % cmd)
 
 
-def _help(cmd, parameters, options, cmd_list):
+def _help(cmd, parameters, cmd_list):
     ''' The help command to print the help for a given command or to print a
         list with all available commands.
 
         @cmd: The command string that lead to this call
-        @options: The dictionary with all the options set
-        @cmd_list: The dictionar with all the commands and its descriptions
         @parameter: The paramter given to the help command (default None) If
             None then an overview over all the commands will be printed.
+        @cmd_list: The dictionar with all the commands and its descriptions
     '''
     if not (cmd.lower() == 'help'):
         output.error("_help function called for the wrong command.")
         raise HandleCmdException("Wrong command used %s" % cmd)
 
     if len(parameters) == 0:
-        _print_overview(cmd_list)
+        return _print_overview(cmd_list)
     else:
-        _print_cmd_help(parameters[0], cmd_list)
+        return _print_cmd_help(cmd, cmd_list)
 
 
 def _print_overview(cmd_list):
@@ -116,6 +115,8 @@ def _print_overview(cmd_list):
         _print_short_help(cmd, info)
     for cmd, info in cmd_list.iteritems():
         _print_short_help(cmd, info)
+
+    return True
 
 
 def _print_short_help(cmd, info):
@@ -138,23 +139,71 @@ def _print_cmd_help(cmd, cmd_list):
         @param cmd: The command to get the help for
     '''
     if cmd == 'help':
-        cmd_list = GENERIC_COMMANDS
-    if cmd in cmd_list:
-        values = cmd_list[cmd]
-        print ""
-        output.message(values[CMD_DESCRIPTION])
-        print ""
-        print "  %s %s" % (cmd, " ".join(values[CMD_PARAM_LIST]))
-        print ""
-        for key in values[CMD_PARAM_LIST]:
-            value = values[CMD_PARAM_DICT][key]
-            output.message("%s\t%s" % (key, value), indent="\t\t",
-                    first_indent="  ")
-            print ""
+        _print_cmd_help_detail('help', GENERIC_COMMANDS['help'])
+    elif cmd in cmd_list:
+        _print_cmd_help_detail(cmd, cmd_list[cmd])
     elif cmd == 'configfile':
         print "CONFIG FILE HELP"
     else:
         output.error("The given command is unknwon: %s\n" % cmd)
-        return _print_overview(cmd_list)
+        _print_overview(cmd_list)
+        return False
 
     return True
+
+
+def _print_cmd_help_detail(cmd, cmd_info):
+    ''' Print the help for one given command
+        @param cmd: The command to print the help for
+        @param cmd_info: The command information from the COMMAND_LIST
+    '''
+    print ""
+    output.message(cmd_info[CMD_DESCRIPTION])
+    print ""
+    print "  %s %s %s" % (os.path.basename(sys.argv[0]), cmd,
+            " ".join(cmd_info[CMD_PARAM_LIST]))
+    print ""
+    print "Parameters:"
+    for key in cmd_info[CMD_PARAM_LIST]:
+        value = cmd_info[CMD_PARAM_DICT][key]
+        i = len(key)
+        if i <= 8:
+            space = (12 - i)
+        else:
+            space = 4 - (i % 4)
+        output.message("%s%s%s" % (key, " " * space, value), indent="        ",
+                first_indent="  ")
+        print ""
+
+
+def _call_command(cmd, args, options, cmd_info):
+    ''' Call the given command from the command list. This does some basic
+        checking if enough but not too man variables are provided for the given
+        command.
+
+        @param cmd: The command that gets called
+        @param args: The arguments for the given command given by the user
+        @param options: The options set by the user
+        @param cmd_info: The command information from the cmd_list
+
+        @return True on success and False on Failure
+        @throws HandleCmdException: If the command could not be processed
+    '''
+    min_cnt = len(cmd_info[CMD_PARAM_LIST])
+    max_cnt = min_cnt
+    for cmd_name in cmd_info[CMD_PARAM_LIST]:
+        if cmd_name.startswith('['):
+            min_cnt -= 1
+    if not (min_cnt <= len(args) <= max_cnt):
+        if min_cnt == max_cnt:
+            output.error('The number of parameters did not match the expected '
+                    'number of paramters. Got: %d, Expected: %d' %
+                    (len(args), max_cnt))
+        else:
+            output.error('The number of parameters did not match the expected '
+                    'number of paramters. Got: %d, Expected between: %d and '
+                    '%d ' % (len(args), min_cnt, max_cnt))
+        _print_cmd_help_detail(cmd, cmd_info)
+        return False
+
+    return cmd_info[CMD_FUNCTION](cmd, options, *args)
