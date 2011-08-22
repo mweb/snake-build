@@ -20,7 +20,23 @@
     command line tools.
 '''
 
+import sys
+import os
+
 from snakebuild.common import output
+
+
+GENERIC_COMMANDS = {'help': (None, 'This is the help command. This command '
+                'provides informatin about all the supported commands and the '
+                'configuration. If not command is given an overview over all '
+                'the commands will be shown.',
+                ['[COMMAND]'], {'[COMMAND]': 'The command to get the help '
+                    'for. In addition to the commands it is possible '
+                    'to request help for the configuratin file with: '
+                    'configfile'}),
+                'configfile': (None, 'This shows the information about the '
+                    'config file. This will give an overview over all the '
+                    'available configuration options.', [], {})}
 
 
 CMD_FUNCTION, CMD_DESCRIPTION, CMD_PARAM_LIST, CMD_PARAM_DICT = range(4)
@@ -92,7 +108,28 @@ def _help(cmd, parameters, options, cmd_list):
 
 def _print_overview(cmd_list):
     ''' Print an overview over all the commands available. '''
-    print "HEP"
+    output.message("This is the overview over all the supported commands for "
+            "the %s." % os.path.basename(sys.argv[0]))
+    print ""
+    print "Commands:"
+    for cmd, info in GENERIC_COMMANDS.iteritems():
+        _print_short_help(cmd, info)
+    for cmd, info in cmd_list.iteritems():
+        _print_short_help(cmd, info)
+
+
+def _print_short_help(cmd, info):
+    ''' Print the short help for a command
+        @param cmd: The command to print the help for
+        @param info: The information for the help command
+    '''
+    i = len(cmd)
+    if i <= 8:
+        space = (12 - i)
+    else:
+        space = 4 - (i % 4)
+    output.message("%s%s%s" % (cmd, " " * space, info[CMD_DESCRIPTION]),
+            indent='        ', first_indent="  ")
 
 
 def _print_cmd_help(cmd, cmd_list):
@@ -100,17 +137,8 @@ def _print_cmd_help(cmd, cmd_list):
 
         @param cmd: The command to get the help for
     '''
-    pcmd_list = { 'help': (None, 'This is the help command. This command '
-                'provides informatin about all the supported commands and the '
-                'configuration. If not command is given an overview over all '
-                'the commands will be shown.',
-                ['[COMMAND]'], {'[COMMAND]': 'The command to get the help '
-                    'for. In addition to the commands it is possible '
-                    'to request help for the configuratin file with: '
-                    'configfile'})}
-
     if cmd == 'help':
-        cmd_list = pcmd_list
+        cmd_list = GENERIC_COMMANDS
     if cmd in cmd_list:
         values = cmd_list[cmd]
         print ""
@@ -127,6 +155,6 @@ def _print_cmd_help(cmd, cmd_list):
         print "CONFIG FILE HELP"
     else:
         output.error("The given command is unknwon: %s\n" % cmd)
-        return _print_overview()
+        return _print_overview(cmd_list)
 
     return True
