@@ -16,11 +16,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-
 ''' This is the main entry for the resource client command line tool.
 '''
 
-def run_client(options,  arguments):
+from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.commands import handle_cmd
+
+def run_client(options, arguments):
     ''' Start the client command and see what the user wants.
 
         @param options: the options set via the command line parameters
@@ -33,7 +35,7 @@ def run_client(options,  arguments):
         return False
 
     try:
-        print "START HERE"
+        handle_cmd(arguments, options, COMMANDS)
     except KeyboardInterrupt:
         print('Abort by Keyboard Interrupt.')
         return False

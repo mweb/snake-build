@@ -16,9 +16,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands which are
-    supported by the resource client command.
+''' This package provides the generic methods to handle the commands for the
+    command line tools.
 '''
 
-COMMANDS = {'acquire': (None, 'example', ['test'], {'test': 'bla bla'})}
-
+from snakebuild.commands.handler import handle_cmd
