@@ -16,28 +16,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands which are
-    supported by the resource client command.
+''' This file provides some common helper functions for the server and client.
 '''
 
-from snakebuild.communication.client import Client
-
-def _test(cmd, options, example, example2=None):
-    ' This is a test command only used for testing new commands. '''
-    print "CMD: %s" % cmd
-    print "options: %s" % options
-    print "Examples: %s" % example
-    print "Example2: %s" % example2
-
-    cl = Client('localhost', 4224)
-
-    answ = cl.send(Client.SJSON, 'test', (12, 13))
-
-    print answ
+import json
 
 
+def prepare_sjson_data(msg):
+    ''' Prepare the data for a sjson request.
 
+        @param msg: The dictionary/list or basic type to transfer to the
+                server as a json string.
+        @return: the message as a string including the header.
+    '''
+    message = json.dumps(msg)
+    length = len(message)
+    data = ('a' + chr((length >> 24) % 256) + chr((length >> 16) % 256) +
+            chr((length >> 8) % 256) + chr(length % 256))
 
-COMMANDS = {'acquire': (_test, 'example', ['test', '[test2]'],
-                {'test': 'bla bla',
-                '[test2]': 'Ihaaaa'})}
+    data += message
+    return data

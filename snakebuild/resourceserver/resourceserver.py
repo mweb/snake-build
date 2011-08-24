@@ -21,6 +21,8 @@
 
 from snakebuild.common import Daemon, Config
 from snakebuild.communication import Server
+from snakebuild.resourceserver.commands import COMMANDS
+
 
 def start_server(options,  arguments):
     ''' Start the resource server.
@@ -40,20 +42,19 @@ def start_server(options,  arguments):
         if cmd == 'stop':
             stop = True
         elif cmd == 'start':
-            stop=False
+            stop = False
         else:
             print "Command not supported for starting: %s" % arguments[0]
 
     host = Config().get_s('resourceserver', 'hostname')
     port = Config().get_s('resourceserver', 'port')
-    commands = {}
     name = 'resourceserver'
 
     if options.foreground:
-        Daemon(Server(host, port, commands, name), Daemon.FOREGROUND)
+        Daemon(Server(host, port, COMMANDS, name), Daemon.FOREGROUND)
     elif stop:
-        Daemon(Server(host, port, commands, name), Daemon.STOP)
+        Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
     else:
-        Daemon(Server(host, port, commands, name), Daemon.START)
+        Daemon(Server(host, port, COMMANDS, name), Daemon.START)
 
     return True

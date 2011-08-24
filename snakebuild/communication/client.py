@@ -23,6 +23,8 @@
 import socket
 import json
 
+from snakebuild.communication.messages import prepare_sjson_data
+
 
 class ClientCommunicationException(BaseException):
     ''' The exception that gets trown on an error during the communication with
@@ -82,7 +84,7 @@ class Client(object):
                     'supported.')
 
         if mtype == self.SJSON:
-            data = _prepare_sjson_data({'cmd': cmd, 'parameters': param})
+            data = prepare_sjson_data({'cmd': cmd, 'parameters': param})
 #        elif mytype == OTHER:
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -121,22 +123,6 @@ def _receive(sock):
         sock.close()
         raise ClientCommunicationException('Received an unsuported '
                 'communication type. Got: %2x' % ord(mtype))
-
-
-def _prepare_sjson_data(msg):
-    ''' Prepare the data for a sjson request.
-
-        @param msg: The dictionary/list or basic type to transfer to the
-                server as a json string.
-        @return: the message as a string including the header.
-    '''
-    message = json.dumps(msg)
-    length = len(message)
-    data = ('a' + chr((length >> 24) % 256) + chr((length >> 16) % 256) +
-            chr((length >> 8) % 256) + chr(length % 256))
-
-    data += message
-    return data
 
 
 def _parse_sjson_data(sock):

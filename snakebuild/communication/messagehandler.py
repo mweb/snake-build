@@ -25,6 +25,8 @@ import SocketServer
 import json
 import logging
 
+from snakebuild.communication.messages import prepare_sjson_data
+
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
 
 
@@ -58,7 +60,6 @@ class MessageHandler(SocketServer.BaseRequestHandler):
 
         data = self.request.recv(length)
         if not len(data) == length:
-            print "HERE %d / %d" % (len(data), length)
             LOG.error('Wrong length of data received: Expected %d but got %d' %
                     (length, len(data)))
             return
@@ -75,8 +76,14 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             LOG.error("The message received did not have a 'parameters' key.")
             return
 
-        _handle_cmd(cmd['cmd'], cmd['parameters'],
-                self.request.server.commands)
+        answer = _handle_cmd(cmd['cmd'], cmd['parameters'],
+                self.server.commands)
+
+        answerdump = prepare_sjson_data({'cmd': cmd['cmd'],
+                'parameters': (answer)})
+
+        self.request.send(answerdump)
+
 
 def _handle_cmd(cmd, parameters, commands):
     ''' Handle the given command if it is specified within the commands.
@@ -93,6 +100,6 @@ def _handle_cmd(cmd, parameters, commands):
         if cmd.lower() in cmd_list:
             return cmd_list[cmd][0](cmd, parameters)
         else:
-            LOG.error("The requested command '%d' is not supported by the "
+            LOG.error("The requested command '%s' is not supported by the "
                     "given server implementation." % cmd)
             return

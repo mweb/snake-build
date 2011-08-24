@@ -16,28 +16,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands which are
-    supported by the resource client command.
+''' This files contains the dictionary with all the commands that the resrouce
+    server supports via the network connection.
 '''
 
-from snakebuild.communication.client import Client
 
-def _test(cmd, options, example, example2=None):
+def _test(cmd, params):
     ' This is a test command only used for testing new commands. '''
     print "CMD: %s" % cmd
-    print "options: %s" % options
-    print "Examples: %s" % example
-    print "Example2: %s" % example2
+    print "options: %s" % params
 
-    cl = Client('localhost', 4224)
-
-    answ = cl.send(Client.SJSON, 'test', (12, 13))
-
-    print answ
+    return 10
 
 
-
-
-COMMANDS = {'acquire': (_test, 'example', ['test', '[test2]'],
+COMMANDS = {'test': (_test, 'example', ['test', '[test2]'],
                 {'test': 'bla bla',
                 '[test2]': 'Ihaaaa'})}
