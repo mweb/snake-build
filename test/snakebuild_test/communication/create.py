@@ -21,6 +21,7 @@ import unittest
 
 from test_client import TestClient
 from test_server import TestServer
+from test_messages import TestMessages
 from test_messagehandler import TestMessageHandler
 
 
@@ -29,5 +30,6 @@ def suite():
     client = unittest.TestLoader().loadTestsFromTestCase(TestClient)
     server = unittest.TestLoader().loadTestsFromTestCase(TestServer)
     handler = unittest.TestLoader().loadTestsFromTestCase(TestMessageHandler)
+    messages = unittest.TestLoader().loadTestsFromTestCase(TestMessages)
 
-    return unittest.TestSuite([client, server, handler])
+    return unittest.TestSuite([client, server, handler, messages])
