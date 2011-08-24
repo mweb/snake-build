@@ -43,11 +43,12 @@ class TestMessageHandler(unittest.TestCase):
                 chr(length % 256)) + msg
 
         dummy = DummySocket()
-        dummy.add_data(message_string)
-        dummy.server = DummyContainer()
-        dummy.server.commands = {'test': (self._handle_call_back,)}
 
-        MessageHandler(dummy, None, None)
+        hdlr = MessageHandler(dummy, None, None)
+        hdlr.server = DummyContainer()
+        hdlr.server.commands = {'test': (self._handle_call_back,)}
+        dummy.add_data(message_string)
+        hdlr.handle()
         self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['parameters'] == data['parameters'])
 
@@ -63,10 +64,10 @@ class TestMessageHandler(unittest.TestCase):
                 chr(length % 256)) + msg
 
         dummy = DummySocket()
-        dummy.server = DummyContainer()
-        dummy.server.commands = {'test': (self._handle_call_back,)}
 
         hdlr = MessageHandler(dummy, None, None)
+        hdlr.server = DummyContainer()
+        hdlr.server.commands = {'test': (self._handle_call_back,)}
         dummy.add_data(message_string)
         hdlr._parse_sjson_request()
         self.assertTrue(self.got_handled['cmd'] == 'test')

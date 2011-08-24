@@ -30,6 +30,7 @@ class DummySocket(object):
         ''' Initialize the DummySocket no data will be stored for now.
         '''
         self.data = ""
+        self.sent_data = []
 
     def add_data(self, msg):
         ''' Add the given string to the current data for receiving with the
@@ -51,6 +52,13 @@ class DummySocket(object):
         self.data = self.data[length:]
         return msg
 
+    def send(self, data):
+        '''' This method simulates the send method form the socket class. But
+            it actually does nothing more than storing the data in sent_data
+        '''
+        self.sent_data.append(data)
+
     def close(self):
         ''' Simulate the close method of the socket. Clear the data buffer. '''
         self.data = ''
+        self.sent_data = []
