@@ -19,3 +19,5 @@
 ''' The snakebuild.resourceserver.resource package. The package for the snake
     resource for the resource server.
 '''
+
+from resource import Resource

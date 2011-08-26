@@ -22,11 +22,14 @@ import unittest
 
 import communication
 import common
+import resourceserver
 
 
 def suite():
     ''' Get the test suite for the common snakebuild classes. '''
     communication_test = communication.suite()
     common_test = common.suite()
+    resourceserver_test = resourceserver.suite()
 
-    return unittest.TestSuite([communication_test, common_test])
+    return unittest.TestSuite([communication_test, common_test, 
+            resourceserver_test])
