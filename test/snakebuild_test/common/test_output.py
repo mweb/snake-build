@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The unit test for the Config object '''
+''' The unit test for the output functions '''
 
 import unittest
 
@@ -24,7 +24,7 @@ from snakebuild.common import output
 
 
 class TestOutput(unittest.TestCase):
-    ''' The unit test for the snake build common Config class. '''
+    ''' The unit test for the snake build common output functions. '''
     def setUp(self):
         ''' Setup the test case. '''
         pass

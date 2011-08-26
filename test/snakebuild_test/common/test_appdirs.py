@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The unit test for the Config object '''
+''' The unit test for the application directories functions and object '''
 
 import unittest
 import sys
