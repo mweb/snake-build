@@ -21,12 +21,72 @@
 '''
 
 import threading
+import json
 
 
 class ResourceException(BaseException):
     ''' The exception that gets thrown if an error within the Resource object
         gets thrown.
     '''
+
+
+def init_resource_from_string(obj_str):
+    ''' This function creates a new resource object from a string which
+        contains a valid json string with the following structure:
+
+        { "name": "TEResource",
+          "parallel_count": 1,
+          "keywords": ["test", "build", "melt"],
+          "parameters": { "ip": "192.168.1.92" }
+        }
+
+        The name must be a unique name for all the currently instancieted
+        resources otherwise this resource can not be managed by the resource
+        manager.
+        The parallel_count must be an integer that indicates how man user might
+        acquire this resource at once.
+
+        The keywords entry must be a list with all the keywords that this
+        resource server should be usable. A client usually dosn't ask for a
+        specific resource instead it asks for a type (keyword).
+
+        The parameters must be a dictionary with an arbitrary structure (only
+        basic types) this structure will be accessible from a client to be able
+        to use the resource.
+
+        @param obj_str: The json string to parse
+        @return: The new Resource object
+    '''
+    obj = json.load(obj_str)
+    if not ('name' in obj and 'parallel_count' in obj and
+            'keywords' in obj and 'parameters' in obj):
+        raise ResourceException('Not all requiered keys available.')
+
+    if type(obj['name']) is str or type(obj['name']) is unicode:
+        resource = Resource(obj['name'])
+    else:
+        raise ResourceException('The name type must be a string. Got: %s' %
+                obj['name'])
+    if type(obj['keywords']) is list:
+        for key in obj['keywords']:
+            if type(key) is str or type(key) is unicode:
+                resource.keywords.append(key)
+    if type(obj['parallel_count']) is int:
+        resource.parallel_count = obj['parallel_count']
+    else:
+        try:
+            resource.parallel_count = int(obj['parallel_count'])
+        except ValueError:
+            raise ResourceException('The parallel_count is not an int value:'
+                    ' %s', obj['parallel_count'])
+
+    if type(obj['parameters']) is dict:
+        resource.parameters = obj['parameters']
+    else:
+        raise ResourceException('The parameters is not of type dict: %s' %
+                obj['parameters'])
+
+    return resource
 
 
 class Resource(object):
@@ -55,7 +115,7 @@ class Resource(object):
 
         # the counter variables
         self.parallel_count = 1
-        self.current_count = 1
+        self.current_count = 0
 
         # the parameters and the keywords
         self.parameters = {}
@@ -94,16 +154,3 @@ class Resource(object):
             rejected.
         '''
         pass
-
-    def set_parameters(self, params):
-        ''' Set the parameters for the resource. This parameters will be
-            accessible by a requester and should help to identify or access a
-            resource.
-            The param dictionary might be a nested dictionary.
-
-            @param params: The params dictionary with all the key value pairs
-        '''
-        if params is dict:
-            self.parameters = params
-        else:
-            raise ResourceException('params object is not a dictionary')
