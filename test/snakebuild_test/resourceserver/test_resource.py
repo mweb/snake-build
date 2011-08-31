@@ -42,7 +42,7 @@ class TestResource(unittest.TestCase):
         res = init_resource_from_string(demo)
         self.assertTrue(res.name == "Test1")
         self.assertTrue(res.parallel_count == 2)
-        self.assertTrue(res.current_count == 0)
+        self.assertTrue(res.current_count == 2)
         self.assertTrue('mytest' in res.keywords)
         self.assertTrue('build' in res.keywords)
         self.assertTrue('test1' in res.keywords)

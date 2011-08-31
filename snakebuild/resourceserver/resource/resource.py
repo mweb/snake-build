@@ -121,12 +121,54 @@ class Resource(object):
         self.users = []
 
         # the counter variables
-        self.parallel_count = 1
-        self.current_count = 0
+        self._parallel_count = 1
+        self._current_count = 1
 
         # the parameters and the keywords
         self.parameters = {}
         self.keywords = [name.lower()]
+
+    @property
+    def parallel_count(self):
+        ''' The number of parallel runs that the instance of this resource
+            can run.
+        '''
+        return self._parallel_count
+
+    @parallel_count.setter
+    def parallel_count(self, value):
+        ''' The setter method for the parallel count value. take care if the
+            current count must be increased as well or not.
+
+            @param value: The new value to set
+        '''
+        if type(value) is not int:
+            raise ResourceException('Wrong type for parallel_count must be an '
+                    'integer. Got: %s (%s)' % (value, type(value)))
+
+        if value <= 0:
+            raise ResourceException('Illegal value for parallel count must be '
+                    '>0. Got: %d' % value)
+            self._parallel_count = value
+
+        self.count_lock.acquire()
+        # if no resource are in use then set the current count to the same
+        # value
+        if self._current_count == self._parallel_count:
+            self._current_count = value
+        elif self.exclusive:
+            pass
+        else:
+            self._current_count = value -\
+                    (self._parallel_count - self._current_count)
+
+        self._parallel_count = value
+        self.count_lock.release()
+
+    @property
+    def current_count(self):
+        ''' The counter used to see how many resources are free to be used. '''
+        return self._current_count
 
     def acquire(self, uname, exclusive, block):
         ''' Acquire the resource if available otherwise this method blocks
@@ -141,7 +183,38 @@ class Resource(object):
 
             @return: True if acquire worked and False if not
         '''
-        pass
+        while self.run:
+            self.count_lock.acquire()
+            if (self.current_count <= 0 or
+                    (self.wait_for_exclusive and not exclusive) or
+                    (exclusive and
+                        self._current_count != self._parallel_count)):
+                # there are no free slots available or there is some one
+                # waiting to get it for exclusive usage therfore all others
+                # have to wait till it is theyr turn.
+                if block:
+                    self.release_listener.clear()
+                    if exclusive:
+                        self.wait_for_exclusive = True
+                    self.count_lock.release()
+                    self.release_listener.wait()
+                    continue
+                else:
+                    self.count_lock.release()
+                    return False
+
+            if exclusive:
+                self. current_count = 0
+                self.wait_for_exclusive = False
+            else:
+                self.current_count -= 1
+
+            self.users.append(uname)
+            self.count_lock.release()
+
+            return True
+
+        return False
 
     def release(self, uname, exclusive):
         ''' Release the resource, if the resource was locked by the given user
