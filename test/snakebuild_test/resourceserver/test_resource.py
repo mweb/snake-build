@@ -48,3 +48,20 @@ class TestResource(unittest.TestCase):
         self.assertTrue('test1' in res.keywords)
         self.assertTrue(res.parameters['value1'] == 'arther')
 
+    def test_acquire_command(self):
+        ''' Test the resource creation methods.
+        '''
+        demo = '''{ "name": "Test",
+                    "parallel_count" : 4,
+                    "keywords": [],
+                    "parameters": {}
+                  }
+                '''
+        res = init_resource_from_string(demo)
+        self.assertTrue(res.name == "Test")
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+        self.assertTrue(res.acquire('unit_test', False, True))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 3)
+

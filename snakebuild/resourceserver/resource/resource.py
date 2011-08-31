@@ -185,7 +185,7 @@ class Resource(object):
         '''
         while self.run:
             self.count_lock.acquire()
-            if (self.current_count <= 0 or
+            if (self._current_count <= 0 or
                     (self.wait_for_exclusive and not exclusive) or
                     (exclusive and
                         self._current_count != self._parallel_count)):
@@ -207,7 +207,7 @@ class Resource(object):
                 self. current_count = 0
                 self.wait_for_exclusive = False
             else:
-                self.current_count -= 1
+                self._current_count -= 1
 
             self.users.append(uname)
             self.count_lock.release()
