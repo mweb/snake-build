@@ -113,6 +113,7 @@ class Resource(object):
         self.release_listener = threading.Event()
         # if set then a client waits for exclusive usage
         self.wait_for_exclusive = False
+        self.exclusive = False
         # if set then the server is shutting down and no new client should get
         # the resource
         self.run = True
@@ -206,6 +207,7 @@ class Resource(object):
             if exclusive:
                 self. current_count = 0
                 self.wait_for_exclusive = False
+                self.exclusive = True
             else:
                 self._current_count -= 1
 

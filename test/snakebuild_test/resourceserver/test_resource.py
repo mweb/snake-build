@@ -49,7 +49,7 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parameters['value1'] == 'arther')
 
     def test_acquire_command(self):
-        ''' Test the resource creation methods.
+        ''' Test the acquire method if it sets the counters correctly.
         '''
         demo = '''{ "name": "Test",
                     "parallel_count" : 4,
@@ -76,4 +76,49 @@ class TestResource(unittest.TestCase):
         self.assertTrue(not res.acquire('unit_test', False, False))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 0)
+
+    def test_counter_change(self):
+        ''' Test the change of the counter during run
+        '''
+        demo = '''{ "name": "Test",
+                    "parallel_count" : 4,
+                    "keywords": [],
+                    "parameters": {}
+                  }
+                '''
+        res = init_resource_from_string(demo)
+        self.assertTrue(res.name == "Test")
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+        res.parallel_count = 3
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 3)
+
+        self.assertTrue(res.acquire('unit_test', False, True))
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 2)
+        res.parallel_count = 2
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 1)
+
+        self.assertTrue(res.acquire('unit_test', False, False))
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 0)
+        self.assertTrue(not res.acquire('unit_test', False, False))
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 0)
+
+        res.parallel_count = 1
+        self.assertTrue(res.parallel_count == 1)
+        self.assertTrue(res.current_count == -1)
+        self.assertTrue(not res.acquire('unit_test', False, False))
+        self.assertTrue(res.parallel_count == 1)
+        self.assertTrue(res.current_count == -1)
+
+        res.parallel_count = 5
+        self.assertTrue(res.parallel_count == 5)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue(res.acquire('unit_test', False, False))
+        self.assertTrue(res.parallel_count == 5)
+        self.assertTrue(res.current_count == 2)
 
