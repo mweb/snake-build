@@ -205,7 +205,7 @@ class Resource(object):
                     return False
 
             if exclusive:
-                self. current_count = 0
+                self._current_count = 0
                 self.wait_for_exclusive = False
                 self.exclusive = True
             else:
@@ -223,13 +223,41 @@ class Resource(object):
             before.
 
             @param uname: The user name that acquired the resource before
-            @param exclusive: This boolean defines if the resource was acquired
-                    exclusive or normaly.
+            @param exclusive: If this boolean is set to True then the resource
+                    which must be blocked exclusive will only release the
+                    exclusive lock but will keep one lock for the given user.
 
             @return: True if release worked and False if not (usually resource
                     was not locked before by this user)
         '''
-        pass
+        self.count_lock.acquire()
+        if not uname in self.users:
+            LOG.error("A user (%s) tried to release a resource which he "
+                    "didn't acquire before.")
+            self.count_lock.release()
+            return False
+
+        if exclusive:
+            if not self.exclusive:
+                LOG.error("A user (%s) tried to free exclusive usage only for "
+                        "a resource which is not acquired exclusivly." % uname)
+                self.count_lock.release()
+                return False
+            self._current_count = self._parallel_count - 1
+            self.exclusive = False
+            self.count_lock.release()
+            self.release_listener.set()
+            return True
+
+        self.users.remove(uname)
+        if self.exclusive:
+            self._current_count = self._parallel_count
+            self.exclusive = False
+        else:
+            self._current_count += 1
+        self.count_lock.release()
+        self.release_listener.set()
+        return True
 
     def do_shutdown(self):
         ''' Prepare the resource for shutdown. All new request will be

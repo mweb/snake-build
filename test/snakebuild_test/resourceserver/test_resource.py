@@ -77,6 +77,51 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 0)
 
+
+    def test_release_command(self):
+        ''' Test the release method if it sets the counters correctly.
+        '''
+        demo = '''{ "name": "Test",
+                    "parallel_count" : 4,
+                    "keywords": [],
+                    "parameters": {}
+                  }
+                '''
+        res = init_resource_from_string(demo)
+        self.assertTrue(res.name == "Test")
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+        self.assertTrue(res.acquire('unit_test', False, True))
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+        self.assertTrue(not res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+
+        # exclusive lock
+        self.assertTrue(res.acquire('unit_test', True, False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 0)
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+
+        # exlusive unlock
+        self.assertTrue(res.acquire('unit_test', True, False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 0)
+        self.assertTrue(res.release('unit_test', True))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue(not res.release('unit_test', True))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+
+
     def test_counter_change(self):
         ''' Test the change of the counter during run
         '''
