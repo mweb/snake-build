@@ -77,7 +77,6 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 0)
 
-
     def test_release_command(self):
         ''' Test the release method if it sets the counters correctly.
         '''
@@ -96,6 +95,15 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
         self.assertTrue(not res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 4)
+
+        # test different user to release
+        self.assertTrue(res.acquire('unit_test1', False, True))
+        self.assertTrue(not res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 4)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue(res.release('unit_test1', False))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
 
@@ -120,7 +128,6 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.release('unit_test', False))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
-
 
     def test_counter_change(self):
         ''' Test the change of the counter during run
@@ -167,3 +174,10 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parallel_count == 5)
         self.assertTrue(res.current_count == 2)
 
+        res.parallel_count = 1
+        self.assertTrue(res.parallel_count == 1)
+        self.assertTrue(res.current_count == -2)
+        self.assertTrue(not res.acquire('unit_test', False, False))
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 1)
+        self.assertTrue(res.current_count == -1)
