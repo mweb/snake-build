@@ -263,4 +263,7 @@ class Resource(object):
         ''' Prepare the resource for shutdown. All new request will be
             rejected.
         '''
-        pass
+        self.run = False
+        LOG.info("Received shutdown signal. Currently used resources: %s" %
+                (self._parallel_count - self._current_count))
+        self.release_listener.set()
