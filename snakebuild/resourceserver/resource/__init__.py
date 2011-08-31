@@ -20,4 +20,4 @@
     resource for the resource server.
 '''
 
-from resource import Resource
+from resource import Resource, init_resource_from_string

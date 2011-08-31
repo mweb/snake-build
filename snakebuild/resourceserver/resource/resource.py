@@ -22,6 +22,9 @@
 
 import threading
 import json
+import logging
+
+LOG = logging.getLogger('snakebuild.resourceserver.resource')
 
 
 class ResourceException(BaseException):
@@ -57,7 +60,7 @@ def init_resource_from_string(obj_str):
         @param obj_str: The json string to parse
         @return: The new Resource object
     '''
-    obj = json.load(obj_str)
+    obj = json.loads(obj_str)
     if not ('name' in obj and 'parallel_count' in obj and
             'keywords' in obj and 'parameters' in obj):
         raise ResourceException('Not all requiered keys available.')
@@ -70,7 +73,11 @@ def init_resource_from_string(obj_str):
     if type(obj['keywords']) is list:
         for key in obj['keywords']:
             if type(key) is str or type(key) is unicode:
-                resource.keywords.append(key)
+                if key.lower() in resource.keywords:
+                    LOG.warning('Duplicated keywords (%s) for resource (%s)' %
+                            (key, resource.name))
+                else:
+                    resource.keywords.append(key.lower())
     if type(obj['parallel_count']) is int:
         resource.parallel_count = obj['parallel_count']
     else:
@@ -119,7 +126,7 @@ class Resource(object):
 
         # the parameters and the keywords
         self.parameters = {}
-        self.keywords = [name]
+        self.keywords = [name.lower()]
 
     def acquire(self, uname, exclusive, block):
         ''' Acquire the resource if available otherwise this method blocks

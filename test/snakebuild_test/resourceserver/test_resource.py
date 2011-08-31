@@ -20,7 +20,8 @@
 
 import unittest
 
-from snakebuild.resourceserver.resource import Resource
+from snakebuild.resourceserver.resource import Resource, \
+        init_resource_from_string
 
 
 class TestResource(unittest.TestCase):
@@ -32,5 +33,18 @@ class TestResource(unittest.TestCase):
     def test_resource_creation(self):
         ''' Test the resource creation methods.
         '''
-        pass
-#        self.assertTrue(value == "#!/bin/sh Test\n# to print\n# a longer\n#"
+        demo = '''{ "name": "Test1",
+                    "parallel_count" : 2,
+                    "keywords": ["myTest", "build"],
+                    "parameters": { "value1" : "arther" }
+                  }
+                '''
+        res = init_resource_from_string(demo)
+        self.assertTrue(res.name == "Test1")
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 0)
+        self.assertTrue('mytest' in res.keywords)
+        self.assertTrue('build' in res.keywords)
+        self.assertTrue('test1' in res.keywords)
+        self.assertTrue(res.parameters['value1'] == 'arther')
+
