@@ -5,12 +5,12 @@ v0.1, June 2010: Document Started
 
 This document provides all the information necessary to extend and improve the
 Snake-Build build server. This includes all the network protocols used and a
-simple overview of the architecture of Snake-Build and its sub components.
+simple overview of the architecture of Snake-Build and its subcomponents.
 
 == Overview
 
 Snake-Build is not one server that can be run and then everything is ready to 
-use. It is separated into several sub modules. 
+use. It is separated into several submodules. 
 TODO give overview over the different modules
 
 include::config.txt[]

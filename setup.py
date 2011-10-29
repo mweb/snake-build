@@ -33,7 +33,7 @@ def find_data(search_path, install_path='share/snakebuild_common'):
         @param search_path: The path to search for files
         @param install_path: The default path to install the files
 
-        TODO: add support for other platforms then Linux
+        TODO: add support for other platforms than Linux
     '''
     walker = os.walk(search_path, topdown=True)
     result = []
@@ -111,12 +111,11 @@ setup(
     license='GPL v3.0',
     author='Mathias Weber',
     author_email='mathew.weber@gmail.com',
-    description='The common libraries for the snake build build server '
+    description='The common libraries for the snake-build build server '
             'components.',
     long_description='The common libraries which are used by all components '
-            'of the snake build build server. This includes config and helper '
+            'of the snake-build build server. This includes config and helper '
             'tools.',
-    #url='https://launchpad.net/pycsmbuilder',
     cmdclass={'install': InstallAndUpdateDataDirectory},
     packages=find_packages('snakebuild'),
     install_requires=[],
