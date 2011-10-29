@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The Server object proovides a server instance which runs forever or until
+''' The Server object provides a server instance which runs forever or until
     the shutdown method is called. It will listen for clients and forward
     all connections to the MessageHandler. The Server requires a dictionary
     with all supported commands with a function to call.
@@ -83,7 +83,7 @@ class Server(object):
 
     def run(self):
         ''' Start the server. This method will not return until the server
-            gets stoped.
+            gets stopped.
         '''
         srvr = threading.Thread(target=self.run_server)
         srvr.start()

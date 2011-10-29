@@ -1,11 +1,11 @@
 == Configuration
 
-The configuration can be done with ini file but for the default values and the
+The configuration can be done with an ini file but for the default values and the
 description of the configuration values a json default configuration is
 required. The Config class from the snakebuild.common package provides a method
 'init_default_config' to load such a json file. 
 
-=== Configure the Config
+=== Configure the Config object
 
 The json file to configure the config object must have the following structure
 and must be provided before any value gets accessed and before all other config
@@ -19,7 +19,7 @@ files are loaded.
         "logging": {
             "default": "stdout",
             "type": "str",
-            "description": "Set the output directory for logging information"
+            "description": "Set the output directory for logging information."
         },
         "answer": {
             "default": 42,
@@ -37,24 +37,24 @@ files are loaded.
 }
 ----
 
-IMPORTANT: The keys are all transferred to lower case since the ini format does
-not support differentiation of upper and lower case letters.
+IMPORTANT: The keys are all transferred to lower case since the ini format is
+not case sensitive.
 
 Each key within a section must have the three keys: `default`, `type` and
-`description`. The only key that must be defined is the `application_name` it 
-requires a string as the value and this is the name that is used to load the 
-default config files (`etc/${APPLICATION_NAME}/${APPLICATION_NAME}.conf`)
+`description`. The only key that must be defined is the `application_name`. It 
+requires a string as value and this is the name that is used to load the 
+default config files (`etc/${APPLICATION_NAME}/${APPLICATION_NAME}.conf`).
 It is not necessary that a section with the application_name is defined but it
 can be defined.
 
-The types of the values is used for the `get_s` method of the Config object.
-All the values will always be translated to the specified type if possible
-otherwise an `ConfigValueException` is thrown. The following types are 
+The types of values are used for the `get_s` method of the Config object.
+All values will always be translated to the specified type if possible
+otherwise a `ConfigValueException` is thrown. The following types are 
 supported:
 
 * *str* A simple 7bit encoded string (python `string`)
-* *unicode* A unicode encoded string (python `unicode`)
-* *int* A integer value (python `int`)
+* *unicode* An unicode encoded string (python `unicode`)
+* *int* An integer value (python `int`)
 * *float* A floating point value (python `float`)
 * *bool* A boolean value (python 'bool')
 
@@ -75,14 +75,14 @@ On Windows this order is slightly different:
 
 . *NOT YET DEFINED OR IMPLEMENTED*
 
-After this the config values can be access with the section and key.
+After this the config values can be accessed with the section and key.
 
 .Example
 [source,python]
 ----
 from snakebuild.common import Config
 
-Config().init_default_config('/usr/share/applicatin_name/config.json')
+Config().init_default_config('/usr/share/application_name/config.json')
 Config().load_default()
 userid = Config().get_s('client', 'user_id')
 ----

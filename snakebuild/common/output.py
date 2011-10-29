@@ -67,7 +67,7 @@ def format_message(value, indent="", line_length=None, first_indent=None):
     '''
     if indent.find('\t'):
         indent = indent.replace('\t', '    ')
-    line_length = get_line_lengt(line_length)
+    line_length = get_line_length(line_length)
 
     result = []
     if first_indent is None:
@@ -88,7 +88,7 @@ def format_message(value, indent="", line_length=None, first_indent=None):
     return "\n".join(result)
 
 
-def get_line_lengt(line_length):
+def get_line_length(line_length):
     ''' Get the line length of a terminal or the given line lenght if not None
 
         @param line_length: The line length to chekc if None then the terminal

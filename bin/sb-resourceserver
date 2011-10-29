@@ -62,7 +62,7 @@ if __name__ == '__main__':
         print 'SnakeBuild-ResrouceServer: %s' % __version__
         sys.exit(0)
 
-    # this is a linux only solution this should be fixed for windows
+    # TODO this is a linux only solution this should be fixed for windows
     if not os.path.exists('/tmp/snakebuild'):
         os.mkdir('/tmp/snakebuild')
 

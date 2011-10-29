@@ -10,10 +10,10 @@ that all the configuration and build instructions for a project should be
 stored within a version control system. This could be http://git-scm.com/[GIT]
 or http://mercurial.selenic.com/[Mercurial] but should not be limited to those.
 
-Overviews
+Overview
 ~~~~~~~~~
 
-The build server it self should consists out of several separated modules. By 
+The build server itself should consist of several separated modules. By 
 dividing it into several separate applications it is possible to have this 
 modules running on separate servers which helps to reduce the load and should
 get a better scalability since not everything depends on a single instance.
@@ -26,9 +26,9 @@ There are 4 different servers available, one client application and one agent
 application. Each of those have one distinct job.
 
 Control Server;;
-    The Control Server is the server most users will use directly
+    The control server is the server most users will use directly
     since this server will provide a webfrontend to control and read the
-    status of the other servers. (This is the frontend of snake build)
+    status of the other servers. (This is the frontend of snake-build)
 
 Reporting Server;;
     The reporting server is the server instance which receives
@@ -38,21 +38,21 @@ Reporting Server;;
 
 Resource Server;;
     The resource server is the server which provides all the resources which
-    can be used for building testing or anything else we can imaging that need
+    can be used for building, testing or anything else we can imagine that needs
     to have a regulated access. The resources which he provides do not need to
-    be connected the the resource server they might be fully independent or
-    maybe they are not even capable to talk with a server. The server just
+    be connected to the resource server, they might be fully independent or
+    maybe they are not even capable of talking to a server. The server just
     assumes that the configured resources are available as configured.
 
 Resource Client;;
-    The resource client is not a resource it self it is a simple binary to
+    The resource client is not a resource itself it is a simple binary to
     request and release resources from the resource server. This binary will
     provide other commands to control the resource server.
 
 Build Server;;
     The build server is the server which handles the build action. It does
     the triggering of the builds and tests. All the builds are configured via
-    the build server he knows when to call what. It supports using different
+    the build server, he knows when to call what. It supports using different
     versions of the build scripts which are available and lets a build client
     run the right version of the scripts.
 
@@ -69,7 +69,7 @@ Build Client;;
 Build Scripts
 ~~~~~~~~~~~~~
 
-The build scripts are stored within a source repository this allows to develop
+The build scripts are stored within a source repository which allows to develop
 new build steps without affecting current builds which are still running on the
 existing server.
 
@@ -85,7 +85,7 @@ the build steps.
 By having the build scripts stored on the buildserver it is possible to change
 the buildscripts for a project without changing the repository of the original
 project and within the build results we can store the revision of the build
-scripts which where used to build the project. This way it is possible to
-change the build scripts in one place and you still now which version was used
-but the developers it self do not need to know which version of the build
-scripts they should use.
+scripts which were used to build the project. This way it is possible to
+change the build scripts in one place and you still know which version was used
+but the developers do not need to know which version of the build scripts
+they should use.
