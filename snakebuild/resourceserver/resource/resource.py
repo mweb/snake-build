@@ -61,6 +61,36 @@ def init_resource_from_string(obj_str):
         @return: The new Resource object
     '''
     obj = json.loads(obj_str)
+    return init_resource_from_obj(obj)
+
+
+def init_resource_from_obj(obj):
+    ''' This function creates a new resource object from a dictionary structure
+        which must be somethin similar to this.
+
+        { "name": "TEResource",
+          "parallel_count": 1,
+          "keywords": ["test", "build", "melt"],
+          "parameters": { "ip": "192.168.1.92" }
+        }
+
+        The name must be a unique name for all the currently instancieted
+        resources otherwise this resource can not be managed by the resource
+        manager.
+        The parallel_count must be an integer that indicates how man user might
+        acquire this resource at once.
+
+        The keywords entry must be a list with all the keywords that this
+        resource server should be usable. A client usually dosn't ask for a
+        specific resource instead it asks for a type (keyword).
+
+        The parameters must be a dictionary with an arbitrary structure (only
+        basic types) this structure will be accessible from a client to be able
+        to use the resource.
+
+        @param obj_str: The json string to parse
+        @return: The new Resource object
+    '''
     if not ('name' in obj and 'parallel_count' in obj and
             'keywords' in obj and 'parameters' in obj):
         raise ResourceException('Not all requiered keys available.')
