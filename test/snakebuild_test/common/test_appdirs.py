@@ -42,7 +42,7 @@ class TestAppdirs(unittest.TestCase):
             self.assertTrue(path == os.path.expanduser('~/.config/snake-build'))
         elif sys.platform == 'darwin':
             self.assertTrue(path == os.path.join(os.path.expanduser(
-                    '~/Library/Application Support', 'snake-build')))
+                    '~/Library/Application Support'), 'snake-build'))
         elif sys.platform.startswith('win'):
             print 'Unit test not yet implemented for windows'
             self.assertTrue(False)
@@ -58,7 +58,7 @@ class TestAppdirs(unittest.TestCase):
                     '~/.config/snake-build/1.2'))
         elif sys.platform == 'darwin':
             self.assertTrue(path == os.path.join(os.path.expanduser(
-                    '~/Library/Application Support', 'snake-build', '1.2')))
+                    '~/Library/Application Support'), 'snake-build', '1.2'))
         elif sys.platform.startswith('win'):
             print 'Unit test not yet implemented for windows'
             self.assertTrue(False)
@@ -144,7 +144,7 @@ class TestAppdirs(unittest.TestCase):
             self.assertTrue(path == os.path.join('/var/log', 'snake-build'))
         elif sys.platform == 'darwin':
             self.assertTrue(path == os.path.join(os.path.expanduser(
-                    '~/Library/Logs', 'snake-build')))
+                    '~/Library/Logs'), 'snake-build'))
         elif sys.platform.startswith('win'):
             print 'Unit test not yet implemented for windows'
             self.assertTrue(False)
@@ -160,7 +160,7 @@ class TestAppdirs(unittest.TestCase):
                     '4.2'))
         elif sys.platform == 'darwin':
             self.assertTrue(path == os.path.join(os.path.expanduser(
-                    '~/Library/Logs', 'snake-build', '4.2')))
+                    '~/Library/Logs'), 'snake-build', '4.2'))
         elif sys.platform.startswith('win'):
             print 'Unit test not yet implemented for windows'
             self.assertTrue(False)
