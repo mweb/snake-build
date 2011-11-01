@@ -152,14 +152,14 @@ def user_data_dir(appname, appauthor=None, version=None, roaming=True):
         @return: the path to the data/config directory for the given
                 application
     '''
-    if platform.get_platform == platform.WINDOWS:
+    if platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
             raise AppDirsException("On windows the 'appauthor' must be "
                     "specified")
         const = roaming and "CSIDL_APPDATA" or "CSIDL_LOCAL_APPDATA"
         path = os.path.join(_get_win_folder(const), appauthor, appname)
 
-    elif platform.get_platform == platform.MACOS:
+    elif platform.get_platform() == platform.MACOS:
         path = os.path.join(
                 os.path.expanduser('~/Library/Application Support/'), appname)
 
@@ -192,14 +192,14 @@ def shared_data_dir(appname, appauthor=None, version=None, roaming=False):
         # during development
         return os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
-    elif platform.get_platform == platform.WINDOWS:
+    elif platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
             raise AppDirsException("On windows the 'appauthor' must be "
                     "specified")
         path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
                 appname)
 
-    elif platform.get_platform == platform.MACOS:
+    elif platform.get_platform() == platform.MACOS:
         path = os.path.join('/Library/Application Support', appname)
     else:
         path = os.path.join('/usr', 'share', appname.lower())
@@ -229,13 +229,13 @@ def shared_config_dir(appname, appauthor=None, version=None):
         # during development
         return os.path.join(os.path.dirname(__file__), '..', '..', 'config')
 
-    elif platform.get_platform == platform.WINDOWS:
+    elif platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
             raise AppDirsException("On windows the 'appauthor' must be "
                     "specified")
         path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
                 appname)
-    elif platform.get_platform == platform.MACOS:
+    elif platform.get_platform() == platform.MACOS:
         path = os.path.join('/Library/Application Support', appname)
     else:
         path = os.path.join('/etc', appname.lower())
@@ -271,11 +271,11 @@ def log_dir(appname, appauthor=None, version=None):
         # during development
         return os.path.join(os.path.dirname(__file__), '..', '..', 'config')
 
-    elif platform.get_platform == platform.WINDOWS:
+    elif platform.get_platform() == platform.WINDOWS:
         path = user_data_dir(appname, appauthor, version)
         path = os.path.join(path, 'Logs')
         version = False
-    elif platform.get_platform == platform.MACOS:
+    elif platform.get_platform() == platform.MACOS:
         path = os.path.join(os.path.expanduser('~/Library/Logs'), appname)
     else:
         path = os.path.join('/var/log/', appname.lower())
@@ -361,7 +361,7 @@ def _get_win_folder_with_ctypes(csidl_name):
     return buf.value
 
 
-if platform.get_platform == platform.WINDOWS:
+if platform.get_platform() == platform.WINDOWS:
     try:
         import win32com.shell
         _get_win_folder = _get_win_folder_with_pywin32
