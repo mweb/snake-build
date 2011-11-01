@@ -26,7 +26,6 @@ import os.path
 import logging
 import json
 
-from snakebuild.common import Config
 from snakebuild.resourceserver.resource import init_resource_from_obj
 
 LOG = logging.getLogger('snakebuild.resourceserver.resource.resourcemanager')
@@ -39,12 +38,19 @@ class ResourceManager(object):
         it provides an interface to get informations about the resources.
     '''
 
-    def __init__(self):
+    def __init__(self, dirname):
         ''' Constructor. Create the ResourceManager object and load the
             resources from the configured resource directory.
+
+            The resources are configured with a file for each resource. All the
+            files must be stored within one directory. All files except the one
+            starting with a dot (hidden files) or files ending with .bkp are
+            read and interpreted as a resource.
+
+            @param: The name of the directory to get the config files from for
+                    the resources
         '''
         LOG.debug('Initialize ResourceManager')
-        dirname = Config().get_s('resourceserver', 'resource_config_dir')
         self.resources = {}
         self.release_listener = threading.Event()
         self.keywords = {}

@@ -19,6 +19,9 @@
 ''' The unit test for the resource object '''
 
 import unittest
+import os
+import shutil
+import json
 
 from snakebuild.resourceserver.resource import ResourceManager
 
@@ -27,8 +30,30 @@ class TestResourceManager(unittest.TestCase):
     ''' The unit test for the snake build resourceserver resourcemanager class.
     '''
     def setUp(self):
-        ''' Setup the test case. '''
-        pass
+        ''' Setup the test case. Create a directory for the test resources. If
+            it allready exists remove it.
+        '''
+        self.config_dir = os.path.join(os.path.dirname(__file__), '..', '..',
+                'data')
+        if os.path.isdir(os.path.join(self.config_dir, 'resources')):
+            shutil.rmtree(os.path.join(self.config_dir, 'resources'))
+        os.makedirs(os.path.join(self.config_dir, 'resources'))
+        data = {"name": "Test1",
+                "parallel_count": 2,
+                "keywords": ["myTest", "build"],
+                "parameters": {"value1": "arther"}}
+        tfile = open(os.path.join(self.config_dir, 'resources',
+                'test1.resource'), 'w')
+        tfile.write(json.dumps(data))
+        tfile.close()
+
+        data = {"name": "Test2",
+                "parallel_count": 4,
+                "keywords": ["myTest", "build", "run"],
+                "parameters": {"value1": "trillian"}}
+        tfile = open(os.path.join(self.config_dir, 'resources',
+                'test2.resource'), 'w')
+        tfile.write(json.dumps(data))
 
     def test_resourcemanager_creation(self):
         ''' Test the resourcemanager creation
