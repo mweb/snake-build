@@ -20,6 +20,7 @@
 
 import unittest
 import json
+import os.path
 
 from snakebuild.common import Config, AppDirs
 from snakebuild.common.config import ConfigValueException
@@ -29,6 +30,8 @@ class TestConfig(unittest.TestCase):
     ''' The unit test for the snake build common Config class. '''
     def setUp(self):
         AppDirs().init('snakebuild_test')
+        self.config_dir = os.path.join(os.path.dirname(__file__), '..', '..',
+                'data')
         data = {"application_name": 'snakebuild_test',
                 "Client": {
                     "first": {"default": "Start", "type": "str",
@@ -52,7 +55,7 @@ class TestConfig(unittest.TestCase):
                         "description": "Dolphins"},
                     "fifth": {"default": False, "type": "bool",
                         "description": "G'Gugvunnts and Vl'hurgs"}}}
-        dfd = open('data/test_data.txt', 'w')
+        dfd = open(os.path.join(self.config_dir, 'test_data.txt'), 'w')
         dfd.write(json.dumps(data))
 
     def test_init_config(self):
@@ -60,8 +63,10 @@ class TestConfig(unittest.TestCase):
         '''
         config = Config()
         with self.assertRaises(ConfigValueException):
-            config.init_default_config('data/test_config.txt')
-        config.init_default_config('data/test_data.txt')
+            config.init_default_config(os.path.join(self.config_dir,
+                    'test_config.txt'))
+        config.init_default_config(os.path.join(self.config_dir,
+                'test_data.txt'))
 
         self.assertTrue(config.application_name == 'snakebuild_test')
 
@@ -87,15 +92,16 @@ class TestConfig(unittest.TestCase):
     def test_save_default_config(self):
         ''' Test the save functionality of the config module '''
         config = Config()
-        config.save('data/test_default_output.txt')
-        config.save('data/test_default_output_verbose.txt', True)
+        config.save(os.path.join(self.config_dir, 'test_default_output.txt'))
+        config.save(os.path.join(self.config_dir,
+                'test_default_output_verbose.txt'), True)
         config.set('client', 'first', 42)
         config.set('client', 'second', 42)
         config.set('server', 'first', 42)
         config.set('server', 'second', 42)
-        config.save('data/test_save_output.txt')
-        config.save('data/test_save_output_verbose.txt', True)
-
+        config.save(os.path.join(self.config_dir, 'test_save_output.txt'))
+        config.save(os.path.join(self.config_dir,
+                'test_save_output_verbose.txt'), True)
 
     def test_set_config(self):
         ''' Test seting and getting values from the config object '''
