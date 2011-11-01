@@ -27,7 +27,7 @@ import logging
 import json
 
 from snakebuild.common import Config
-from snakebuild.resouceserver.resource import init_resource_from_obj
+from snakebuild.resourceserver.resource import init_resource_from_obj
 
 LOG = logging.getLogger('snakebuild.resourceserver.resource.resourcemanager')
 

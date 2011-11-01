@@ -25,7 +25,7 @@ from snakebuild.resourceserver.resource import Resource, \
 
 
 class TestResource(unittest.TestCase):
-    ''' The unit test for the snake build common Config class. '''
+    ''' The unit test for the snake build resourceserver resource class. '''
     def setUp(self):
         ''' Setup the test case. '''
         pass

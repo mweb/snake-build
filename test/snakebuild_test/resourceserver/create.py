@@ -21,10 +21,12 @@
 import unittest
 
 from test_resource import TestResource
+from test_resourcemanager import TestResourceManager
 
 
 def suite():
     ''' Get the test suite for the resourceserver snakebuild classes. '''
     res = unittest.TestLoader().loadTestsFromTestCase(TestResource)
+    res_mgr = unittest.TestLoader().loadTestsFromTestCase(TestResourceManager)
 
-    return unittest.TestSuite([res])
+    return unittest.TestSuite([res, res_mgr])

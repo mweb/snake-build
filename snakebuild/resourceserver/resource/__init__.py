@@ -20,4 +20,6 @@
     resource for the resource server.
 '''
 
-from resource import Resource, init_resource_from_string
+from resource import Resource, init_resource_from_string, \
+        init_resource_from_obj
+from resourcemanager import ResourceManager
