@@ -21,7 +21,7 @@
 import unittest
 
 from snakebuild.resourceserver.resource import Resource, \
-        init_resource_from_string
+        init_resource_from_string, ResourceException
 
 
 class TestResource(unittest.TestCase):
@@ -94,13 +94,15 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.release('unit_test', False))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
-        self.assertTrue(not res.release('unit_test', False))
+        with self.assertRaises(ResourceException):
+            res.release('unit_test', False)
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
 
         # test different user to release
         self.assertTrue(res.acquire('unit_test1', False, True))
-        self.assertTrue(not res.release('unit_test', False))
+        with self.assertRaises(ResourceException):
+            res.release('unit_test', False)
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 3)
         self.assertTrue(res.release('unit_test1', False))
@@ -122,7 +124,8 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.release('unit_test', True))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 3)
-        self.assertTrue(not res.release('unit_test', True))
+        with self.assertRaises(ResourceException):
+            res.release('unit_test', True)
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 3)
         self.assertTrue(res.release('unit_test', False))

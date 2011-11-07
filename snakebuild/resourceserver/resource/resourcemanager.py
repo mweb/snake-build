@@ -27,6 +27,7 @@ import logging
 import json
 
 from snakebuild.resourceserver.resource import init_resource_from_obj
+from snakebuild.resourceserver.resource import ResourceException
 
 LOG = logging.getLogger('snakebuild.resourceserver.resource.resourcemanager')
 
@@ -76,7 +77,62 @@ class ResourceManager(object):
         ''' Shut down the resource manager. If there are any request waiting
             wake up the given thread and decline all questions for resources.
         '''
-        pass
+        # Implement the shutdown
+        self.run = False
+        self.release_listener.set()
+
+    def acquire(self, uname, keyword, exclusive):
+        ''' Acquire a resource. This will return the resource acquired. This
+            method will block if no resource for the given keyword is
+            available.
+
+            @param uname: The username to use as the user of the resource
+            @param keyword: The keyword to search for the resource
+            @param exclusive: Boolean value if set to True then the user will
+                usethe resource exclusiv no one else should be using it.
+
+            @return: The name of the resource aquired or None if not available.
+        '''
+        if not keyword in self.keywords:
+            LOG.warning('The user (%s) tried to access a resouce with the '
+                    'keyword "%s". But this keyword does not exist.' %
+                    (uname, keyword))
+            return None
+
+        while self.run:
+            names = self.keywords[keyword]
+            self.release_listener.clear()
+            for name in names:
+                if self.resources[name].acquire(uname, exclusive, False):
+                    return name
+            self.release_listener.wait()
+
+    def release(self, resourcename, uname, exclusive):
+        ''' Release a given resource. If the resource wasn't locked by the
+            given user nothin will happen.
+
+            The exclusive boolean is to release the exclusive lock from a
+            resource. The user will keep a normal lock of the resource till he
+            calls the release without the exclusive lock.
+            If a resource is locked exclusive and this call is called without
+            the exclusive lock then the resource will be released completely.
+
+            @param resourcename: The name of the resource to release
+            @param uname: The user name how owns the lock
+            @param exclusive: Switch on/off the exclusive release of the lock
+
+            @return: True if released and otherwise a ResoruceException is
+                    raised
+        '''
+        if not resourcename in self.resources:
+            LOG.error('Release command called for a not existing resource %s'
+                    ' User: %s' % (resourcename, uname))
+            raise ResourceException('Release command called for a not existing'
+                    ' resource %s User: %s' % (resourcename, uname))
+
+        self.resources[resourcename].release(uname, exclusive)
+        self.release_listener.set()
+        return True
 
     def _load_resources(self, dirname):
         ''' Load all the resources from the given directory.

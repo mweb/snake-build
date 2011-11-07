@@ -96,12 +96,16 @@ class TestResourceManager(unittest.TestCase):
     def test_acquire_command(self):
         ''' Test the acquire method if it sets the counters correctly.
         '''
-        pass
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        self.assertTrue(len(mgr.resources) == 2)
+        self.assertTrue(mgr.acquire('Arther', 'test1', False) == 'Test1')
 
     def test_release_command(self):
         ''' Test the release method if it uses the right resource.
         '''
-        pass
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        name = mgr.acquire('Arther', 'test1', False)
+        self.assertTrue(mgr.release(name, 'Arther', False))
 
     def test_shutdown_command(self):
         ''' Test the shutdown command

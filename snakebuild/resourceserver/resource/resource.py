@@ -28,8 +28,8 @@ LOG = logging.getLogger('snakebuild.resourceserver.resource')
 
 
 class ResourceException(BaseException):
-    ''' The exception that gets thrown if an error within the Resource object
-        gets thrown.
+    ''' This exception gets thrown if the resourcemanager or a resource has
+        a problem during the normal usage.
     '''
 
 
@@ -257,22 +257,25 @@ class Resource(object):
                     which must be blocked exclusive will only release the
                     exclusive lock but will keep one lock for the given user.
 
-            @return: True if release worked and False if not (usually resource
-                    was not locked before by this user)
+            @return: True if release worked. Otherwise a ResourceException is
+                    raised
         '''
         self.count_lock.acquire()
         if not uname in self.users:
             LOG.error("A user (%s) tried to release a resource which he "
                     "didn't acquire before.")
             self.count_lock.release()
-            return False
+            raise ResourceException("Tried to release resource with the wrong "
+                    'user: %s' % uname)
 
         if exclusive:
             if not self.exclusive:
                 LOG.error("A user (%s) tried to free exclusive usage only for "
-                        "a resource which is not acquired exclusivly." % uname)
+                        "a resource which is not acquired exclusively." %
+                        uname)
                 self.count_lock.release()
-                return False
+                raise ResourceException('Resource not acquired exclusively '
+                        'before.')
             self._current_count = self._parallel_count - 1
             self.exclusive = False
             self.count_lock.release()

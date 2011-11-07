@@ -21,5 +21,5 @@
 '''
 
 from resource import Resource, init_resource_from_string, \
-        init_resource_from_obj
+        init_resource_from_obj, ResourceException
 from resourcemanager import ResourceManager
