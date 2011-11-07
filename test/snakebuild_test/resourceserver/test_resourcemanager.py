@@ -27,7 +27,8 @@ from snakebuild.resourceserver.resource import ResourceManager
 
 
 class TestResourceManager(unittest.TestCase):
-    ''' The unit test for the snake build resourceserver resourcemanager class.
+    ''' The unit test for the snake build resourceserver resourcemanager
+        class.
     '''
     def setUp(self):
         ''' Setup the test case. Create a directory for the test resources. If
@@ -58,7 +59,39 @@ class TestResourceManager(unittest.TestCase):
     def test_resourcemanager_creation(self):
         ''' Test the resourcemanager creation
         '''
-        pass
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        self.assertTrue(len(mgr.resources) == 2)
+        # test resources names
+        self.assertTrue('Test2' in mgr.resources)
+        self.assertTrue(mgr.resources['Test2'].name == 'Test2')
+        self.assertTrue('Test1' in mgr.resources)
+        self.assertTrue(mgr.resources['Test1'].name == 'Test1')
+
+        # test keywords
+        self.assertTrue('test1' in mgr.keywords)
+        self.assertTrue('test2' in mgr.keywords)
+        self.assertTrue('mytest' in mgr.keywords)
+        self.assertTrue('build' in mgr.keywords)
+        self.assertTrue('run' in mgr.keywords)
+
+        # check resource if loaded correctly.
+        self.assertTrue(mgr.resources['Test1'].parallel_count == 2)
+        self.assertTrue('mytest' in mgr.resources['Test1'].keywords)
+        self.assertTrue('build' in mgr.resources['Test1'].keywords)
+        self.assertTrue('test1' in mgr.resources['Test1'].keywords)
+        self.assertTrue('value1' in mgr.resources['Test1'].parameters)
+        self.assertTrue(mgr.resources['Test1'].parameters['value1'] ==
+                'arther')
+
+        self.assertTrue(mgr.resources['Test2'].parallel_count == 4)
+        self.assertTrue('mytest' in mgr.resources['Test2'].keywords)
+        self.assertTrue('build' in mgr.resources['Test2'].keywords)
+        self.assertTrue('run' in mgr.resources['Test2'].keywords)
+        self.assertTrue('test2' in mgr.resources['Test2'].keywords)
+        self.assertTrue(not 'test1' in mgr.resources['Test2'].keywords)
+        self.assertTrue('value1' in mgr.resources['Test2'].parameters)
+        self.assertTrue(mgr.resources['Test2'].parameters['value1'] ==
+                'trillian')
 
     def test_acquire_command(self):
         ''' Test the acquire method if it sets the counters correctly.

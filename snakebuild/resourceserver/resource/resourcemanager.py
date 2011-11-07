@@ -59,7 +59,18 @@ class ResourceManager(object):
         if os.path.isdir(dirname):
             self._load_resources(dirname)
 
-        # TODO initialize the keywords list
+        for name, resource in self.resources.iteritems():
+            for keyword in resource.keywords:
+                if keyword in self.keywords:
+                    if name in self.keywords[keyword]:
+                        # it is already here why?
+                        LOG.warning('A dupplicate keyword, resource name, this'
+                                ' should not happend. Ignore it: Keyword=%s, '
+                                'ResoruceName=%s' % (keyword, name))
+                        continue
+                    self.keywords[keyword].append(name)
+                else:
+                    self.keywords[keyword] = [name]
 
     def shutdown(self):
         ''' Shut down the resource manager. If there are any request waiting
