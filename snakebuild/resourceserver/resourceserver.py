@@ -19,15 +19,16 @@
 ''' This file provides a start_server method to start the ResourceServer.
 '''
 
-from snakebuild.common import Daemon, Config
+from snakebuild.common import Daemon
 from snakebuild.communication import Server
 from snakebuild.resourceserver.commands import COMMANDS
 
 
-def start_server(options,  arguments):
+def start_server(options, arguments, config):
     ''' Start the resource server.
 
         @param options: the options set via the command line parameters
+        @param config: the global configuration to use for starting the server
         @param arguments: the arguments for the command the first argument
                 within this list is always the command it self.
         @return true or false depends on success or failure
@@ -46,8 +47,8 @@ def start_server(options,  arguments):
         else:
             print "Command not supported for starting: %s" % arguments[0]
 
-    host = Config().get_s('resourceserver', 'hostname')
-    port = Config().get_s('resourceserver', 'port')
+    host = config.get_s('resourceserver', 'hostname')
+    port = config.get_s('resourceserver', 'port')
     name = 'resourceserver'
 
     if options.foreground:

@@ -70,28 +70,34 @@ class TestConfig(unittest.TestCase):
 
         self.assertTrue(config.application_name == 'snakebuild_test')
 
-        self._check_value('client', 'first', 'Aldebarans', str, 'Start',
-                'Start')
-        self._check_value('client', 'second', 'Altairians', unicode, 'Stop',
-                'Stop')
-        self._check_value('client', 'third', 'Amoeboid Zingatularians', int,
-                12, 12)
-        self._check_value('client', 'forth', 'Bartledanians', float, 12.2,
-                12.2)
-        self._check_value('client', 'fifth', 'Belcerebons', bool, True, True)
+        self._check_value(config, 'client', 'first', 'Aldebarans', str,
+                'Start', 'Start')
+        self._check_value(config, 'client', 'second', 'Altairians', unicode,
+                'Stop', 'Stop')
+        self._check_value(config, 'client', 'third', 'Amoeboid Zingatularians',
+                int, 12, 12)
+        self._check_value(config, 'client', 'forth', 'Bartledanians', float,
+                12.2, 12.2)
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool, True,
+                True)
 
-        self._check_value('server', 'first', 'Betelgeusians', str, 'End',
-                'End')
-        self._check_value('server', 'second', 'Blagulon Kappans', unicode,
-                'Accelerate', 'Accelerate')
-        self._check_value('server', 'third', 'Dentrassis', int, -12, -12)
-        self._check_value('server', 'forth', 'Dolphins', float, 3.3333, 3.3333)
-        self._check_value('server', 'fifth', "G'Gugvunnts and Vl'hurgs", bool,
-                False, False)
+        self._check_value(config, 'server', 'first', 'Betelgeusians', str,
+                'End', 'End')
+        self._check_value(config, 'server', 'second', 'Blagulon Kappans',
+                unicode, 'Accelerate', 'Accelerate')
+        self._check_value(config, 'server', 'third', 'Dentrassis', int, -12,
+                -12)
+        self._check_value(config, 'server', 'forth', 'Dolphins', float, 3.3333,
+                3.3333)
+        self._check_value(config, 'server', 'fifth',
+                "G'Gugvunnts and Vl'hurgs", bool, False, False)
 
     def test_save_default_config(self):
         ''' Test the save functionality of the config module '''
         config = Config()
+#        config.init_default_config(os.path.join(self.config_dir,
+#                'test_data.txt'))
+
         config.save(os.path.join(self.config_dir, 'test_default_output.txt'))
         config.save(os.path.join(self.config_dir,
                 'test_default_output_verbose.txt'), True)
@@ -106,36 +112,67 @@ class TestConfig(unittest.TestCase):
     def test_set_config(self):
         ''' Test seting and getting values from the config object '''
         config = Config()
+
+        # tests without default config loaded
         config.set('client', 'first', 12)
-        self._check_value('client', 'first', 'Aldebarans', str, 'Start', "12")
-        config.set('client', 'second', 12.45)
-        self._check_value('client', 'second', 'Altairians', unicode, 'Stop',
-                '12.45')
+        value = config.get_s('client', 'first')
+        self.assertTrue(type(value) == str)
+        # this is a string since we don't now anything about it
+        self.assertTrue(value == '12')
+
         config.set('client', 'third', -16)
-        self._check_value('client', 'third', 'Amoeboid Zingatularians', int,
-                12, -16)
+        value = config.get_s('client', 'third')
+        self.assertTrue(type(value) == str)
+        # this is a string since we don't now anything about it
+        self.assertTrue(value == '-16')
+
+        # and now with default config loaded
+        config.init_default_config(os.path.join(self.config_dir,
+                'test_data.txt'))
+
+        # check previous set values if the previous value remains.
+        self._check_value(config, 'client', 'first', 'Aldebarans', str,
+                'Start', "12")
+        self._check_value(config, 'client', 'third',
+                'Amoeboid Zingatularians', int, 12, -16)
+
+        # now do some test for all kind of types
+        config.set('client', 'first', 112)
+        self._check_value(config, 'client', 'first', 'Aldebarans', str,
+                'Start', "112")
+        config.set('client', 'second', 12.45)
+        self._check_value(config, 'client', 'second', 'Altairians', unicode,
+                'Stop', '12.45')
+        config.set('client', 'third', -166)
+        self._check_value(config, 'client', 'third',
+                'Amoeboid Zingatularians', int, 12, -166)
         config.set('client', 'forth', 11)
-        self._check_value('client', 'forth', 'Bartledanians', float, 12.2,
-                11.0)
+        self._check_value(config, 'client', 'forth', 'Bartledanians', float,
+                12.2, 11.0)
         config.set('client', 'fifth', False)
-        self._check_value('client', 'fifth', 'Belcerebons', bool, True, False)
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
+                True, False)
 
         config.set('server', 'first', True)
-        self._check_value('server', 'first', 'Betelgeusians', str, 'End',
-                'True')
+        self._check_value(config, 'server', 'first', 'Betelgeusians', str,
+                'End', 'True')
         config.set('server', 'second', "Arther Dent")
-        self._check_value('server', 'second', 'Blagulon Kappans', unicode,
-                'Accelerate', 'Arther Dent')
+        self._check_value(config, 'server', 'second', 'Blagulon Kappans',
+                unicode, 'Accelerate', 'Arther Dent')
         config.set('server', 'third', 42)
-        self._check_value('server', 'third', 'Dentrassis', int, -12, 42)
+        self._check_value(config, 'server', 'third', 'Dentrassis', int, -12,
+                42)
         config.set('server', 'forth', 42.43)
-        self._check_value('server', 'forth', 'Dolphins', float, 3.3333, 42.43)
+        self._check_value(config, 'server', 'forth', 'Dolphins', float,
+                3.3333, 42.43)
         config.set('server', 'fifth', True)
-        self._check_value('server', 'fifth', "G'Gugvunnts and Vl'hurgs", bool,
-                False, True)
+        self._check_value(config, 'server', 'fifth',
+                "G'Gugvunnts and Vl'hurgs", bool, False, True)
 
-    def _check_value(self, section, key, edesc, etype, edefault, evalue):
+    def _check_value(self, config, section, key, edesc, etype, edefault,
+            evalue):
         ''' Check if the given config value has the expected values.
+            @param config: The config object to check
             @param section: The section to check
             @param key: The key to check
             @param edesc: Expected Description
@@ -143,10 +180,10 @@ class TestConfig(unittest.TestCase):
             @param edefault: Expected default value
             @param evalue: Expected value
         '''
-        value = Config().get_s(section, key)
+        value = config.get_s(section, key)
         self.assertTrue(type(value) == etype)
         self.assertTrue(value == evalue)
-        desc, ctype, default = Config().get_description(section, key)
+        desc, ctype, default = config.get_description(section, key)
         self.assertTrue(default == edefault)
         self.assertTrue(desc == edesc)
         self.assertTrue(ctype == etype)

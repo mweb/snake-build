@@ -22,7 +22,8 @@
 
 from snakebuild.communication.client import Client
 
-def _test(cmd, options, example, example2=None):
+
+def _test(cmd, options, config, example, example2=None):
     ' This is a test command only used for testing new commands. '''
     print "CMD: %s" % cmd
     print "options: %s" % options
@@ -34,8 +35,6 @@ def _test(cmd, options, example, example2=None):
     answ = cl.send(Client.SJSON, 'test', (12, 13))
 
     print answ
-
-
 
 
 COMMANDS = {'acquire': (_test, 'example', ['test', '[test2]'],

@@ -66,6 +66,6 @@ if __name__ == '__main__':
     if not os.path.exists('/tmp/snakebuild'):
         os.mkdir('/tmp/snakebuild')
 
-    run_client(options, args)
+    run_client(options, args, config)
 
     LOG.debug('finished')

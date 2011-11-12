@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
 ''' This file holds Config class for loading/storing the configuration of the
-    Project. The Config class is implemented a singleton so it is easily
-    accessible from everywhere.
+    Project.
 '''
 
 # python imports
@@ -28,7 +27,7 @@ import logging
 import ConfigParser
 
 # common imports
-from snakebuild.common import singleton, output
+from snakebuild.common import output
 from snakebuild.common.appdirs import AppDirs
 
 LOG = logging.getLogger('snakebuild.common.config')
@@ -53,7 +52,6 @@ class Config(object, ConfigParser.SafeConfigParser):
         a config file. But it is possible to have it within the config file.
         This group can be used for storing passwords.
     '''
-    __metaclass__ = singleton.Singleton
 
     def __init__(self):
         ConfigParser.SafeConfigParser.__init__(self)
@@ -78,7 +76,6 @@ class Config(object, ConfigParser.SafeConfigParser):
             if 'application_name' == key:
                 self.application_name = data[key].lower()
                 continue
-
             self._add_section_default(key, data[key])
 
     def get_description(self, section, key):
@@ -115,12 +112,12 @@ class Config(object, ConfigParser.SafeConfigParser):
         ''' Load the default config files.
             First the global config file then the user config file.
         '''
-        self.load(AppDirs().get_shared_config_file("%s.conf" % 
+        self.load(AppDirs().get_shared_config_file("%s.conf" %
                 self.application_name.lower()))
         if os.getuid() > 0:
             config_path = AppDirs().get_user_file('.%s' %
                     self.application_name.lower())
-            config_file = os.path.join(config_path, "%s.conf" % \
+            config_file = os.path.join(config_path, "%s.conf" %
                             self.application_name)
             if os.path.exists(config_file):
                 self.load(config_file)
@@ -187,6 +184,9 @@ class Config(object, ConfigParser.SafeConfigParser):
                             'boolean' % value)
             else:
                 value = value_type(value)
+
+        if not self.has_section(section):
+            self.add_section(section)
 
         ConfigParser.SafeConfigParser.set(self, section, key, str(value))
 

@@ -47,7 +47,7 @@ class HandleCmdException(BaseException):
     '''
 
 
-def handle_cmd(cmd_args, options, cmd_list):
+def handle_cmd(cmd_args, options, config, cmd_list):
     ''' Handle the given comman, check if the number of passwords match and if
         it does call the command.
 
@@ -70,6 +70,7 @@ def handle_cmd(cmd_args, options, cmd_list):
 
         @param cmd_args: The command including the arguments as a string
         @param options: The options given to this commanand
+        @param config: The configuration instance
         @param cmd_list: The complete command list to search for the command
 
         @return: True if everything went fine False on error
@@ -79,21 +80,23 @@ def handle_cmd(cmd_args, options, cmd_list):
 
     cmd = cmd_args[0].lower()
     if cmd in cmd_list:
-        return _call_command(cmd, cmd_args[1:], options, cmd_list[cmd])
+        return _call_command(cmd, cmd_args[1:], options, config, cmd_list[cmd])
     elif cmd == 'help':
-        return _help(cmd, cmd_args[1:], cmd_list)
+        return _help(cmd, cmd_args[1:], cmd_list, config)
     else:
         raise HandleCmdException('Unknown Command %s' % cmd)
 
 
-def _help(cmd, parameters, cmd_list):
+def _help(cmd, parameters, cmd_list, config):
     ''' The help command to print the help for a given command or to print a
         list with all available commands.
 
         @cmd: The command string that lead to this call
         @parameter: The paramter given to the help command (default None) If
             None then an overview over all the commands will be printed.
-        @cmd_list: The dictionar with all the commands and its descriptions
+        @param cmd_list: The dictionar with all the commands and its
+            descriptions
+        @param config: The configuration instance
     '''
     if not (cmd.lower() == 'help'):
         output.error("_help function called for the wrong command.")
@@ -133,10 +136,13 @@ def _print_short_help(cmd, info):
             indent='        ', first_indent="  ")
 
 
-def _print_cmd_help(cmd, cmd_list):
+def _print_cmd_help(cmd, cmd_list, config):
     ''' Print help for the given command
 
         @param cmd: The command to get the help for
+        @param cmd_list: The dictionar with all the commands and its
+            descriptions
+        @param config: The configuration instance
     '''
     if cmd == 'help':
         _print_cmd_help_detail('help', GENERIC_COMMANDS['help'])
@@ -176,14 +182,15 @@ def _print_cmd_help_detail(cmd, cmd_info):
         print ""
 
 
-def _call_command(cmd, args, options, cmd_info):
+def _call_command(cmd, args, options, config, cmd_info):
     ''' Call the given command from the command list. This does some basic
-        checking if enough but not too man variables are provided for the given
+        checking if the paramter count matches the expected count for the given
         command.
 
         @param cmd: The command that gets called
         @param args: The arguments for the given command given by the user
         @param options: The options set by the user
+        @param config: The configuration instance
         @param cmd_info: The command information from the cmd_list
 
         @return True on success and False on Failure
@@ -206,4 +213,4 @@ def _call_command(cmd, args, options, cmd_info):
         _print_cmd_help_detail(cmd, cmd_info)
         return False
 
-    return cmd_info[CMD_FUNCTION](cmd, options, *args)
+    return cmd_info[CMD_FUNCTION](cmd, options, config, *args)

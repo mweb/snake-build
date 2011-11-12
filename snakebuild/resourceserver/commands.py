@@ -21,7 +21,7 @@
 '''
 
 
-def _test(cmd, params):
+def _test(cmd, params, config):
     ' This is a test command only used for testing new commands. '''
     print "CMD: %s" % cmd
     print "options: %s" % params

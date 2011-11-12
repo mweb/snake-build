@@ -22,12 +22,13 @@
 from snakebuild.resourceclient.client_commands import COMMANDS
 from snakebuild.commands import handle_cmd
 
-def run_client(options, arguments):
+def run_client(options, arguments, config):
     ''' Start the client command and see what the user wants.
 
         @param options: the options set via the command line parameters
         @param arguments: the arguments for the command the first argument
                 within this list is always the command it self.
+        @param config: The loaded config object
         @return true or false depends on success or failure
     '''
     if len(arguments) == 0:
@@ -35,7 +36,7 @@ def run_client(options, arguments):
         return False
 
     try:
-        handle_cmd(arguments, options, COMMANDS)
+        handle_cmd(arguments, options, config, COMMANDS)
     except KeyboardInterrupt:
         print('Abort by Keyboard Interrupt.')
         return False
