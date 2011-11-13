@@ -67,7 +67,7 @@ class Server(object):
             @param port: The network port to use for the connection (as int)
             @param commands: A dictionary with all the supported commands and
                     the methods to call if such a command get received.
-            @param name: This name is used for the identifier for the pid, 
+            @param name: This name is used for the identifier for the pid,
                     stdin, stdout and stederr files.
         '''
         self.host = host

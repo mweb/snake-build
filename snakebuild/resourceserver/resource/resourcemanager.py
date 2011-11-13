@@ -77,9 +77,11 @@ class ResourceManager(object):
         ''' Shut down the resource manager. If there are any request waiting
             wake up the given thread and decline all questions for resources.
         '''
-        # Implement the shutdown
+        LOG.info('Recieved shutdown signal.')
         self.run = False
         self.release_listener.set()
+        for resource in self.resources.itervalues():
+            resource.do_shutdown()
 
     def acquire(self, uname, keyword, exclusive):
         ''' Acquire a resource. This will return the resource acquired. This
