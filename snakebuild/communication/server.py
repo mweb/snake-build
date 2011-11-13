@@ -55,7 +55,7 @@ class Server(object):
     # this defines the known message types
     SJSON, UNKNWON = range(2)
 
-    def __init__(self, host, port, commands, name):
+    def __init__(self, host, port, commands, name, data=None):
         ''' Create a server object with the given host and port. The server
             does not start listening until the run method is called.
 
@@ -69,10 +69,12 @@ class Server(object):
                     the methods to call if such a command get received.
             @param name: This name is used for the identifier for the pid,
                     stdin, stdout and stederr files.
+            @param data: The data object which has is required by the commands
         '''
         self.host = host
         self.port = port
         self.commands = commands
+        self.data = data
         self.server = None
         self.server_running = True
 
@@ -114,6 +116,7 @@ class Server(object):
         LOG.info('Server started.')
 
         self.server.commands = self.commands
+        self.server.data = self.data
         if self.server_running:
             self.server.serve_forever()
 

@@ -77,7 +77,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             return
 
         answer = _handle_cmd(cmd['cmd'], cmd['parameters'],
-                self.server.commands)
+                self.server.commands, self.server.data)
 
         answerdump = prepare_sjson_data({'cmd': cmd['cmd'],
                 'parameters': (answer)})
@@ -85,20 +85,21 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         self.request.send(answerdump)
 
 
-def _handle_cmd(cmd, parameters, commands):
+def _handle_cmd(cmd, parameters, commands, data):
     ''' Handle the given command if it is specified within the commands.
 
         @param cmd: The command as a string
         @param parameters: The paramters for the command
         @param commands: The dictionary with the suported commands
+        @param data: The data object to provide to the commands
     '''
     cmd = cmd.lower()
     if cmd in commands:
-        return commands[cmd][0](cmd, parameters)
+        return commands[cmd][0](cmd, parameters, data)
     else:
         cmd_list = dict((k.lower(), v) for k, v in commands.iteritems())
         if cmd.lower() in cmd_list:
-            return cmd_list[cmd][0](cmd, parameters)
+            return cmd_list[cmd][0](cmd, parameters, data)
         else:
             LOG.error("The requested command '%s' is not supported by the "
                     "given server implementation." % cmd)

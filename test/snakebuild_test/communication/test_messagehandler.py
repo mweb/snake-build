@@ -47,10 +47,12 @@ class TestMessageHandler(unittest.TestCase):
         hdlr = MessageHandler(dummy, None, None)
         hdlr.server = DummyContainer()
         hdlr.server.commands = {'test': (self._handle_call_back,)}
+        hdlr.server.data = "PING"
         dummy.add_data(message_string)
         hdlr.handle()
         self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['parameters'] == data['parameters'])
+        self.assertTrue(self.got_handled['data'] == 'PING')
 
     def test_parse_sjson_request(self):
         ''' Test the private method _parse_sjson_request. '''
@@ -68,20 +70,24 @@ class TestMessageHandler(unittest.TestCase):
         hdlr = MessageHandler(dummy, None, None)
         hdlr.server = DummyContainer()
         hdlr.server.commands = {'test': (self._handle_call_back,)}
+        hdlr.server.data = 16.7
         dummy.add_data(message_string)
         hdlr._parse_sjson_request()
         self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['parameters'] == data['parameters'])
+        self.assertTrue(self.got_handled['data'] == 16.7)
 
     def test_handle_cmd(self):
         ''' Test the private method of the message handler class. '''
         self.got_handled = {'cmd': None, 'parameters': None}
         _handle_cmd('test', [1, 2, 3],
-                {'test': (self._handle_call_back,)})
+                {'test': (self._handle_call_back,)}, 12)
         self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['parameters'] == [1, 2, 3])
+        self.assertTrue(self.got_handled['data'] == 12)
 
-    def _handle_call_back(self, cmd, parameters):
+    def _handle_call_back(self, cmd, parameters, data):
         ''' Used as call back for the _handle_cmd. '''
         self.got_handled['cmd'] = cmd
         self.got_handled['parameters'] = parameters
+        self.got_handled['data'] = data

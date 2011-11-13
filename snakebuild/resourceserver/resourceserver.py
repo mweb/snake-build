@@ -22,6 +22,7 @@
 from snakebuild.common import Daemon
 from snakebuild.communication import Server
 from snakebuild.resourceserver.commands import COMMANDS
+from snakebuild.resourceserver.resource import ResourceManager
 
 
 def start_server(options, arguments, config):
@@ -51,11 +52,16 @@ def start_server(options, arguments, config):
     port = config.get_s('resourceserver', 'port')
     name = 'resourceserver'
 
-    if options.foreground:
-        Daemon(Server(host, port, COMMANDS, name), Daemon.FOREGROUND)
-    elif stop:
+    if stop:
         Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
     else:
-        Daemon(Server(host, port, COMMANDS, name), Daemon.START)
+        resourcemanager = ResourceManager(config.get_s('resourceserver',
+               'resources_directory'))
+        if options.foreground:
+            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+                    Daemon.FOREGROUND)
+        else:
+            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+                    Daemon.START)
 
     return True
