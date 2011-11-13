@@ -22,14 +22,13 @@
 import logging
 import os
 
-from snakebuild.common import config
-#from snakebuild.common import filetools
 
-
-def create_logger(appname):
+def create_logger(config, appname=None):
     ''' Create a default logging information and set the default values.
 
-        @param appname: The name of the application to load the config from
+        @param config: The config instance to load
+        @param appname: The key name of the app to get the config for. If not
+            set then then the application name of the config is taken
     '''
     # change this to WARNING but at the moment DEBUG is ok
     # do regreate the logger with the settings in the config
@@ -38,19 +37,24 @@ def create_logger(appname):
                 '%(message)s',
         filemode='w')
 
-    set_logging_to_config_values(appname)
+    set_logging_to_config_values(config, appname)
 
 
-def set_logging_to_config_values(appname):
+def set_logging_to_config_values(config, appname=None):
     ''' Set the logging to the values specified within the config.
 
-        @param appname: The name of the application to load the config from
+        @param config: The config instance to load
+        @param appname: The key name of the app to get the config for. If not
+            set then then the application name of the config is taken
     '''
-    __set_log_level_config(appname)
-    __set_log_output_config(appname)
+    if appname is None:
+        appname = config.application_name
+
+    __set_log_level_config(config, appname)
+    __set_log_output_config(config, appname)
 
 
-def __set_log_level_config(appname):
+def __set_log_level_config(config, appname):
     ''' Set the log level to the current configured value. Possible values are
         fatal    (show only the fatal messages)
         critical (show only the cirtical and the fatal messages)
@@ -59,12 +63,12 @@ def __set_log_level_config(appname):
         info     (show the general information and all above messages)
         debug    (show all messages)
 
-        @param appname: The name of the application to load the config from
+        @param config: The config instance to get the settings from
+        @param appname: The key name of the app to get the config for.
     '''
-    conf = config.Config()
     logger = logging.getLogger()
     # set the logging level correct
-    level = conf.get_s(appname, 'logging_level').lower()
+    level = config.get_s(appname, 'logging_level').lower()
     if level == 'critical':
         logger.setLevel(logging.CRITICAL)
     elif level == 'debug':
@@ -79,19 +83,19 @@ def __set_log_level_config(appname):
         logger.setLevel(logging.INFO)
 
 
-def __set_log_output_config(appname):
+def __set_log_output_config(config, appname):
     ''' Set the log output config to the configured value.
 
-        @param appname: The name of the application to load the config from
+        @param config: The config instance to get the settings from
+        @param appname: The key name of the app to get the config for.
     '''
-    conf = config.Config()
     formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - '
             '%(name)-10s: %(message)s')
     logger = logging.getLogger()
     # set the logging output
     for handler in logger.handlers:
         logger.removeHandler(handler)
-    logtype = conf.get_s(appname, 'logging').split(';')
+    logtype = config.get_s(appname, 'logging').split(';')
     for output in logtype:
         output = output.strip().lower()
         if output == 'stdout':
@@ -101,7 +105,7 @@ def __set_log_output_config(appname):
             # TODO change this
             #filetools.check_dir(conf.get_s(appname, 'logging_dir'))
             handler = logging.FileHandler(
-                    os.path.join(conf.get_s(appname, 'logging_dir'),
+                    os.path.join(config.get_s(appname, 'logging_dir'),
                                 '%s.log' % appname))
         elif output == '':
             continue

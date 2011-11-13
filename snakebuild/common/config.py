@@ -143,6 +143,8 @@ class Config(object, ConfigParser.SafeConfigParser):
             @exception: if the type is specified and the value could not be
                     translated to the given type.
         '''
+        section = section.lower()
+        key = key.lower()
         descr, value_type, default = self.get_description(section, key)
         if value_type == bool:
             return self.getboolean(section, key)
