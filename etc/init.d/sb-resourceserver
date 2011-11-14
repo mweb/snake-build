@@ -15,11 +15,11 @@ export PATH="${PATH}:+${PATH}:/usr/sbin/:sbin"
 case "$1" in
   start)
     log_action_msg "Starting the snake build resource server" 
-    sb-resourceserver
+    sb-resourceserver --background
     ;;
   stop)
     log_action_msg "Stoping the snake build resource server" 
-    sb-resourceserver --stop
+    sb-resourceserver stop
     ;;
   *)
     log_action_msg "Usage: /etc/init.d/sb-resourceserver {start|stop}"
