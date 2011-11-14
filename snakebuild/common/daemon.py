@@ -32,7 +32,7 @@ History:
     2008/06/06 by Mathias Weber
     2011/07/09 by Mathias Weber
 
-Included it into the snake-build project and made some project specific 
+Included it into the snake-build project and made some project specific
 changes.
 """
 
@@ -45,7 +45,7 @@ import os
 import sys
 import time
 import logging
-from signal import SIGTERM
+from signal import signal, SIGTERM
 
 from snakebuild.common import output
 
@@ -94,7 +94,21 @@ class Daemon(object):
         '''
         self.instance = instance
         self.startstop(action)
-        instance.run()
+        signal(SIGTERM, self.shutdown)
+        try:
+            instance.run()
+        except KeyboardInterrupt:
+            instance.shutdown()
+        os.remove(self.instance.pidfile)
+
+    def shutdown(self, signum, frame):
+        """ The signal handler for the SIGTERM signal.
+            @param signum: The signal number must be SIGTERM
+            @param frame: The stack frame (not used)
+        """
+        LOG.info("SIGTERM received shutdown.")
+        self.instance.shutdown()
+        return True
 
     def deamonize(self):
         """Fork the process into the background.

@@ -93,7 +93,7 @@ class Server(object):
         while self.server_running:
             try:
                 time.sleep(1)
-            except (KeyboardInterrupt, SystemExit):
+            except (SystemExit):
                 break
 
         self.server_running = False
@@ -121,3 +121,12 @@ class Server(object):
             self.server.serve_forever()
 
         LOG.info('Shutdown the server.')
+
+    def shutdown(self):
+        ''' This method gets called on shutdown. If the commands have a
+            shutdown command defined this will be called with no paramters.
+        '''
+        self.server_running = False
+        if 'shutdown' in self.commands:
+            self.commands['shutdown'][0]('shutdown', None, self.data)
+        self.server.shutdown()

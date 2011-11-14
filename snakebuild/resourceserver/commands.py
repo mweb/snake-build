@@ -21,7 +21,7 @@
 '''
 
 
-def _test(cmd, params):
+def _test(cmd, params, res_mgr):
     ' This is a test command only used for testing new commands. '''
     print "CMD: %s" % cmd
     print "options: %s" % params
@@ -29,6 +29,21 @@ def _test(cmd, params):
     return 10
 
 
+def _shutdown(cmd, params, res_mgr):
+    ''' This method is called on a shutdown request.
+
+        @param cmd: The called command.
+        @param params: The parameters given if None then the local shutdown is
+                called.
+        @param res_mgr: The ResourceManager instance
+    '''
+    if params is None:
+        res_mgr.shutdown()
+
+    return True
+
+
 COMMANDS = {'test': (_test, 'example', ['test', '[test2]'],
                 {'test': 'bla bla',
-                '[test2]': 'Ihaaaa'})}
+                '[test2]': 'Ihaaaa'}),
+            'shutdown': (_shutdown, 'Shutdown the server', [], {})}
