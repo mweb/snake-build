@@ -32,8 +32,8 @@ def parse_command_line():
         help='The configfile to load. This will be the last file to be '
         'loaded and it will be overwritten for storing a new '
         'configuration.', default=None)
-    parser.add_option('--foreground', dest='foreground', action='store_true',
-            help="Run the server in foreground instead of background", 
+    parser.add_option('--background', dest='background', action='store_true',
+            help="Run the server in background",
             default=False)
     parser.add_option('-v', '--version', dest='version', action='store_true',
             help='Ask for the version.', default=False)

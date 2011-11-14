@@ -57,11 +57,11 @@ def start_server(options, arguments, config):
     else:
         resourcemanager = ResourceManager(config.get_s('resourceserver',
                'resources_directory'))
-        if options.foreground:
-            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
-                    Daemon.FOREGROUND)
-        else:
+        if options.background:
             Daemon(Server(host, port, COMMANDS, name, resourcemanager),
                     Daemon.START)
+        else:
+            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+                    Daemon.FOREGROUND)
 
     return True

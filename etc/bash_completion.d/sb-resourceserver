@@ -6,7 +6,7 @@ _sbresourceserver()
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
     commands="start stop"
-    params="--help -h -f --configfile --foreground -v --version"
+    params="--help -h -f --configfile --background -v --version"
 
     if [ ${COMP_CWORD} -eq 0 ]; then
         COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )
