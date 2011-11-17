@@ -26,6 +26,8 @@ import json
 import logging
 
 from snakebuild.communication.messages import prepare_sjson_data
+from snakebuild.communication.command_structure import FUNCTION, PARAMETERS,\
+        SIGNED, prepare_error
 
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
 
@@ -42,10 +44,21 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             return
         if ord(data[0]) == 0x61:
             self._parse_sjson_request()
+        elif ord(data[0]) == 0x62:
+            self._parse_signed_request()
         else:
             LOG.error('The message type received is not supported. got: %x' %
                     ord(data[0]))
             return
+
+    def _parse_signed_request(self):
+        ''' Check if the given request is correctly signed. If yes forward it
+            to the _sjson_request_handler.
+            The message it self is not encrypted.
+        '''
+        # TODO implement the signature check
+        pass
+        #self._sjson_request_handler(cmd, True)
 
     def _parse_sjson_request(self):
         ''' Get a sjson request and call the appropriate command if available.
@@ -69,6 +82,17 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             LOG.error('Could not parse the received data. Not a valid json '
                     'string.')
             return
+        self._sjson_request_handler(cmd, False)
+
+    def _sjson_request_handler(self, cmd, signed):
+        ''' Check the cmd dictionary which was parsed from a sjson if it is a
+            valid command. If it is call it.
+
+            @param cmd: The loaded dictionary
+            @param signed: If set to true then the command was called with a
+                valid signature. Which means it should be allowd to to
+                administrativ tasks.
+        '''
         if not 'cmd' in cmd:
             LOG.error("The message received did not have a 'cmd' key.")
             return
@@ -77,7 +101,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
             return
 
         answer = _handle_cmd(cmd['cmd'], cmd['parameters'],
-                self.server.commands, self.server.data)
+                self.server.commands, self.server.data, signed)
 
         answerdump = prepare_sjson_data({'cmd': cmd['cmd'],
                 'parameters': (answer)})
@@ -85,22 +109,63 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         self.request.send(answerdump)
 
 
-def _handle_cmd(cmd, parameters, commands, data):
+def _handle_cmd(cmd, parameters, commands, data, signed):
     ''' Handle the given command if it is specified within the commands.
 
         @param cmd: The command as a string
-        @param parameters: The paramters for the command
+        @param parameters: The parameters for the command
         @param commands: The dictionary with the suported commands
         @param data: The data object to provide to the commands
+        @param signed: The switch if the message was sent signed or not.
+                Certain command are not allowed to be called without signature.
+
+        @return the answer of the command or an error message if the parameters
+            are not valid.
     '''
     cmd = cmd.lower()
     if cmd in commands:
-        return commands[cmd][0](cmd, parameters, data)
+        return _call_cmd(commands[cmd], cmd, parameters, data, signed)
     else:
         cmd_list = dict((k.lower(), v) for k, v in commands.iteritems())
         if cmd.lower() in cmd_list:
-            return cmd_list[cmd][0](cmd, parameters, data)
+            cmd = cmd.lower()
+            return _call_cmd(cmd_list[cmd], cmd, parameters, data, signed)
         else:
-            LOG.error("The requested command '%s' is not supported by the "
-                    "given server implementation." % cmd)
-            return
+            return prepare_error('The requested command is not supported by '
+                    'this server instance. Command: %s' % cmd)
+
+
+def _call_cmd(cmd, cmd_name, parameters, data, signed):
+    ''' Call the given command and performe some sanity checks if the
+        requested command is valid.
+
+        @param cmd: The command dictionary entry
+        @param cmd_name: The name of the command.
+        @param parameters The parameters for the command
+        @param data: The data object to pass to the command
+        @param signed: The switch whicht is enabled if the message was sent
+            with a valid signature.
+
+        @return the answer of the command or an error message if the parameters
+            are not valid.
+    '''
+    for param in cmd[PARAMETERS]:
+        if param.startswith('['):
+            # we don't look for the optional parameters right now
+            continue
+        if not param in parameters:
+            return prepare_error('The parameter (%s) is required for the call '
+                    'of this command.' % param)
+    for key in parameters.iterkeys():
+        if key in cmd[PARAMETERS]:
+            continue
+        elif ("[%s]" % key) in cmd[PARAMETERS]:
+            continue
+        else:
+            return prepare_error('The parameter (%s) is not specified for the '
+                    'call of this command.' % key)
+    if cmd[SIGNED] and not signed:
+        return prepare_error('You are not allowed to call this command. This '
+                'command is only allowed for verified users.')
+
+    return cmd[FUNCTION](cmd_name, parameters, data)

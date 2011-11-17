@@ -20,6 +20,8 @@
     server supports via the network connection.
 '''
 
+from snakebuild.communication.command_structure import prepare_answer
+
 
 def _test(cmd, params, res_mgr):
     ' This is a test command only used for testing new commands. '''
@@ -40,10 +42,11 @@ def _shutdown(cmd, params, res_mgr):
     if params is None:
         res_mgr.shutdown()
 
-    return True
+    return prepare_answer()
 
 
+# The commands for the message handler
 COMMANDS = {'test': (_test, 'example', ['test', '[test2]'],
                 {'test': 'bla bla',
-                '[test2]': 'Ihaaaa'}),
-            'shutdown': (_shutdown, 'Shutdown the server', [], {})}
+                '[test2]': 'Ihaaaa'}, False),
+            'shutdown': (_shutdown, 'Shutdown the server', [], {}, True)}

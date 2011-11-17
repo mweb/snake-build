@@ -42,7 +42,7 @@ class Client(object):
         protocol.
     '''
     # this defines the known message types
-    SJSON, UNKNWON = range(2)
+    SJSON, SJSON_SIGNED, UNKNWON = range(3)
 
     def __init__(self, host, port):
         ''' Create a client with the given host address and network port
