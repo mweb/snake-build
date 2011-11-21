@@ -16,9 +16,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
+''' Create the test suite for the communication package. '''
 
 import unittest
 
+from test_commandstructure import TestCommandStructure
 from test_client import TestClient
 from test_server import TestServer
 from test_messages import TestMessages
@@ -27,9 +29,11 @@ from test_messagehandler import TestMessageHandler
 
 def suite():
     ''' Get the test suite for the communication snakebuild classes. '''
+    cmd_struct = unittest.TestLoader().loadTestsFromTestCase(
+            TestCommandStructure)
     client = unittest.TestLoader().loadTestsFromTestCase(TestClient)
     server = unittest.TestLoader().loadTestsFromTestCase(TestServer)
     handler = unittest.TestLoader().loadTestsFromTestCase(TestMessageHandler)
     messages = unittest.TestLoader().loadTestsFromTestCase(TestMessages)
 
-    return unittest.TestSuite([client, server, handler, messages])
+    return unittest.TestSuite([cmd_struct, client, server, handler, messages])

@@ -32,7 +32,7 @@
         this list. The parameters must be all lower case.
     PARAM_NAME: For each parameter from the PARAMETERS_LIST we require the
         name here again.
-    PARAM_DESCRIPTION: The description of the paramter.
+    PARAMETER_DESCRIPTION: The description of the paramter.
     True/False: If set to True then this command can only be called from an
         instance which could sign the message correctly (This are usually
         commands which should only be called from verified sources
@@ -49,7 +49,7 @@ class CommandStructureError(BaseException):
 
 
 # the access enums for the commands used within the message handler.
-FUNCTION, DESCRIPTION, PARAMETERS, PARAMTER_DESCRIPTIONS, SIGNED = range(5)
+FUNCTION, DESCRIPTION, PARAMETERS, PARAMETER_DESCRIPTIONS, SIGNED = range(5)
 
 ERROR = 'error'
 SUCCESS = 'success'
