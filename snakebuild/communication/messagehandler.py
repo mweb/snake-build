@@ -26,7 +26,7 @@ import json
 import logging
 
 from snakebuild.communication.messages import prepare_sjson_data
-from snakebuild.communication.command_structure import FUNCTION, PARAMETERS,\
+from snakebuild.communication.commandstructure import FUNCTION, PARAMETERS,\
         SIGNED, prepare_error
 
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
