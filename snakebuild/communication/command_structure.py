@@ -51,6 +51,9 @@ class CommandStructureError(BaseException):
 # the access enums for the commands used within the message handler.
 FUNCTION, DESCRIPTION, PARAMETERS, PARAMTER_DESCRIPTIONS, SIGNED = range(5)
 
+ERROR = 'error'
+SUCCESS = 'success'
+
 
 def prepare_error(message):
     ''' Return a dictionary with a valid error message. This always has the
@@ -67,7 +70,7 @@ def prepare_error(message):
 
         @param message: The message that belongs to the error
     '''
-    return {'status': 'error', 'message': message}
+    return {'status': ERROR, 'message': message}
 
 
 def prepare_answer(data=None):
@@ -77,9 +80,9 @@ def prepare_answer(data=None):
         after the call.
     '''
     if data is None:
-        return {'status': 'success'}
+        return {'status': SUCCESS}
     if type(data) is dict:
-        data['status'] = 'success'
+        data['status'] = SUCCESS
         return data
     else:
         raise CommandStructureError('The given data for the answer data is '
