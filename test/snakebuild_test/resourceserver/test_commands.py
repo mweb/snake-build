@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The unit test for the resource object '''
+''' The unit test for the resource server commands. '''
 
 import unittest
 import os
@@ -64,3 +64,4 @@ class TestCommands(unittest.TestCase):
 
         # test result
         self.assertTrue(len(result) == 2)
+        # TODO add more tests
