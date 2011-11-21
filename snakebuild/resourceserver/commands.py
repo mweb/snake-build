@@ -47,7 +47,7 @@ def _status_list(cmd, params, res_mgr):
 
     answer = prepare_answer()
     answer['resources'] = {}
-    for res in res_mgr.itervalues():
+    for res in res_mgr.resources.itervalues():
         values = {'name': res.name,
                 'keywords': res.keywords,
                 'slots': res.parallel_count,
