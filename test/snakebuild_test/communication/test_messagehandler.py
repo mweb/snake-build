@@ -21,7 +21,7 @@ import unittest
 import json
 
 from snakebuild.communication.messagehandler import MessageHandler, _handle_cmd
-from snakebuild.communication.command_structure import prepare_answer, \
+from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
 
 from test_helpers.dummysocket import DummySocket
