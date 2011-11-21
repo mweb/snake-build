@@ -20,15 +20,42 @@
     server supports via the network connection.
 '''
 
-from snakebuild.communication.command_structure import prepare_answer
+import logging
+
+from snakebuild.communication.command_structure import prepare_answer, \
+        prepare_error
+
+LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-def _test(cmd, params, res_mgr):
-    ' This is a test command only used for testing new commands. '''
-    print "CMD: %s" % cmd
-    print "options: %s" % params
+def _status_list(cmd, params, res_mgr):
+    ''' This command returns a list with all the configured resources. In
+        addtion to the name we return the current status and the keywords
+        of all the resources.
 
-    return 10
+        @param cmd: The command that lead to the call of this function
+        @param params: The paramters used for this call
+        @param res_mgr: The resource manager instance
+        @return: the answer object to return to the client
+    '''
+    if cmd is not 'status_list':
+        LOG.error('_status_list called with the wrong command: %s' % cmd)
+        return prepare_error('Server Error')
+
+    if params is not None:
+        return prepare_error('Illegal paramters')
+
+    answer = prepare_answer()
+    answer['resources'] = {}
+    for res in res_mgr.itervalues():
+        values = {'name': res.name,
+                'keywords': res.keywords,
+                'slots': res.parallel_count,
+                'free': res.current_count,
+                'users': res.users}
+        answer['resources'][res.name] = values
+
+    return answer
 
 
 def _shutdown(cmd, params, res_mgr):
@@ -39,14 +66,20 @@ def _shutdown(cmd, params, res_mgr):
                 called.
         @param res_mgr: The ResourceManager instance
     '''
-    if params is None:
-        res_mgr.shutdown()
+    if cmd != 'shutdown':
+        LOG.error('_status_list called with the wrong command: %s' % cmd)
+        return prepare_error('Server Error')
+
+    if params is not None:
+        return prepare_error('Illegal paramters')
+
+    res_mgr.shutdown()
 
     return prepare_answer()
 
 
 # The commands for the message handler
-COMMANDS = {'test': (_test, 'example', ['test', '[test2]'],
-                {'test': 'bla bla',
-                '[test2]': 'Ihaaaa'}, False),
+COMMANDS = {'status_list': (_status_list, 'Get a simple list with all the '
+        'resources available. This includes the current status.', [],
+                {}, False),
             'shutdown': (_shutdown, 'Shutdown the server', [], {}, True)}
