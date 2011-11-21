@@ -46,14 +46,14 @@ def _status_list(cmd, params, res_mgr):
         return prepare_error('Illegal paramters')
 
     answer = prepare_answer()
-    answer['resources'] = {}
+    answer['resources'] = []
     for res in res_mgr.resources.itervalues():
         values = {'name': res.name,
                 'keywords': res.keywords,
                 'slots': res.parallel_count,
                 'free': res.current_count,
                 'users': res.users}
-        answer['resources'][res.name] = values
+        answer['resources'].append(values)
 
     return answer
 
