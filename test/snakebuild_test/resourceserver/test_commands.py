@@ -111,8 +111,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(len(result['message']) > 0)
 
         # test with parameters
-        result = COMMANDS['status_list'][FUNCTION]('status', {'action': 1},
-                mgr)
+        result = COMMANDS['status_list'][FUNCTION]('status_list',
+                {'action': 1}, mgr)
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
