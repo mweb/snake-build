@@ -120,6 +120,36 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
+    def test_shutdown_cmd(self):
+        ''' '''
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+
+        # test before any action
+        result = COMMANDS['shutdown'][FUNCTION]('shutdown', None, mgr)
+
+        self.assertTrue(len(result) == 1)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == SUCCESS)
+        self.assertTrue(mgr.run == False)
+
+        # test it with the wrong command name parameter
+        result = COMMANDS['shutdown'][FUNCTION]('down', None, mgr)
+
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue('message' in result)
+        self.assertTrue(len(result['message']) > 0)
+
+        # test it with the wrong command name parameter
+        result = COMMANDS['shutdown'][FUNCTION]('shutdown', {'data': 1}, mgr)
+
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue('message' in result)
+        self.assertTrue(len(result['message']) > 0)
+
     def _checkresource(self, res, name, keywords, slots, free, users):
         ''' Check if the given resource full fills the following criteries.
 
