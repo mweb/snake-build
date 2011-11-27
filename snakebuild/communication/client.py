@@ -61,7 +61,7 @@ class Client(object):
 
             The param can be anything from a dictionary, list to an int, float
             or any other basic type. Even None. It is possible to have
-            multiple nexted dicts and list but it should be kept as simple
+            multiple nested dicts and list but it should be kept as simple
             as possible.
 
             The answer of this command returns the command and the paramers
