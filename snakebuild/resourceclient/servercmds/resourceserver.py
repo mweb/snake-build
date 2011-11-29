@@ -21,9 +21,16 @@
 '''
 
 from snakebuild.communication.client import Client
+from snakebuild.communication.commandstructure import SUCCESS
+
+
+class ResourceRemoteServerError(BaseException):
+    ''' The base exception of the errors of the remote server. '''
+
 
 class ResourceServer(object):
-    '''
+    ''' This instance allows communicating with a resouce server with simple
+        methods there is not knowledge of the protocol necessary.
     '''
 
     def __init__(self, url, port):
@@ -33,3 +40,24 @@ class ResourceServer(object):
             @param port: The network port where the server is listening.
         '''
         self.client = Client(url, port)
+
+    def get_status_list(self):
+        ''' Get the status information about all the configured resources.
+
+            The answer of this command is a list if successfull otherwise an
+            Exception is thrown with the error message stored.
+            The answer list has one entry for each resource and each resource
+            is stored within a dictionary with the following informations
+            (keys):
+            name: The name of the resource
+            slots: The number of parallel slots configured
+            free: The number of free slots
+            users: The list of user names currently using the resource
+
+            @return: If successfull it will return a list with a dictionary
+                    for each resource.
+        '''
+        cmd, answ = self.client.send(Client.SJSON, 'status_list', None)
+        if answ['status'] == SUCCESS:
+            return answ['resources']
+        raise ResourceRemoteServerError("[%s]: %s" % (cmd, answ['message']))
