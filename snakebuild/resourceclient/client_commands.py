@@ -20,7 +20,9 @@
     supported by the resource client command.
 '''
 
-from snakebuild.resourceclient.servercmds.resourceserver import ResourceServer, ResourceRemoteServerError
+from snakebuild.resourceclient.servercmds.resourceserver import \
+        ResourceServer, ResourceRemoteServerError
+
 
 def _status(cmd, options, config):
     ''' This is the command to get a list with information about all the
@@ -34,31 +36,19 @@ def _status(cmd, options, config):
         print "ERROR"
         return
 
-    srvr = ResourceServer(config.get_s('resourceclient', 'hostname'), 
+    srvr = ResourceServer(config.get_s('resourceclient', 'hostname'),
             config.get_s('resourceclient', 'port'))
     try:
         answer = srvr.get_status_list()
-    except ResourceRemoteServerError, x:
-        print "Got error while talking with the server: %s" % x
+    except ResourceRemoteServerError, exc:
+        print "Got error while talking with the server: %s" % exc
         return
 
     print "Name            | Slots/Free | Keywords"
     for resource in answer:
-        print ("{0[name]:15s} |  {0[slots]:4d}/{0[free]:4d} | {1}".format(resource, ", ".join(resource['keywords'])))
+        print ("{0[name]:15s} |  {0[slots]:4d}/{0[free]:4d} | {1}".format(
+            resource, ", ".join(resource['keywords'])))
     return True
-
-def _test(cmd, options, config, example, example2=None):
-    ' This is a test command only used for testing new commands. '''
-    print "CMD: %s" % cmd
-    print "options: %s" % options
-    print "Examples: %s" % example
-    print "Example2: %s" % example2
-
-#    cl = Client('localhost', 4224)
-
-#    answ = cl.send(Client.SJSON, 'test', (12, 13))
-
-#    print answ
 
 
 COMMANDS = {'status': (_status, 'Get the status of all configured resources.',
