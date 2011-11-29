@@ -26,7 +26,7 @@ import json
 import logging
 
 from snakebuild.communication.messages import prepare_sjson_data
-from snakebuild.communication.commandstructure import FUNCTION, PARAMETERS,\
+from snakebuild.communication.commandstructure import FUNCTION, PARAMETERS, \
         SIGNED, prepare_error
 
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
@@ -156,14 +156,15 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
         if not param in parameters:
             return prepare_error('The parameter (%s) is required for the call '
                     'of this command.' % param)
-    for key in parameters.iterkeys():
-        if key in cmd[PARAMETERS]:
-            continue
-        elif ("[%s]" % key) in cmd[PARAMETERS]:
-            continue
-        else:
-            return prepare_error('The parameter (%s) is not specified for the '
-                    'call of this command.' % key)
+    if parameters is not None:
+        for key in parameters.iterkeys():
+            if key in cmd[PARAMETERS]:
+                continue
+            elif ("[%s]" % key) in cmd[PARAMETERS]:
+                continue
+            else:
+                return prepare_error('The parameter (%s) is not specified for '
+                        'the call of this command.' % key)
     if cmd[SIGNED] and not signed:
         return prepare_error('You are not allowed to call this command. This '
                 'command is only allowed for verified users.')
