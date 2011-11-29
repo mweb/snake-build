@@ -38,7 +38,7 @@ def _status_list(cmd, params, res_mgr):
         @param res_mgr: The resource manager instance
         @return: the answer object to return to the client
     '''
-    if cmd is not 'status_list':
+    if cmd != 'status_list':
         LOG.error('_status_list called with the wrong command: %s' % cmd)
         return prepare_error('Server Error')
 
