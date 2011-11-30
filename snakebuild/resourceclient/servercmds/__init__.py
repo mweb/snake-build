@@ -19,3 +19,6 @@
 ''' The snakebuild.resourceclient.servercmds package. This package provides
     an interface to communicate with the server.
 '''
+
+from snakebuild.resourceclient.servercmds.resourceserver import \
+        ResourceServer, ResourceServerRemoteError

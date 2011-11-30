@@ -24,7 +24,7 @@ from snakebuild.communication.client import Client
 from snakebuild.communication.commandstructure import SUCCESS
 
 
-class ResourceRemoteServerError(BaseException):
+class ResourceServerRemoteError(BaseException):
     ''' The base exception of the errors of the remote server. '''
 
 
@@ -60,4 +60,4 @@ class ResourceServer(object):
         cmd, answ = self.client.send(Client.SJSON, 'status_list', None)
         if answ['status'] == SUCCESS:
             return answ['resources']
-        raise ResourceRemoteServerError("[%s]: %s" % (cmd, answ['message']))
+        raise ResourceServerRemoteError("[%s]: %s" % (cmd, answ['message']))

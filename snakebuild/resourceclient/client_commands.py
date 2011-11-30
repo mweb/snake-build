@@ -20,8 +20,8 @@
     supported by the resource client command.
 '''
 
-from snakebuild.resourceclient.servercmds.resourceserver import \
-        ResourceServer, ResourceRemoteServerError
+from snakebuild.resourceclient.servercmds import ResourceServer, \
+        ResourceServerRemoteError
 
 
 def _status(cmd, options, config):
@@ -40,7 +40,7 @@ def _status(cmd, options, config):
             config.get_s('resourceclient', 'port'))
     try:
         answer = srvr.get_status_list()
-    except ResourceRemoteServerError, exc:
+    except ResourceServerRemoteError, exc:
         print "Got error while talking with the server: %s" % exc
         return
 
