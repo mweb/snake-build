@@ -19,9 +19,11 @@
 ''' The unit test for the resource client commands. '''
 
 import unittest
-import minimock
+import os.path
+import subprocess
 
 from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.common import Config
 
 
 class TestCommands(unittest.TestCase):
@@ -30,9 +32,45 @@ class TestCommands(unittest.TestCase):
     def setUp(self):
         ''' Setup the test case. Nothing to yet.
         '''
-        pass
+        self.config_dir = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..',
+                'data', 'client_tests'))
+        config_file = os.path.join(self.config_dir, 'client.conf')
+        config_data_file = os.path.join(os.path.dirname(__file__), '..', '..',
+                '..', 'data', 'resourceclient.conf')
+        self.server_bin = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..',
+                '..', 'bin', 'sb-resourceserver'))
+        self.config = Config()
+        self.config.init_default_config(config_data_file)
+        self.config.load(config_file)
+
+        # write server.conf file
+        sfl = open(os.path.join(self.config_dir, 'server.conf'), 'w')
+        sfl.write('[resourceserver]\n')
+        sfl.write('resource_directory={0:s}\n'.format(
+                os.path.join(self.config_dir, 'resources')))
+        sfl.write('port = 9999\n')
+        # write client.conf
+        sfl = open(os.path.join(self.config_dir, 'client.conf'), 'w')
+        sfl.write('[resourceclient]\n')
+        sfl.write('resource_directory={0:s}\n'.format(
+                os.path.join(self.config_dir, 'resources')))
+        sfl.write('port = 9999\n')
 
     def test_status_cmd(self):
         ''' Test the status command function.
         '''
-        self.assertTrue(True)
+        self.assertTrue('status' in COMMANDS)
+        self.assertTrue(COMMANDS['status'][0]("none", None, self.config) \
+                == None)
+        #self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
+         #       == None)
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
+                '--background', '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+
+        self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
+                == True)
+
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
