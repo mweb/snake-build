@@ -40,7 +40,7 @@ def error(value, line_length=None):
 
 
 def warning(value, line_length=None):
-    ''' print a error message io the standard out. '''
+    ''' print a warning message io the standard out. '''
     print format_message("Warning: %s" % value, indent=4,
             line_length=line_length, first_indent=0)
 
