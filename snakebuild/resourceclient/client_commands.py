@@ -20,6 +20,7 @@
     supported by the resource client command.
 '''
 
+from snakebuild.common import output
 from snakebuild.resourceclient.servercmds import ResourceServer, \
         ResourceServerRemoteError
 
@@ -33,7 +34,7 @@ def _status(cmd, options, config):
         @param config: The config object to use.
     '''
     if cmd != 'status':
-        print "ERROR"
+        output.error('Status called with a wrong command: "{0}"'.format(cmd))
         return
 
     srvr = ResourceServer(config.get_s('resourceclient', 'hostname'),
@@ -41,12 +42,13 @@ def _status(cmd, options, config):
     try:
         answer = srvr.get_status_list()
     except ResourceServerRemoteError, exc:
-        print "Got error while talking with the server: %s" % exc
+        output.error("Got error while talking with the server:\n "
+                "{0}".format(exc))
         return
 
     print "Name            | Slots/Free | Keywords"
     for resource in answer:
-        print ("{0[name]:15s} |  {0[slots]:4d}/{0[free]:4d} | {1}".format(
+        print ("{0[name]:<15s} |  {0[slots]:>4d}/{0[free]:<4d} | {1}".format(
             resource, ", ".join(resource['keywords'])))
     return True
 
