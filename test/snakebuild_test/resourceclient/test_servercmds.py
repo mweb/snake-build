@@ -16,23 +16,24 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The unit test for the resource client commands. '''
+''' The unit test for the resource server remote library calls. '''
 
 import unittest
 import minimock
 
-from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.resourceclient.servercmds import ResourceServer, \
+        ResourceServerRemoteError
 
 
-class TestCommands(unittest.TestCase):
-    ''' The unit test for the snake build resourceclient commands.
+class TestServerCmds(unittest.TestCase):
+    ''' The unit test for the snake build resource client remote commands.
     '''
     def setUp(self):
-        ''' Setup the test case. Nothing to yet.
+        ''' Setup the test case. Nothing yet.
         '''
         pass
 
-    def test_status_cmd(self):
-        ''' Test the status command function.
+    def test_status_list_cmd(self):
+        ''' Test the status list command function.
         '''
         self.assertTrue(True)

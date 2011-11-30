@@ -16,23 +16,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The unit test for the resource client commands. '''
+''' The unit test for the resource client run command. '''
 
 import unittest
 import minimock
 
-from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.resourceclient.client import run_client
 
 
-class TestCommands(unittest.TestCase):
-    ''' The unit test for the snake build resourceclient commands.
+class TestClient(unittest.TestCase):
+    ''' The unit test for the snake build resourceclient run command.
     '''
     def setUp(self):
-        ''' Setup the test case. Nothing to yet.
+        ''' Setup the test case. Nothing to do here.
         '''
         pass
 
-    def test_status_cmd(self):
-        ''' Test the status command function.
+    def test_run_cmd(self):
+        ''' Test the run command of the client.
         '''
         self.assertTrue(True)
