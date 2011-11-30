@@ -187,7 +187,8 @@ class Daemon(object):
             except OSError, err:
                 err = str(err)
                 if err.find("No such process") > 0:
-                    os.remove(self.instance.pidfile)
+                    if os.path.isfile(self.instance.pidfile):
+                        os.remove(self.instance.pidfile)
                     if action == self.STOP:
                         sys.exit(0)
                     action = self.START
