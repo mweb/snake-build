@@ -42,6 +42,12 @@ class ServerCommunicationException(BaseException):
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     ''' Get a multithreaded socket server. '''
 
+    def __init__(self, server_address, RequestHandlerClass):
+        ''' Init allow reusing the address for faster restart. '''
+        self.allow_reuse_address = True
+        SocketServer.TCPServer.__init__(self, server_address,
+                RequestHandlerClass)
+
 
 class Server(object):
     ''' This class is simple wrapper class for a server class which handles
