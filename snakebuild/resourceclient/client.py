@@ -36,7 +36,7 @@ def run_client(options, arguments, config):
         return False
 
     try:
-        handle_cmd(arguments, options, config, COMMANDS)
+        return handle_cmd(arguments, options, config, COMMANDS)
     except KeyboardInterrupt:
         print('Abort by Keyboard Interrupt.')
         return False

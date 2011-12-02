@@ -89,8 +89,16 @@ class Client(object):
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        sock.connect((self.host, self.port))
-        sock.send(data)
+        try:
+            sock.connect((self.host, self.port))
+        except socket.error, emsg:
+            raise ClientCommunicationException('Could not connect to the '
+                    'server: {0}'.format(emsg))
+        try:
+            sock.send(data)
+        except socket.error, emsg:
+            raise ClientCommunicationException('Could not send the data to '
+                    'the server: {0}'.format(emsg))
 
         if no_answer:
             sock.close()

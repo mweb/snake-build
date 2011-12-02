@@ -21,6 +21,7 @@
 '''
 
 from snakebuild.common import output
+from snakebuild.communication import ClientCommunicationException
 from snakebuild.resourceclient.servercmds import ResourceServer, \
         ResourceServerRemoteError
 
@@ -45,6 +46,9 @@ def _status(cmd, options, config):
         output.error("Got error while talking with the server:\n "
                 "{0}".format(exc))
         return
+    except ClientCommunicationException, exc:
+        output.error(exc)
+        return False
 
     print "Name            | Slots/Free | Keywords"
     for resource in answer:
