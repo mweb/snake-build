@@ -45,7 +45,7 @@ def _status(cmd, options, config):
     except ResourceServerRemoteError, exc:
         output.error("Got error while talking with the server:\n "
                 "{0}".format(exc))
-        return
+        return False
     except ClientCommunicationException, exc:
         output.error(exc)
         return False

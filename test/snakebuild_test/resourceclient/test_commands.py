@@ -21,6 +21,7 @@
 import unittest
 import os.path
 import subprocess
+import time
 
 from snakebuild.resourceclient.client_commands import COMMANDS
 from snakebuild.common import Config
@@ -64,12 +65,12 @@ class TestCommands(unittest.TestCase):
         self.assertTrue('status' in COMMANDS)
         self.assertTrue(COMMANDS['status'][0]("none", None, self.config) \
                 == None)
-        #self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
-         #       == None)
+        self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
+                == False)
         self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
                 '--background', '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
-
+        time.sleep(0.2)
         self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
                 == True)
 
