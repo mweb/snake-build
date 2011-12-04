@@ -63,7 +63,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action
-        result = COMMANDS['status_list'][FUNCTION]('status_list', None, mgr)
+        result = COMMANDS['status_list'][FUNCTION]('status_list', mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -85,7 +85,7 @@ class TestCommands(unittest.TestCase):
         mgr.acquire('Zaphod', 'test2', False)
         mgr.acquire('Ford', 'test1', True)
 
-        result = COMMANDS['status_list'][FUNCTION]('status_list', None, mgr)
+        result = COMMANDS['status_list'][FUNCTION]('status_list', mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -102,17 +102,7 @@ class TestCommands(unittest.TestCase):
                         'run'], 4, 1, ['Ford', 'Beeblebrox', 'Zaphod'])
 
         # test with wrong command name
-        result = COMMANDS['status_list'][FUNCTION]('status', None, mgr)
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue('status' in result)
-        self.assertTrue('message' in result)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue(len(result['message']) > 0)
-
-        # test with parameters
-        result = COMMANDS['status_list'][FUNCTION]('status_list',
-                {'action': 1}, mgr)
+        result = COMMANDS['status_list'][FUNCTION]('status', mgr)
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -127,7 +117,7 @@ class TestCommands(unittest.TestCase):
 
         # test before any action
         result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                ['Test1'], mgr)
+                mgr, 'Test1')
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -145,7 +135,7 @@ class TestCommands(unittest.TestCase):
 
         # test with not existing resource
         result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                ['Arther'], mgr)
+                mgr, ['Arther'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -154,28 +144,8 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(len(result['message']) > 0)
 
         # test with wrong command name
-        result = COMMANDS['resource_details'][FUNCTION]('resource', ['Test1'],
-                mgr)
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue('status' in result)
-        self.assertTrue('message' in result)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue(len(result['message']) > 0)
-
-        # test with no parameters
-        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                None, mgr)
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue('status' in result)
-        self.assertTrue('message' in result)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue(len(result['message']) > 0)
-
-        # test with to many parameters
-        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                ['Test1', 'Test2'], mgr)
+        result = COMMANDS['resource_details'][FUNCTION]('resource', mgr,
+                ['Test1'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -188,7 +158,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action
-        result = COMMANDS['shutdown'][FUNCTION]('shutdown', None, mgr)
+        result = COMMANDS['shutdown'][FUNCTION]('shutdown', mgr)
 
         self.assertTrue(len(result) == 1)
         self.assertTrue(type(result) == dict)
@@ -196,16 +166,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(mgr.run == False)
 
         # test it with the wrong command name parameter
-        result = COMMANDS['shutdown'][FUNCTION]('down', None, mgr)
-
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue('message' in result)
-        self.assertTrue(len(result['message']) > 0)
-
-        # test it with the wrong command name parameter
-        result = COMMANDS['shutdown'][FUNCTION]('shutdown', {'data': 1}, mgr)
+        result = COMMANDS['shutdown'][FUNCTION]('down', mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)

@@ -54,7 +54,8 @@ class TestMessageHandler(unittest.TestCase):
         dummy.add_data(message_string)
         hdlr.handle()
         self.assertTrue(self.got_handled['cmd'] == 'test')
-        self.assertTrue(self.got_handled['parameters'] == data['parameters'])
+        self.assertTrue(self.got_handled['Test'] == [1, 2])
+        self.assertTrue(self.got_handled['Other'] == 'Quack')
         self.assertTrue(self.got_handled['data'] == 'PING')
 
     def test_parse_sjson_request(self):
@@ -78,7 +79,8 @@ class TestMessageHandler(unittest.TestCase):
         dummy.add_data(message_string)
         hdlr._parse_sjson_request()
         self.assertTrue(self.got_handled['cmd'] == 'test')
-        self.assertTrue(self.got_handled['parameters'] == data['parameters'])
+        self.assertTrue(self.got_handled['Test'] == [1, 2])
+        self.assertTrue(self.got_handled['Other'] == 'Quack')
         self.assertTrue(self.got_handled['data'] == 16.7)
 
     def test_handle_cmd(self):
@@ -88,14 +90,19 @@ class TestMessageHandler(unittest.TestCase):
                 {'test': (self._handle_call_back, '', ['p1', 'p2', '[p3]'], {},
                     False)}, 12, False)
         self.assertTrue(self.got_handled['cmd'] == 'test')
-        self.assertTrue(self.got_handled['parameters'] == {'p1': 1, 'p2': 2, 
-            'p3': 3})
+        self.assertTrue(self.got_handled['p1'] == 1)
+        self.assertTrue(self.got_handled['p2'] == 2)
+        self.assertTrue(self.got_handled['p3'] == 3)
         self.assertTrue(self.got_handled['data'] == 12)
         self.assertTrue(answ['status'] == 'success')
 
-    def _handle_call_back(self, cmd, parameters, data):
+    def _handle_call_back(self, cmd, data, Test=None, Other=None, p1=None, p2=None, p3=None):
         ''' Used as call back for the _handle_cmd. '''
         self.got_handled['cmd'] = cmd
-        self.got_handled['parameters'] = parameters
+        self.got_handled['Test'] = Test
+        self.got_handled['Other'] = Other
+        self.got_handled['p1'] = p1
+        self.got_handled['p2'] = p2
+        self.got_handled['p3'] = p3
         self.got_handled['data'] = data
         return prepare_answer()

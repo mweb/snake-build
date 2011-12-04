@@ -168,5 +168,7 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
     if cmd[SIGNED] and not signed:
         return prepare_error('You are not allowed to call this command. This '
                 'command is only allowed for verified users.')
-
-    return cmd[FUNCTION](cmd_name, parameters, data)
+    if parameters is None:
+        return cmd[FUNCTION](cmd_name, data)
+    else:
+        return cmd[FUNCTION](cmd_name, data, **parameters)

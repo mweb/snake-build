@@ -28,22 +28,18 @@ from snakebuild.communication.commandstructure import prepare_answer, \
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-def _status_list(cmd, params, res_mgr):
+def _status_list(cmd, res_mgr):
     ''' This command returns a list with all the configured resources. In
         addtion to the name we return the current status and the keywords
         of all the resources.
 
         @param cmd: The command that lead to the call of this function
-        @param params: The paramters used for this call
         @param res_mgr: The resource manager instance
         @return: the answer object to return to the client
     '''
     if cmd != 'status_list':
         LOG.error('_status_list called with the wrong command: %s' % cmd)
         return prepare_error('Server Error')
-
-    if params is not None:
-        return prepare_error('Illegal paramters')
 
     answer = prepare_answer()
     answer['resources'] = []
@@ -58,29 +54,27 @@ def _status_list(cmd, params, res_mgr):
     return answer
 
 
-def _resource_details(cmd, params, res_mgr):
+def _resource_details(cmd, res_mgr, name):
     ''' This command returns all the configured information about a resouce.
         The data sent is similar to the data available within the config file.
         Just the run time datas are added, like free slots and current users.
 
         @param cmd: The command that lead to the call of this function
-        @param params: The paramters used for this call
         @param res_mgr: The resource manager instance
+        @param name: The name of the resource to get the details for
         @return: the answer object to return to the client
     '''
     if cmd != 'resource_details':
         LOG.error('_resource_details called with the wrong command: %s' % cmd)
         return prepare_error('Server Error')
 
-    if params is None:
-        return prepare_error('Illegal number of paramters. Expected 1 got 0')
-    if len(params) != 1:
-        return prepare_error('Illegal number of paramters. Expected 1 got '
-                '{0}'.format(len(params)))
+    if not(type(name) == str or type(name) == unicode):
+        return prepare_error('Illegal value for the name. Expected a string '
+                'but got {0}'.format(type(name)))
 
     answer = prepare_answer()
-    if params[0] in res_mgr.resources:
-        res = res_mgr.resources[params[0]]
+    if name in res_mgr.resources:
+        res = res_mgr.resources[name]
         values = {'name': res.name,
                 'keywords': res.keywords,
                 'slots': res.parallel_count,
@@ -92,23 +86,18 @@ def _resource_details(cmd, params, res_mgr):
         return answer
     else:
         return prepare_error('The expected resource does not exist: '
-                '{0}'.format(params[0]))
+                '{0}'.format(name))
 
 
-def _shutdown(cmd, params, res_mgr):
+def _shutdown(cmd, res_mgr):
     ''' This method is called on a shutdown request.
 
         @param cmd: The called command.
-        @param params: The parameters given if None then the local shutdown is
-                called.
         @param res_mgr: The ResourceManager instance
     '''
     if cmd != 'shutdown':
         LOG.error('_status_list called with the wrong command: %s' % cmd)
         return prepare_error('Server Error')
-
-    if params is not None:
-        return prepare_error('Illegal paramters')
 
     res_mgr.shutdown()
 
@@ -120,6 +109,6 @@ COMMANDS = {'status_list': (_status_list, 'Get a simple list with all the '
                 'resources available. This includes the current status.', [],
                 {}, False),
             'resource_details': (_resource_details, 'Get the full information '
-                'about a resource.', ['NAME'], {'NAME': 'The name of the '
+                'about a resource.', ['name'], {'name': 'The name of the '
                 'resource to get the information from.'}, False),
             'shutdown': (_shutdown, 'Shutdown the server', [], {}, True)}
