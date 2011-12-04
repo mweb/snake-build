@@ -58,6 +58,43 @@ def _status_list(cmd, params, res_mgr):
     return answer
 
 
+def _resource_details(cmd, params, res_mgr):
+    ''' This command returns all the configured information about a resouce.
+        The data sent is similar to the data available within the config file.
+        Just the run time datas are added, like free slots and current users.
+
+        @param cmd: The command that lead to the call of this function
+        @param params: The paramters used for this call
+        @param res_mgr: The resource manager instance
+        @return: the answer object to return to the client
+    '''
+    if cmd != 'resource_details':
+        LOG.error('_resource_details called with the wrong command: %s' % cmd)
+        return prepare_error('Server Error')
+
+    if params is None:
+        return prepare_error('Illegal number of paramters. Expected 1 got 0')
+    if len(params) != 1:
+        return prepare_error('Illegal number of paramters. Expected 1 got '
+                '{0}'.format(len(params)))
+
+    answer = prepare_answer()
+    if params[0] in res_mgr.resources:
+        res = res_mgr.resources[params[0]]
+        values = {'name': res.name,
+                'keywords': res.keywords,
+                'slots': res.parallel_count,
+                'free': res.current_count,
+                'users': res.users,
+                'parameters': res.parameters}
+        answer = prepare_answer()
+        answer['resource'] = values
+        return answer
+    else:
+        return prepare_error('The expected resource does not exist: '
+                '{0}'.format(params[0]))
+
+
 def _shutdown(cmd, params, res_mgr):
     ''' This method is called on a shutdown request.
 
@@ -80,6 +117,9 @@ def _shutdown(cmd, params, res_mgr):
 
 # The commands for the message handler
 COMMANDS = {'status_list': (_status_list, 'Get a simple list with all the '
-        'resources available. This includes the current status.', [],
+                'resources available. This includes the current status.', [],
                 {}, False),
+            'resource_details': (_resource_details, 'Get the full information '
+                'about a resource.', ['NAME'], {'NAME': 'The name of the '
+                'resource to get the information from.'}, False),
             'shutdown': (_shutdown, 'Shutdown the server', [], {}, True)}

@@ -58,7 +58,7 @@ class TestCommands(unittest.TestCase):
         tfile.write(json.dumps(data))
 
     def test_status_list_cmd(self):
-        ''' Test the status_list command function.
+        ''' Test the status_list command.
         '''
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
@@ -113,6 +113,69 @@ class TestCommands(unittest.TestCase):
         # test with parameters
         result = COMMANDS['status_list'][FUNCTION]('status_list',
                 {'action': 1}, mgr)
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue('status' in result)
+        self.assertTrue('message' in result)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+    def test_resource_details_cmd(self):
+        ''' Test the resource_details command
+        '''
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+
+        # test before any action
+        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
+                ['Test1'], mgr)
+
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == SUCCESS)
+        self.assertTrue('resource' in result)
+        resource = result['resource']
+        self.assertTrue(type(resource) == dict)
+        self.assertTrue('name' in resource)
+        self._checkresource(resource, 'Test1', ['test1', 'mytest', 'build'],
+                    2, 2, [])
+        self.assertTrue('parameters' in resource)
+        self.assertTrue(type(resource['parameters']) == dict)
+        self.assertTrue('value1' in resource['parameters'])
+        self.assertTrue(resource['parameters']['value1'] == 'arther')
+
+        # test with not existing resource
+        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
+                ['Arther'], mgr)
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue('status' in result)
+        self.assertTrue('message' in result)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # test with wrong command name
+        result = COMMANDS['resource_details'][FUNCTION]('resource', ['Test1'],
+                mgr)
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue('status' in result)
+        self.assertTrue('message' in result)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # test with no parameters
+        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
+                None, mgr)
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue('status' in result)
+        self.assertTrue('message' in result)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # test with to many parameters
+        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
+                ['Test1', 'Test2'], mgr)
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
