@@ -19,7 +19,6 @@
 ''' The unit test for the resource client run command. '''
 
 import unittest
-import minimock
 
 from snakebuild.resourceclient.client import run_client
 

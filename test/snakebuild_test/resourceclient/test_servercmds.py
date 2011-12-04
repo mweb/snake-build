@@ -19,7 +19,6 @@
 ''' The unit test for the resource server remote library calls. '''
 
 import unittest
-import minimock
 
 from snakebuild.resourceclient.servercmds import ResourceServer, \
         ResourceServerRemoteError
