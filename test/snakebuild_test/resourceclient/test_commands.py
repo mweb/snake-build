@@ -73,6 +73,23 @@ class TestCommands(unittest.TestCase):
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
+    def test_details_cmd(self):
+        ''' Test the status command function.
+        '''
+        self.assertTrue('details' in COMMANDS)
+        self.assertTrue(COMMANDS['details'][0]("none", None, self.config,
+                None) == None)
+        self.assertFalse(COMMANDS['details'][0]("details", None, self.config,
+                'Test1'))
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
+                '--background', '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        time.sleep(0.2)
+        self.assertTrue(COMMANDS['details'][0]("details", None, self.config,
+                'Test1'))
+
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
+
 
 _NETWORK_PORT = 9999
 

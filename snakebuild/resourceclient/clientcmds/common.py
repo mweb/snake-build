@@ -16,15 +16,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands which are
-    supported by the resource client command.
+''' The file provides some common functions for all client command handlers.
 '''
 
-from snakebuild.resourceclient.clientcmds import status, details
+from snakebuild.resourceclient.servercmds import ResourceServer
 
 
-COMMANDS = {'status': (status, 'Get the status of all configured resources.',
-                [], {}),
-            'details': (details, 'Get the details about one resource.',
-                ['RESOURCE_NAME'], {'RESOURCE_NAME': 'The name of the '
-                    'resource to get the detail informations.'})}
+def get_resource_server(config):
+    ''' get an instance of the resource server.
+
+        @param config: The config object to use for the required parameters.
+    '''
+    return ResourceServer(config.get_s('resourceclient', 'hostname'),
+            config.get_s('resourceclient', 'port'))
