@@ -16,24 +16,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' Create the snakebuild_test suite '''
+''' Create the test suite for the command handler classes. '''
 
 import unittest
 
-import communication
-import common
-import commands
-import resourceserver
-import resourceclient
+from test_handler import TestHandler
 
 
 def suite():
-    ''' Get the test suite for the common snakebuild classes. '''
-    communication_test = communication.suite()
-    common_test = common.suite()
-    commands_test = commands.suite()
-    resourceserver_test = resourceserver.suite()
-    resourceclient_test = resourceclient.suite()
+    ''' Get the test suite for the communication snakebuild classes. '''
+    handler = unittest.TestLoader().loadTestsFromTestCase(TestHandler)
 
-    return unittest.TestSuite([communication_test, common_test, commands_test,
-            resourceserver_test, resourceclient_test])
+    return unittest.TestSuite([handler])

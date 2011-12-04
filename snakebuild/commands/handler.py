@@ -105,7 +105,7 @@ def _help(cmd, parameters, cmd_list, config):
     if len(parameters) == 0:
         return _print_overview(cmd_list)
     else:
-        return _print_cmd_help(cmd, cmd_list)
+        return _print_cmd_help(parameters[0], cmd_list, config)
 
 
 def _print_overview(cmd_list):
