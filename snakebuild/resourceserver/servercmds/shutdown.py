@@ -16,19 +16,28 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands that the resrouce
-    server supports via the network connection.
+''' The snakebuild.resourceserver.servercmd shutdown. This command provides
+    the functionality to shutdown the resource server.
 '''
 
-from snakebuild.resourceserver.servercmds import status_list, \
-        resource_details, shutdown
+import logging
+
+from snakebuild.communication.commandstructure import prepare_answer, \
+        prepare_error
+
+LOG = logging.getLogger('snakebuild.resourcesserver.servercmds.shutdown')
 
 
-# The commands for the message handler
-COMMANDS = {'status_list': (status_list, 'Get a simple list with all the '
-                'resources available. This includes the current status.', [],
-                {}, False),
-            'resource_details': (resource_details, 'Get the full information '
-                'about a resource.', ['name'], {'name': 'The name of the '
-                'resource to get the information from.'}, False),
-            'shutdown': (shutdown, 'Shutdown the server', [], {}, True)}
+def shutdown(cmd, res_mgr):
+    ''' This method is called on a shutdown request.
+
+        @param cmd: The called command.
+        @param res_mgr: The ResourceManager instance
+    '''
+    if cmd != 'shutdown':
+        LOG.error('_status_list called with the wrong command: %s' % cmd)
+        return prepare_error('Server Error')
+
+    res_mgr.shutdown()
+
+    return prepare_answer()

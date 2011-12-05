@@ -16,19 +16,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This files contains the dictionary with all the commands that the resrouce
-    server supports via the network connection.
+''' The snakebuild.resourceserver.servercmds package where all the server cmds
+    are handled.
 '''
 
-from snakebuild.resourceserver.servercmds import status_list, \
-        resource_details, shutdown
-
-
-# The commands for the message handler
-COMMANDS = {'status_list': (status_list, 'Get a simple list with all the '
-                'resources available. This includes the current status.', [],
-                {}, False),
-            'resource_details': (resource_details, 'Get the full information '
-                'about a resource.', ['name'], {'name': 'The name of the '
-                'resource to get the information from.'}, False),
-            'shutdown': (shutdown, 'Shutdown the server', [], {}, True)}
+from snakebuild.resourceserver.servercmds.shutdown import shutdown
+from snakebuild.resourceserver.servercmds.status_list import status_list
+from snakebuild.resourceserver.servercmds.resource_details import \
+        resource_details
