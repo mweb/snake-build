@@ -22,25 +22,21 @@
 
 import logging
 
-from snakebuild.communication.commandstructure import prepare_answer, \
-        prepare_error
+from snakebuild.communication.commandstructure import prepare_answer
+from snakebuild.resourceserver.servercmds import command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-def status_list(cmd, res_mgr):
+@command('status_list', False)
+def status_list(res_mgr):
     ''' This command returns a list with all the configured resources. In
         addtion to the name we return the current status and the keywords
         of all the resources.
 
-        @param cmd: The command that lead to the call of this function
         @param res_mgr: The resource manager instance
         @return: the answer object to return to the client
     '''
-    if cmd != 'status_list':
-        LOG.error('_status_list called with the wrong command: %s' % cmd)
-        return prepare_error('Server Internal Error')
-
     answer = prepare_answer()
     answer['resources'] = []
     for res in res_mgr.resources.itervalues():

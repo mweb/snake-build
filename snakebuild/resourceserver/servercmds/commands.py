@@ -20,15 +20,10 @@
     server supports via the network connection.
 '''
 
-from snakebuild.resourceserver.servercmds import status_list, \
-        resource_details, shutdown
+from snakebuild.communication import command_register
 
 
 # The commands for the message handler
-COMMANDS = {'status_list': (status_list, 'Get a simple list with all the '
-                'resources available. This includes the current status.', [],
-                {}, False),
-            'resource_details': (resource_details, 'Get the full information '
-                'about a resource.', ['name'], {'name': 'The name of the '
-                'resource to get the information from.'}, False),
-            'shutdown': (shutdown, 'Shutdown the server', [], {}, True)}
+COMMANDS = {}
+
+command = command_register(COMMANDS)

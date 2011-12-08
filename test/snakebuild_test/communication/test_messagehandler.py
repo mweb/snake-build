@@ -48,12 +48,11 @@ class TestMessageHandler(unittest.TestCase):
 
         hdlr = MessageHandler(dummy, None, None)
         hdlr.server = DummyContainer()
-        hdlr.server.commands = {'test': (self._handle_call_back, '',
-                ['Test', 'Other'], {}, False)}
+        hdlr.server.commands = {'test': (self._handle_call_back,
+                ['Test', 'Other'], False)}
         hdlr.server.data = "PING"
         dummy.add_data(message_string)
         hdlr.handle()
-        self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['Test'] == [1, 2])
         self.assertTrue(self.got_handled['Other'] == 'Quack')
         self.assertTrue(self.got_handled['data'] == 'PING')
@@ -73,12 +72,11 @@ class TestMessageHandler(unittest.TestCase):
 
         hdlr = MessageHandler(dummy, None, None)
         hdlr.server = DummyContainer()
-        hdlr.server.commands = {'test': (self._handle_call_back, '',
-                ['Test', 'Other'], {}, False)}
+        hdlr.server.commands = {'test': (self._handle_call_back,
+                ['Test', 'Other'], False)}
         hdlr.server.data = 16.7
         dummy.add_data(message_string)
         hdlr._parse_sjson_request()
-        self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['Test'] == [1, 2])
         self.assertTrue(self.got_handled['Other'] == 'Quack')
         self.assertTrue(self.got_handled['data'] == 16.7)
@@ -87,18 +85,17 @@ class TestMessageHandler(unittest.TestCase):
         ''' Test the private method of the message handler class. '''
         self.got_handled = {'cmd': None, 'parameters': None}
         answ = _handle_cmd('test', {'p1': 1, 'p2': 2, 'p3': 3},
-                {'test': (self._handle_call_back, '', ['p1', 'p2', '[p3]'], {},
+                {'test': (self._handle_call_back, ['p1', 'p2', '[p3]'],
                     False)}, 12, False)
-        self.assertTrue(self.got_handled['cmd'] == 'test')
         self.assertTrue(self.got_handled['p1'] == 1)
         self.assertTrue(self.got_handled['p2'] == 2)
         self.assertTrue(self.got_handled['p3'] == 3)
         self.assertTrue(self.got_handled['data'] == 12)
         self.assertTrue(answ['status'] == 'success')
 
-    def _handle_call_back(self, cmd, data, Test=None, Other=None, p1=None, p2=None, p3=None):
+    def _handle_call_back(self, data, Test=None, Other=None, p1=None, p2=None,
+            p3=None):
         ''' Used as call back for the _handle_cmd. '''
-        self.got_handled['cmd'] = cmd
         self.got_handled['Test'] = Test
         self.got_handled['Other'] = Other
         self.got_handled['p1'] = p1

@@ -134,5 +134,5 @@ class Server(object):
         '''
         self.server_running = False
         if 'shutdown' in self.commands:
-            self.commands['shutdown'][0]('shutdown', self.data)
+            self.commands['shutdown'][0](self.data)
         self.server.shutdown()

@@ -24,24 +24,21 @@ import logging
 
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
+from snakebuild.resourceserver.servercmds import command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-def resource_details(cmd, res_mgr, name):
+@command('resource_details', False)
+def resource_details(res_mgr, name):
     ''' This command returns all the configured information about a resouce.
         The data sent is similar to the data available within the config file.
         Just the run time datas are added, like free slots and current users.
 
-        @param cmd: The command that lead to the call of this function
         @param res_mgr: The resource manager instance
         @param name: The name of the resource to get the details for
         @return: the answer object to return to the client
     '''
-    if cmd != 'resource_details':
-        LOG.error('_resource_details called with the wrong command: %s' % cmd)
-        return prepare_error('Server Error')
-
     if not(type(name) == str or type(name) == unicode):
         return prepare_error('Illegal value for the name. Expected a string '
                 'but got {0}'.format(type(name)))

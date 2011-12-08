@@ -24,3 +24,5 @@ from snakebuild.communication.client import Client, \
         ClientCommunicationException
 from snakebuild.communication.server import Server, \
         ServerCommunicationException
+from snakebuild.communication.commandstructure import command_register, \
+        prepare_error, prepare_answer

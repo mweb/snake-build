@@ -22,9 +22,9 @@
 
 import unittest
 
-from snakebuild.communication.commandstructure import prepare_error,\
-        prepare_answer, FUNCTION, DESCRIPTION, PARAMETERS,\
-        PARAMETER_DESCRIPTIONS, SIGNED, ERROR, SUCCESS, CommandStructureError
+from snakebuild.communication.commandstructure import prepare_error, \
+        prepare_answer, FUNCTION, PARAMETERS, SIGNED, ERROR, SUCCESS, \
+        CommandStructureError
 
 
 class TestCommandStructure(unittest.TestCase):
@@ -92,10 +92,8 @@ class TestCommandStructure(unittest.TestCase):
             the same as described in the documentation.
         '''
         self.assertTrue(FUNCTION == 0)
-        self.assertTrue(DESCRIPTION == 1)
-        self.assertTrue(PARAMETERS == 2)
-        self.assertTrue(PARAMETER_DESCRIPTIONS == 3)
-        self.assertTrue(SIGNED == 4)
+        self.assertTrue(PARAMETERS == 1)
+        self.assertTrue(SIGNED == 2)
 
     def test_constantes(self):
         ''' Test if the constante value have the expected value. '''

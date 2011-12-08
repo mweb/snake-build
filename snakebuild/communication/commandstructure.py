@@ -43,16 +43,47 @@
     [test]
 '''
 
+import inspect
+
 
 class CommandStructureError(BaseException):
     ''' The error that gets thrown if an answer could not be created. '''
 
 
 # the access enums for the commands used within the message handler.
-FUNCTION, DESCRIPTION, PARAMETERS, PARAMETER_DESCRIPTIONS, SIGNED = range(5)
+FUNCTION, PARAMETERS, SIGNED = range(3)
 
 ERROR = 'error'
 SUCCESS = 'success'
+
+
+def command_register(table):
+    ''' With this function a decorator to register the commands is created.
+        All the commands are beeing added to the given table.
+
+        @param table: The dictionary table with all the commands
+    '''
+    def cmd(name, restricted=False):
+        ''' The decorator function paramters to name it correctly.
+            @param name: The name to call this command
+            @param restricted: Is this command only allowed for authenticated
+                users? If yes set to True.
+        '''
+        def register(func):
+            ''' Register the given function/method within the given table.
+            '''
+            spec = inspect.getargspec(func)
+            if spec.defaults is None:
+                arguments = spec.args[1:]
+            else:
+                arguments = spec.args[1:-len(spec.defatuls)]
+                for key in spec.args[len(arguments)+1:]:
+                    arguments.push_back('[{0}]'.format(key))
+
+            table[name] = func, arguments, restricted
+            return func
+        return register
+    return cmd
 
 
 def prepare_error(message):

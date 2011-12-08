@@ -20,7 +20,6 @@
     are handled.
 '''
 
-from snakebuild.resourceserver.servercmds.shutdown import shutdown
-from snakebuild.resourceserver.servercmds.status_list import status_list
-from snakebuild.resourceserver.servercmds.resource_details import \
-        resource_details
+from snakebuild.resourceserver.servercmds.commands import COMMANDS, command
+
+from snakebuild.resourceserver.servercmds import resource_details, shutdown, status_list

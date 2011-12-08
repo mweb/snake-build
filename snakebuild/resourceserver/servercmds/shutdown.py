@@ -22,22 +22,18 @@
 
 import logging
 
-from snakebuild.communication.commandstructure import prepare_answer, \
-        prepare_error
+from snakebuild.communication.commandstructure import prepare_answer
+from snakebuild.resourceserver.servercmds import command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.servercmds.shutdown')
 
 
-def shutdown(cmd, res_mgr):
+@command('shutdown', True)
+def shutdown(res_mgr):
     ''' This method is called on a shutdown request.
 
-        @param cmd: The called command.
         @param res_mgr: The ResourceManager instance
     '''
-    if cmd != 'shutdown':
-        LOG.error('_status_list called with the wrong command: %s' % cmd)
-        return prepare_error('Server Error')
-
     res_mgr.shutdown()
 
     return prepare_answer()

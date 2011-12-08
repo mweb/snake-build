@@ -155,7 +155,7 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
             continue
         if not param in parameters:
             return prepare_error('The parameter (%s) is required for the call '
-                    'of this command.' % param)
+                    'of this command, but is not available.' % param)
     if parameters is not None:
         for key in parameters.iterkeys():
             if key in cmd[PARAMETERS]:
@@ -169,6 +169,6 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
         return prepare_error('You are not allowed to call this command. This '
                 'command is only allowed for verified users.')
     if parameters is None:
-        return cmd[FUNCTION](cmd_name, data)
+        return cmd[FUNCTION](data)
     else:
-        return cmd[FUNCTION](cmd_name, data, **parameters)
+        return cmd[FUNCTION](data, **parameters)

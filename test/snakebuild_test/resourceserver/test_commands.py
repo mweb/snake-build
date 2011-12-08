@@ -23,7 +23,7 @@ import os
 import shutil
 import json
 
-from snakebuild.resourceserver.commands import COMMANDS
+from snakebuild.resourceserver.servercmds import COMMANDS
 from snakebuild.communication.commandstructure import FUNCTION, SUCCESS, ERROR
 from snakebuild.resourceserver.resource import ResourceManager
 
@@ -63,7 +63,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action
-        result = COMMANDS['status_list'][FUNCTION]('status_list', mgr)
+        result = COMMANDS['status_list'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -85,7 +85,7 @@ class TestCommands(unittest.TestCase):
         mgr.acquire('Zaphod', 'test2', False)
         mgr.acquire('Ford', 'test1', True)
 
-        result = COMMANDS['status_list'][FUNCTION]('status_list', mgr)
+        result = COMMANDS['status_list'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -101,23 +101,13 @@ class TestCommands(unittest.TestCase):
                 self._checkresource(res, 'Test2', ['test2', 'mytest', 'build',
                         'run'], 4, 1, ['Ford', 'Beeblebrox', 'Zaphod'])
 
-        # test with wrong command name
-        result = COMMANDS['status_list'][FUNCTION]('status', mgr)
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue('status' in result)
-        self.assertTrue('message' in result)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue(len(result['message']) > 0)
-
     def test_resource_details_cmd(self):
         ''' Test the resource_details command
         '''
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action
-        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                mgr, 'Test1')
+        result = COMMANDS['resource_details'][FUNCTION](mgr, 'Test1')
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -134,18 +124,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(resource['parameters']['value1'] == 'arther')
 
         # test with not existing resource
-        result = COMMANDS['resource_details'][FUNCTION]('resource_details',
-                mgr, ['Arther'])
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue('status' in result)
-        self.assertTrue('message' in result)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue(len(result['message']) > 0)
-
-        # test with wrong command name
-        result = COMMANDS['resource_details'][FUNCTION]('resource', mgr,
-                ['Test1'])
+        result = COMMANDS['resource_details'][FUNCTION](mgr, ['Arther'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -158,21 +137,12 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action
-        result = COMMANDS['shutdown'][FUNCTION]('shutdown', mgr)
+        result = COMMANDS['shutdown'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 1)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == SUCCESS)
         self.assertTrue(mgr.run == False)
-
-        # test it with the wrong command name parameter
-        result = COMMANDS['shutdown'][FUNCTION]('down', mgr)
-
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(type(result) == dict)
-        self.assertTrue(result['status'] == ERROR)
-        self.assertTrue('message' in result)
-        self.assertTrue(len(result['message']) > 0)
 
     def _checkresource(self, res, name, keywords, slots, free, users):
         ''' Check if the given resource full fills the following criteries.
