@@ -76,7 +76,7 @@ def command_register(table):
             if spec.defaults is None:
                 arguments = spec.args[1:]
             else:
-                arguments = spec.args[1:-len(spec.defatuls)]
+                arguments = spec.args[1:-len(spec.defaults)]
                 for key in spec.args[len(arguments)+1:]:
                     arguments.push_back('[{0}]'.format(key))
 
