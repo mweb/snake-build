@@ -133,8 +133,31 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
+    def test_acquire_release_cmds(self):
+        ''' Test the acquire and the release functions of the resource server.
+        '''
+        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+
+        # test before any action
+        result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test1')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == SUCCESS)
+        self.assertTrue('resource' in result)
+        resource = result['resource']
+        self.assertTrue(type(resource) == str or type(resource) == unicode)
+
+        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == SUCCESS)
+        self.assertTrue('resource' in result)
+        resource = result['resource']
+        self.assertTrue(type(resource) == str or type(resource) == unicode)
+        # TODO add more tests here and check the status of the resources
+
     def test_shutdown_cmd(self):
-        ''' '''
+        ''' Test the private shutdown function. '''
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
         # test before any action

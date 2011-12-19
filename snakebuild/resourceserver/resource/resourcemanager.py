@@ -95,6 +95,7 @@ class ResourceManager(object):
 
             @return: The name of the resource aquired or None if not available.
         '''
+        keyword = keyword.lower()
         if not keyword in self.keywords:
             LOG.warning('The user (%s) tried to access a resouce with the '
                     'keyword "%s". But this keyword does not exist.' %

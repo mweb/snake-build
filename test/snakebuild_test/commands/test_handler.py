@@ -21,7 +21,6 @@
 import unittest
 
 from snakebuild.commands import handle_cmd, command
-from snakebuild.commands.handler import HandleCmdException
 from snakebuild.common import Config
 
 

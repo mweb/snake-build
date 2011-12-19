@@ -21,6 +21,7 @@
 '''
 
 import snakebuild.resourceserver.servercmds.acquire
+import snakebuild.resourceserver.servercmds.release
 import snakebuild.resourceserver.servercmds.shutdown
 import snakebuild.resourceserver.servercmds.status_list
 import snakebuild.resourceserver.servercmds.resource_details
