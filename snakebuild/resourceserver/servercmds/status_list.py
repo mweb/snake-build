@@ -23,7 +23,7 @@
 import logging
 
 from snakebuild.communication.commandstructure import prepare_answer
-from snakebuild.resourceserver.servercmds import command
+from snakebuild.resourceserver.servercommands import command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 

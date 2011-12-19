@@ -21,7 +21,8 @@
 
 from snakebuild.common import Daemon
 from snakebuild.communication import Server
-from snakebuild.resourceserver.servercmds import COMMANDS
+from snakebuild.resourceserver.servercommands import COMMANDS
+from snakebuild.resourceserver.servercmds import *
 from snakebuild.resourceserver.resource import ResourceManager
 
 

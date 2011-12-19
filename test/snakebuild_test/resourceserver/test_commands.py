@@ -23,7 +23,8 @@ import os
 import shutil
 import json
 
-from snakebuild.resourceserver.servercmds import COMMANDS
+from snakebuild.resourceserver.servercommands import COMMANDS
+from snakebuild.resourceserver.servercmds import *
 from snakebuild.communication.commandstructure import FUNCTION, SUCCESS, ERROR
 from snakebuild.resourceserver.resource import ResourceManager
 
