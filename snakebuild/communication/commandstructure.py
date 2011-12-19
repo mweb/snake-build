@@ -78,7 +78,7 @@ def command_register(table):
             else:
                 arguments = spec.args[1:-len(spec.defaults)]
                 for key in spec.args[len(arguments)+1:]:
-                    arguments.push_back('[{0}]'.format(key))
+                    arguments.append('[{0}]'.format(key))
 
             table[name] = func, arguments, restricted
             return func
