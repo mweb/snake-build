@@ -22,25 +22,20 @@
 
 from snakebuild.common import output
 from snakebuild.communication import ClientCommunicationException
+from snakebuild.commands import command
 from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.resourceclient.servercmds import ResourceServerRemoteError
 
+@command('details')
+def details(options, config, name):
+    ''' Get the details about one resource.
 
-def details(cmd, options, config, name):
-    ''' This command gets the detail information about one resource. This
-        includes all the paramters configured for this resource.
-
-        @param cmd: The command string that lead to this call
         @param options: The options provided to this command call
         @param config: The config object to use
         @param name: The name of the resource to get the details for
 
         @return True on success, False on error and nothing on wrong usage.
     '''
-    if cmd != 'details':
-        output.error('Details called with a wrong command: "{0}"'.format(cmd))
-        return
-
     srvr = get_resource_server(config)
     try:
         answer = srvr.get_resource_details(name)

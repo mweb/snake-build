@@ -20,7 +20,7 @@
 
 import unittest
 
-from snakebuild.commands import handle_cmd
+from snakebuild.commands import handle_cmd, command
 from snakebuild.commands.handler import HandleCmdException
 from snakebuild.common import Config
 
@@ -30,91 +30,82 @@ class TestHandler(unittest.TestCase):
     '''
     def setUp(self):
         ''' Setup the test case. '''
-        self.cmd_list = {'test1': (_test1, 'The first test command',
-                    [], {}),
-                'test2': (_test2, 'The second test command', ['TEST'],
-                    {'TEST': 'param 1'}),
-                'test3': (_test3, 'The third test command', ['[TEST]'],
-                    {'[TEST]': 'param 1'}),
-                'test4': (_test4, 'The fourth test command', ['TEST', '[OPT]'],
-                    {'TEST': 'param 1', '[OPT]': 'param 2'}),
-                'test5': (_test5, 'The fifth test command', ['TEST'],
-                    {'TEST': 'param 1'})}
+        pass
 
     def test_help_commands(self):
         ''' Test the handle_cmd with the help command.
         '''
-        self.assertTrue(handle_cmd(['help'], None, None, self.cmd_list))
-        self.assertFalse(handle_cmd(['help', 'other'], None, None,
-                self.cmd_list))
-        self.assertTrue(handle_cmd(['help', 'test1'], None, None,
-                self.cmd_list))
-        self.assertTrue(handle_cmd(['help', 'help'], None, None,
-                self.cmd_list))
+        self.assertTrue(handle_cmd(['help'], None, None))
+        self.assertFalse(handle_cmd(['help', 'other'], None, None))
+        self.assertTrue(handle_cmd(['help', 'test1'], None, None))
+        self.assertTrue(handle_cmd(['help', 'help'], None, None))
 
         config = Config()
-        self.assertTrue(handle_cmd(['help', 'configfile'], None, config,
-                self.cmd_list))
-        self.assertTrue(handle_cmd([], None, None, self.cmd_list))
-        with self.assertRaises(HandleCmdException):
-            handle_cmd(['ping'], None, None, self.cmd_list)
+        self.assertTrue(handle_cmd(['help', 'configfile'], None, config))
+        self.assertTrue(handle_cmd([], None, None))
+        self.assertFalse(handle_cmd(['ping'], None, None))
 
     def test_handle_cmd(self):
         ''' Test the handle_cmd for the common command handling.
         '''
-        self.assertTrue(handle_cmd(['test1'], None, None, self.cmd_list))
-        self.assertFalse(handle_cmd(['test1', 'param1'], None, None,
-                self.cmd_list))
+        self.assertTrue(handle_cmd(['test1'], None, None))
+        self.assertFalse(handle_cmd(['test1', 'param1'], None, None))
 
-        self.assertFalse(handle_cmd(['test2'], None, None, self.cmd_list))
-        self.assertTrue(handle_cmd(['test2', 'param1'], None, None,
-                self.cmd_list))
-        self.assertFalse(handle_cmd(['test2', 'param1', 'param3'], None, None,
-                self.cmd_list))
+        self.assertFalse(handle_cmd(['test2'], None, None))
+        self.assertTrue(handle_cmd(['test2', 'param1'], None, None))
+        self.assertFalse(handle_cmd(['test2', 'param1', 'param3'], None, None))
 
-        self.assertTrue(handle_cmd(['test3'], None, None, self.cmd_list))
-        self.assertTrue(handle_cmd(['test3', 'param1'], None, None,
-                self.cmd_list))
-        self.assertFalse(handle_cmd(['test3', 'param1', 'param3'], None, None,
-                self.cmd_list))
+        self.assertTrue(handle_cmd(['test3'], None, None))
+        self.assertTrue(handle_cmd(['test3', 'param1'], None, None))
+        self.assertFalse(handle_cmd(['test3', 'param1', 'param3'], None, None))
 
-        self.assertFalse(handle_cmd(['test4'], None, None, self.cmd_list))
-        self.assertTrue(handle_cmd(['test4', 'param1'], None, None,
-                self.cmd_list))
-        self.assertTrue(handle_cmd(['test4', 'param1', 'param3'], None, None,
-                self.cmd_list))
+        self.assertFalse(handle_cmd(['test4'], None, None))
+        self.assertTrue(handle_cmd(['test4', 'param1'], None, None))
+        self.assertTrue(handle_cmd(['test4', 'param1', 'param3'], None, None))
 
-        self.assertFalse(handle_cmd(['test5', 'param1'], None, None,
-                self.cmd_list))
-        self.assertFalse(handle_cmd(['test5', 12], None, None,
-                self.cmd_list))
-        self.assertFalse(handle_cmd(['test5', 12], 11, None, self.cmd_list))
-        self.assertTrue(handle_cmd(['test5', 12], 11, 10, self.cmd_list))
+        self.assertFalse(handle_cmd(['test5', 'param1'], None, None))
+        self.assertFalse(handle_cmd(['test5', 12], None, None))
+        self.assertFalse(handle_cmd(['test5', 12], 11, None))
+        self.assertTrue(handle_cmd(['test5', 12], 11, 10))
 
 
-def _test1(cmd, options, config):
-    ''' The first test call '''
+@command('test1')
+def _test1(options, config):
+    ''' The first test call
+    '''
     return True
 
 
-def _test2(cmd, options, config, param1):
-    ''' The second test call with one parameter '''
+@command('test2')
+def _test2(options, config, param1):
+    ''' The second test call with one parameter
+        @param param1: The description of the first parameter
+    '''
     return True
 
 
-def _test3(cmd, options, config, param1=12):
-    ''' The third test call with one optional parameter '''
+@command('test3')
+def _test3(options, config, param1=12):
+    ''' The third test call with one optional parameter 
+        @param param1: The description of the first parameter
+    '''
     return True
 
 
-def _test4(cmd, options, config, param1, param2=12):
-    ''' The fourth test call with two parameters one is optional '''
+@command('test4')
+def _test4(options, config, param1, param2=12):
+    ''' The fourth test call with two parameters one is optional 
+        @param param1: The description of the first parameter
+        @param param2: The description of the second parameter
+    '''
     return True
 
 
-def _test5(cmd, options, config, param1):
+@command('test5')
+def _test5(options, config, param1):
     ''' The fifth test call with one parameter. This call is special since
         it check the parameter 1 the options and config values.
+        @param param1: The description of the first parameter
     '''
     if not param1 == 12:
         return False

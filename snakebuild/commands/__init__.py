@@ -20,4 +20,4 @@
     command line tools.
 '''
 
-from snakebuild.commands.handler import handle_cmd
+from snakebuild.commands.handler import handle_cmd, command

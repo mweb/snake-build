@@ -25,7 +25,8 @@ import subprocess
 import time
 import json
 
-from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.resourceclient.clientcmds import *
+from snakebuild.commands.handler import SHELL_COMMANDS
 from snakebuild.common import Config
 
 
@@ -59,16 +60,13 @@ class TestCommands(unittest.TestCase):
     def test_status_cmd(self):
         ''' Test the status command function.
         '''
-        self.assertTrue('status' in COMMANDS)
-        self.assertTrue(COMMANDS['status'][0]("none", None, self.config) \
-                == None)
-        self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
-                == False)
+        self.assertTrue('status' in SHELL_COMMANDS)
+        self.assertTrue(SHELL_COMMANDS['status'][0](None, self.config) == False)
         self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
                 '--background', '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
         time.sleep(0.2)
-        self.assertTrue(COMMANDS['status'][0]("status", None, self.config) \
+        self.assertTrue(SHELL_COMMANDS['status'][0](None, self.config) \
                 == True)
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
@@ -76,16 +74,14 @@ class TestCommands(unittest.TestCase):
     def test_details_cmd(self):
         ''' Test the status command function.
         '''
-        self.assertTrue('details' in COMMANDS)
-        self.assertTrue(COMMANDS['details'][0]("none", None, self.config,
-                None) == None)
-        self.assertFalse(COMMANDS['details'][0]("details", None, self.config,
+        self.assertTrue('details' in SHELL_COMMANDS)
+        self.assertFalse(SHELL_COMMANDS['details'][0](None, self.config,
                 'Test1'))
         self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
                 '--background', '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
         time.sleep(0.2)
-        self.assertTrue(COMMANDS['details'][0]("details", None, self.config,
+        self.assertTrue(SHELL_COMMANDS['details'][0](None, self.config,
                 'Test1'))
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))

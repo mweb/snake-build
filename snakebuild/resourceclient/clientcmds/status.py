@@ -21,24 +21,22 @@
 '''
 
 from snakebuild.common import output
+from snakebuild.commands import command
 from snakebuild.communication import ClientCommunicationException
 from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.resourceclient.servercmds import ResourceServerRemoteError
 
-def status(cmd, options, config):
+
+@command('status')
+def status(options, config):
     ''' This is the command to get a list with information about all the
         resources.
 
-        @param cmd: The command string that lead to this call
         @param options: The options provided to this command call
         @param config: The config object to use.
 
         @return True on success, False on error and nothing on wrong usage.
     '''
-    if cmd != 'status':
-        output.error('Status called with a wrong command: "{0}"'.format(cmd))
-        return
-
     srvr = get_resource_server(config)
     try:
         answer = srvr.get_status_list()

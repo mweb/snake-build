@@ -19,7 +19,7 @@
 ''' This is the main entry for the resource client command line tool.
 '''
 
-from snakebuild.resourceclient.client_commands import COMMANDS
+from snakebuild.resourceclient.clientcmds import *
 from snakebuild.commands import handle_cmd
 
 def run_client(options, arguments, config):
@@ -36,7 +36,7 @@ def run_client(options, arguments, config):
         return False
 
     try:
-        return handle_cmd(arguments, options, config, COMMANDS)
+        return handle_cmd(arguments, options, config)
     except KeyboardInterrupt:
         print('Abort by Keyboard Interrupt.')
         return False
