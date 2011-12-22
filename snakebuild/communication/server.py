@@ -28,6 +28,7 @@ import time
 import logging
 import SocketServer
 
+from snakebuild.i18n import _
 from snakebuild.communication.messagehandler import MessageHandler
 
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
@@ -116,17 +117,17 @@ class Server(object):
                 self.server = ThreadedTCPServer((self.host, self.port),
                         MessageHandler)
             except socket.error:
-                LOG.warning('Could not open network connection, will try again'
-                        ' within a few seconds.')
+                LOG.warning(_('Could not open network connection, will try '
+                        'again within a few seconds.'))
                 time.sleep(2)
-        LOG.info('Server started.')
+        LOG.info(_('Server started.'))
 
         self.server.commands = self.commands
         self.server.data = self.data
         if self.server_running:
             self.server.serve_forever()
 
-        LOG.info('Shutdown the server.')
+        LOG.info(_('Shutdown the server.'))
 
     def shutdown(self):
         ''' This method gets called on shutdown. If the commands have a

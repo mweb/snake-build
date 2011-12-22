@@ -45,6 +45,8 @@
 
 import inspect
 
+from snakebuild.i18n import _
+
 
 class CommandStructureError(BaseException):
     ''' The error that gets thrown if an answer could not be created. '''
@@ -77,7 +79,7 @@ def command_register(table):
                 arguments = spec.args[1:]
             else:
                 arguments = spec.args[1:-len(spec.defaults)]
-                for key in spec.args[len(arguments)+1:]:
+                for key in spec.args[len(arguments) + 1:]:
                     arguments.append('[{0}]'.format(key))
 
             table[name] = func, arguments, restricted
@@ -116,5 +118,5 @@ def prepare_answer(data=None):
         data['status'] = SUCCESS
         return data
     else:
-        raise CommandStructureError('The given data for the answer data is '
-                'not a dictionary.i')
+        raise CommandStructureError(_('The given data for the answer data is '
+                'not a dictionary.i'))

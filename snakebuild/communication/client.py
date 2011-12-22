@@ -23,6 +23,7 @@
 import socket
 import json
 
+from snakebuild.i18n import _
 from snakebuild.communication.messages import prepare_sjson_data
 
 
@@ -80,8 +81,8 @@ class Client(object):
             @return: The answer from the server as a tuple (cmd, parameters)
         '''
         if mtype >= self.UNKNWON:
-            raise ClientCommunicationException('The given message type is not '
-                    'supported.')
+            raise ClientCommunicationException(_('The given message type is '
+                    'not supported.'))
 
         if mtype == self.SJSON:
             data = prepare_sjson_data({'cmd': cmd, 'parameters': param})
@@ -92,13 +93,13 @@ class Client(object):
         try:
             sock.connect((self.host, self.port))
         except socket.error, emsg:
-            raise ClientCommunicationException('Could not connect to the '
-                    'server: {0}'.format(emsg))
+            raise ClientCommunicationException(_('Could not connect to the '
+                    'server: {0}').format(emsg))
         try:
             sock.send(data)
         except socket.error, emsg:
-            raise ClientCommunicationException('Could not send the data to '
-                    'the server: {0}'.format(emsg))
+            raise ClientCommunicationException(_('Could not send the data to '
+                    'the server: {0}').format(emsg))
 
         if no_answer:
             sock.close()
@@ -122,15 +123,15 @@ def _receive(sock):
     mtype = sock.recv(1)
     if len(mtype) != 1:
         sock.close()
-        raise ClientCommunicationException('Could not receive the message '
-                'type from the server.')
+        raise ClientCommunicationException(_('Could not receive the message '
+                'type from the server.'))
 
     if ord(mtype) == 0x61:
         return _parse_sjson_data(sock)
     else:
         sock.close()
-        raise ClientCommunicationException('Received an unsuported '
-                'communication type. Got: %2x' % ord(mtype))
+        raise ClientCommunicationException(_('Received an unsuported '
+            'communication type. Got: 0x{0:%02x').format(ord(mtype)))
 
 
 def _parse_sjson_data(sock):
@@ -147,8 +148,9 @@ def _parse_sjson_data(sock):
     '''
     size_data = sock.recv(4)
     if not len(size_data) == 4:
-        raise ClientCommunicationException('Could not receive the message'
-                "header. Expected 4 bytes but got: %d" % len(size_data))
+        raise ClientCommunicationException(_('Could not receive the message'
+                "header. Expected 4 bytes but got: {0:d}").format(
+                len(size_data)))
     length = ((ord(size_data[0]) << 24) + (ord(size_data[1]) << 16) +
             (ord(size_data[2]) << 8) + ord(size_data[3]))
     if length == 0:
@@ -156,16 +158,16 @@ def _parse_sjson_data(sock):
 
     data = sock.recv(length)
     if not len(data) == length:
-        raise ClientCommunicationException('Could not receive all the data'
-                ' from the client. Expected %d bytes but got: %d' %
-                (length, len(data)))
+        raise ClientCommunicationException(_('Could not receive all the data'
+                ' from the client. Expected {0:d} bytes but got: '
+                '{0:d}').format(length, len(data)))
 
     answer = json.loads(data)
     if not 'cmd' in answer:
-        raise ClientCommunicationException('The answer received did not '
-                "have a 'cmd' key.")
+        raise ClientCommunicationException(_('The answer received did not '
+                "have a 'cmd' key."))
     if not 'parameters' in answer:
-        raise ClientCommunicationException('The answer received did not '
-                "have a 'parameters' key.")
+        raise ClientCommunicationException(_('The answer received did not '
+                "have a 'parameters' key."))
 
     return answer['cmd'], answer['parameters']

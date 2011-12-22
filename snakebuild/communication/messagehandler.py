@@ -25,6 +25,7 @@ import SocketServer
 import json
 import logging
 
+from snakebuild.i18n import _
 from snakebuild.communication.messages import prepare_sjson_data
 from snakebuild.communication.commandstructure import FUNCTION, PARAMETERS, \
         SIGNED, prepare_error
@@ -47,8 +48,8 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         elif ord(data[0]) == 0x62:
             self._parse_signed_request()
         else:
-            LOG.error('The message type received is not supported. got: %x' %
-                    ord(data[0]))
+            LOG.error(_('The message type received is not supported. got: '
+                    '0x{0:02x}').format(ord(data[0])))
             return
 
     def _parse_signed_request(self):
@@ -65,22 +66,23 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         '''
         length_data = self.request.recv(4)
         if not len(length_data) == 4:
-            LOG.error('The message received did not return 4 bytes for the '
-                    'length of th message: Only got: %d' % len(length_data))
+            LOG.error(_('The message received did not return 4 bytes for the '
+                    'length of th message: Only got: {0:d}').format(
+                    len(length_data)))
             return
         length = ((ord(length_data[0]) << 24) + (ord(length_data[1]) << 16) +
                 (ord(length_data[2]) << 8) + ord(length_data[3]))
 
         data = self.request.recv(length)
         if not len(data) == length:
-            LOG.error('Wrong length of data received: Expected %d but got %d' %
-                    (length, len(data)))
+            LOG.error(_('Wrong length of data received: Expected {0:d} but '
+                    'got {0:d}').format(length, len(data)))
             return
         try:
             cmd = json.loads(data)
         except ValueError:
-            LOG.error('Could not parse the received data. Not a valid json '
-                    'string.')
+            LOG.error(_('Could not parse the received data. Not a valid json '
+                    'string.'))
             return
         self._sjson_request_handler(cmd, False)
 
@@ -94,10 +96,11 @@ class MessageHandler(SocketServer.BaseRequestHandler):
                 administrativ tasks.
         '''
         if not 'cmd' in cmd:
-            LOG.error("The message received did not have a 'cmd' key.")
+            LOG.error(_("The message received did not have a 'cmd' key."))
             return
         if not 'parameters' in cmd:
-            LOG.error("The message received did not have a 'parameters' key.")
+            LOG.error(_("The message received did not have a 'parameters' "
+                "key."))
             return
 
         answer = _handle_cmd(cmd['cmd'], cmd['parameters'],
@@ -131,8 +134,8 @@ def _handle_cmd(cmd, parameters, commands, data, signed):
             cmd = cmd.lower()
             return _call_cmd(cmd_list[cmd], cmd, parameters, data, signed)
         else:
-            return prepare_error('The requested command is not supported by '
-                    'this server instance. Command: %s' % cmd)
+            return prepare_error(_('The requested command is not supported '
+                    'by this server instance. Command: {0}').format(cmd))
 
 
 def _call_cmd(cmd, cmd_name, parameters, data, signed):
@@ -154,8 +157,9 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
             # we don't look for the optional parameters right now
             continue
         if not param in parameters:
-            return prepare_error('The parameter (%s) is required for the call '
-                    'of this command, but is not available.' % param)
+            return prepare_error(_('The parameter ({0}) is required for the '
+                    'call of this command, but is not '
+                    'available.').format(param))
     if parameters is not None:
         for key in parameters.iterkeys():
             if key in cmd[PARAMETERS]:
@@ -163,11 +167,11 @@ def _call_cmd(cmd, cmd_name, parameters, data, signed):
             elif ("[%s]" % key) in cmd[PARAMETERS]:
                 continue
             else:
-                return prepare_error('The parameter (%s) is not specified for '
-                        'the call of this command.' % key)
+                return prepare_error(_('The parameter ({0}) is not specified '
+                        'for the call of this command.').format(key))
     if cmd[SIGNED] and not signed:
-        return prepare_error('You are not allowed to call this command. This '
-                'command is only allowed for verified users.')
+        return prepare_error(_('You are not allowed to call this command. '
+                'This command is only allowed for verified users.'))
     if parameters is None:
         return cmd[FUNCTION](data)
     else:
