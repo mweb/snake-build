@@ -23,118 +23,89 @@ Use xgettext like normal to extract strings marked as translatable and
 join the message cataloges to get the final catalog.
 """
 
-import os, sys, inspect
+import os
+import sys
 
 
-def escape(s):
+def escape(value):
+    ''' Escape special characters.
+
+        @param value: The value to escape
+        @return: The string with the special characters escaped.
+    '''
     # The order is important, the backslash must be escaped first
     # since the other replacements introduce new backslashes
     # themselves.
-    s = s.replace('\\', '\\\\')
-    s = s.replace('\n', '\\n')
-    s = s.replace('\r', '\\r')
-    s = s.replace('\t', '\\t')
-    s = s.replace('"', '\\"')
-    return s
+    value = value.replace('\\', '\\\\')
+    value = value.replace('\n', '\\n')
+    value = value.replace('\r', '\\r')
+    value = value.replace('\t', '\\t')
+    value = value.replace('"', '\\"')
+    return value
 
 
-def normalize(s):
-    # This converts the various Python string types into a format that
-    # is appropriate for .po files, namely much closer to C style.
-    lines = s.split('\n')
+def normalize(value):
+    ''' This converts the various Python string types into a format that
+        is appropriate for .po files, namely much closer to C style.
+
+        @param value: The string to translate
+        @return: The string normalized
+    '''
+    lines = value.split('\n')
     if len(lines) == 1:
-        s = '"' + escape(s) + '"'
+        value = '"' + escape(value) + '"'
     else:
         if not lines[-1]:
             del lines[-1]
             lines[-1] = lines[-1] + '\n'
         lines = map(escape, lines)
         lineterm = '\\n"\n"'
-        s = '""\n"' + lineterm.join(lines) + '"'
-    return s
+        value = '""\n"' + lineterm.join(lines) + '"'
+    return value
 
 
-def poentry(path, lineno, s):
-    return ('#: %s:%d\n' % (path, lineno) +
-            'msgid %s\n' % normalize(s) +
-            'msgstr ""\n')
+def poentry(binary, cmd, param, value):
+    ''' Get the poentry for print it to the console
+
+        @param binary: The name of the binary that uses this translation
+        @param cmd: The command which uses this text
+        @param param: The name of the parameter that gets translated
+        @param value: The text to translate.
+        @return a printable string
+    '''
+    return ('#: {0}:{1}-{2}\n'
+            'msgid {3}\n'
+            'msgstr ""\n'.format(binary, cmd, param, normalize(value)))
 
 
-def offset(src, doc, name, default):
-    """Compute offset or issue a warning on stdout."""
-    # Backslashes in doc appear doubled in src.
-    end = src.find(doc.replace('\\', '\\\\'))
-    if end == -1:
-        # This can happen if the docstring contains unnecessary escape
-        # sequences such as \" in a triple-quoted string. The problem
-        # is that \" is turned into " and so doc wont appear in src.
-        sys.stderr.write("warning: unknown offset in %s, assuming %d lines\n"
-                         % (name, default))
-        return default
-    else:
-        return src.count('\n', 0, end)
-
-
-def importpath(path):
-    """Import a path like foo/bar/baz.py and return the baz module."""
+def docstrings(binary, path):
+    """Extract docstrings from shell command descriptions for the given shell
+        command.
+        @param binary: The name of the binary for the comment to simplify
+                translation.
+        @param path: The path where the files for the SHELL_COMMANDS can be
+                found.
+    """
+    path = path.replace('/', '.')
     if path.endswith('.py'):
         path = path[:-3]
-    if path.endswith('/__init__'):
-        path = path[:-9]
-    path = path.replace('/', '.')
-    mod = __import__(path)
-    for comp in path.split('.')[1:]:
-        mod = getattr(mod, comp)
-    return mod
+    __import__(path)
+    from snakebuild.commands.handler import SHELL_COMMANDS, CMD_DESCRIPTION, \
+            CMD_PARAM_LIST
 
-
-def docstrings(path):
-    """Extract docstrings from path.
-
-    This respects the Mercurial cmdtable/table convention and will
-    only extract docstrings from functions mentioned in these tables.
-    """
-    mod = importpath(path)
-    if mod.__doc__:
-        src = open(path).read()
-        lineno = 1 + offset(src, mod.__doc__, path, 7)
-        print poentry(path, lineno, mod.__doc__)
-
-    functions = list(getattr(mod, 'i18nfunctions', []))
-    functions = [(f, True) for f in functions]
-
-    cmdtable = getattr(mod, 'cmdtable', {})
-    if not cmdtable:
-        # Maybe we are processing mercurial.commands?
-        cmdtable = getattr(mod, 'table', {})
-    functions.extend((c[0], False) for c in cmdtable.itervalues())
-
-    for func, rstrip in functions:
-        if func.__doc__:
-            src = inspect.getsource(func)
-            name = "%s.%s" % (path, func.__name__)
-            lineno = func.func_code.co_firstlineno
-            doc = func.__doc__
-            if rstrip:
-                doc = doc.rstrip()
-            lineno += offset(src, doc, name, 1)
-            print poentry(path, lineno, doc)
-
-
-def rawtext(path):
-    src = open(path).read()
-    print poentry(path, 1, src)
+    for key, value in SHELL_COMMANDS.iteritems():
+        print poentry(binary, key, '', value[CMD_DESCRIPTION].strip())
+        for param, value in value[CMD_PARAM_LIST]:
+            print poentry(binary, key, param, value.strip())
 
 
 if __name__ == "__main__":
     # It is very important that we import the Snakebuild modules from
-    # the source tree where snakebuildgettext is executed. Otherwise we 
+    # the source tree where snakebuildgettext is executed. Otherwise we
     # might accidentally import and extract strings from a Snakebuild
     # installation mentioned in PYTHONPATH.
     sys.path.insert(0, os.getcwd())
-    from mercurial import demandimport; demandimport.enable()
-    for path in sys.argv[1:]:
-        if path.endswith('.txt'):
-            rawtext(path)
-        else:
-            docstrings(path)
+    if len(sys.argv) != 3:
+        print "start with binary name and path to the cmdlist imports"
+        exit(-1)
+    docstrings(sys.argv[1], sys.argv[2])
