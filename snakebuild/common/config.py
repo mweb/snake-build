@@ -27,6 +27,7 @@ import logging
 import ConfigParser
 
 # common imports
+from snakebuild.i18n import _
 from snakebuild.common import output
 from snakebuild.common.appdirs import AppDirs
 
@@ -68,8 +69,8 @@ class Config(object, ConfigParser.SafeConfigParser):
             @param path: The path to the config config file.
         '''
         if not (os.path.exists(path) and os.path.isfile(path)):
-            raise ConfigValueException('The given config config file does not '
-                    'exist. (%s)' % path)
+            raise ConfigValueException(_('The given config config file does '
+                    'not exist. ({0})').format(path))
         cfl = open(path, 'r')
         data = json.load(cfl)
         for key in data.iterkeys():
@@ -96,8 +97,8 @@ class Config(object, ConfigParser.SafeConfigParser):
                     # that has some config values but is not initialized.
                     return "", str, ""
                 else:
-                    raise ConfigValueException('Key (%s) does not exist in '
-                            'section: %s ' % (key, section))
+                    raise ConfigValueException(_('Key ({0}) does not exist '
+                            'in section: {1}').format(key, section))
         else:
             if self.has_section(section):
                 # return an empty string since it is possible that a section
@@ -105,8 +106,8 @@ class Config(object, ConfigParser.SafeConfigParser):
                 # config values but is not initialized.
                 return "", str, ""
             else:
-                raise ConfigValueException('Section does not exist [%s]' %
-                        section)
+                raise ConfigValueException(_('Section does not exist '
+                        '[{0}]').format(section))
 
     def load_default(self):
         ''' Load the default config files.
@@ -179,11 +180,11 @@ class Config(object, ConfigParser.SafeConfigParser):
                             int(value) == 0):
                         value = False
                     else:
-                        raise ConfigValueException('Could not convert boolean '
-                                'type: %s' % value)
+                        raise ConfigValueException(_('Could not convert '
+                                'boolean type: {0}').format(value))
                 except:
-                    raise ConfigValueException('Could not convert %s to type '
-                            'boolean' % value)
+                    raise ConfigValueException(_('Could not convert %s to '
+                            'type boolean').format(value))
             else:
                 value = value_type(value)
 
@@ -214,10 +215,10 @@ class Config(object, ConfigParser.SafeConfigParser):
                 if not ('config_file' in
                         self.config_description[self.application_name]):
                     self.config_description[self.application_name]\
-                            ['config_file'] = ('The config file to overwrite '
-                                'on change of the config values. '
-                                '[$HOME/.%s/%s.conf]' % (self.application_name,
-                                self.application_name), str, value)
+                            ['config_file'] = (_('The config file to '
+                                'overwrite on change of the config values. '
+                                '[$HOME/.{0}/{0}.conf]').format(
+                                    self.application_name), str, value)
 
             filename = self.get(self.application_name, 'config_file')
 
@@ -290,8 +291,8 @@ class Config(object, ConfigParser.SafeConfigParser):
             key = key.lower()
             if not ('default' in value and 'type' in value and
                     'description' in value):
-                raise ConfigValueException('For the given key no all required '
-                        'values are defined.')
+                raise ConfigValueException(_('For the given key no all '
+                        'required values are defined.'))
             if not self.has_option(section, key):
                 self.set(section, key, value['default'])
             vtype = _get_type(value['type'])
@@ -316,4 +317,4 @@ def _get_type(stype):
         return float
     if stype == 'bool':
         return bool
-    raise ConfigValueException('Unsuported type given: %s' % stype)
+    raise ConfigValueException(_('Unsuported type given: {0}').format(stype))

@@ -22,6 +22,8 @@
 
 import sys
 
+from snakebuild.i18n import _
+
 __installed__ = False
 
 WINDOWS, MACOS, LINUX, UNKNOWN = range(4)
@@ -36,8 +38,8 @@ def get_platform():
     elif sys.platform.startswith('linux'):
         return LINUX
     else:
-        print ("OS type could not be found. We try the Linux configuration if "
-            "this doesn't work switch to a supported platform.")
+        print _("OS type could not be found. We try the Linux configuration "
+                "if this doesn't work switch to a supported platform.")
         return LINUX
 
 

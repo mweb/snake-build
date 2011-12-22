@@ -47,6 +47,7 @@ import time
 import logging
 from signal import signal, SIGTERM
 
+from snakebuild.i18n import _
 from snakebuild.common import output
 
 LOG = logging.getLogger('snakebuild.common.Daemon')
@@ -73,7 +74,7 @@ class Daemon(object):
     UMASK = 0
     WORKDIR = "."
     instance = None
-    startmsg = 'started with pid %s'
+    startmsg = _('started with pid {0}')
 
     def __init__(self, instance, action):
         ''' Depending on the defined action the given instance of a class
@@ -106,7 +107,7 @@ class Daemon(object):
             @param signum: The signal number must be SIGTERM
             @param frame: The stack frame (not used)
         """
-        LOG.info("SIGTERM received shutdown.")
+        LOG.info(_("SIGTERM received shutdown."))
         self.instance.shutdown()
         return True
 
@@ -118,7 +119,8 @@ class Daemon(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, err:
-            LOG.error("fork #1 failed: (%d) %s\n" % (err.errno, err.strerror))
+            LOG.error(_("fork #1 failed: ({0:d}) {1}\n").format(err.errno,
+                    err.strerror))
             sys.exit(1)
 
         os.chdir(self.WORKDIR)
@@ -130,7 +132,8 @@ class Daemon(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, err:
-            LOG.error("fork #2 failed: (%d) %s\n" % (err.errno, err.strerror))
+            LOG.error(_("fork #2 failed: ({0:d}) {1}\n").format(err.errno,
+                    err.strerror))
             sys.exit(1)
 
         if not self.instance.stderr:
@@ -145,7 +148,7 @@ class Daemon(object):
 
         pid = str(os.getpid())
 
-        LOG.info("\n%s\n" % self.startmsg % pid)
+        LOG.info(_("\n{0}\n").format(self.startmsg).format(pid))
         sys.stderr.flush()
 
         if self.instance.pidfile:
@@ -177,8 +180,8 @@ class Daemon(object):
             pid = None
         if action == self.STOP or action == self.RESTART:
             if not pid:
-                LOG.error("Could not stop, pid file '%s' missing." %
-                        self.instance.pidfile)
+                LOG.error(_("Could not stop, pid file '%s' missing.").format(
+                        self.instance.pidfile))
                 sys.exit(1)
             try:
                 while 1:
@@ -198,15 +201,16 @@ class Daemon(object):
                     sys.exit(1)
         if action == self.START:
             if pid:
-                LOG.error("Start aborted since pid file '%s' exists." %
-                        self.instance.pidfile)
+                LOG.error(_("Start aborted since pid file '%s' "
+                        "exists.").format(self.instance.pidfile))
                 sys.exit(1)
             self.deamonize()
             return
         if action == self.FOREGROUND:
             if pid:
-                print >> sys.stderr, output.format_message("Start aborted "
-                        "since pid file '%s' exists." % self.instance.pidfile)
+                print >> sys.stderr, output.format_message(_("Start aborted "
+                        "since pid file '{0}' exists.").format(
+                            self.instance.pidfile))
                 sys.exit(1)
             self.createpid()
             return

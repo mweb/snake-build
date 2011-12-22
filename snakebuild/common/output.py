@@ -22,6 +22,8 @@
 
 import os
 
+from snakebuild.i18n import _
+
 __LINE_LENGTH = None
 
 
@@ -35,13 +37,13 @@ def message(value, indent="", line_length=None, first_indent=None):
 
 def error(value, line_length=None):
     ''' print a error message io the standard out. '''
-    print format_message("Error: %s" % value, indent="    ",
+    print format_message(_("Error: {0}").format(value), indent=" " * 4,
             line_length=line_length, first_indent="")
 
 
 def warning(value, line_length=None):
     ''' print a warning message io the standard out. '''
-    print format_message("Warning: %s" % value, indent=4,
+    print format_message(_("Warning: {0}").format(value), indent=" " * 4,
             line_length=line_length, first_indent=0)
 
 
@@ -79,10 +81,10 @@ def format_message(value, indent="", line_length=None, first_indent=None):
             ele = ele.replace('\t', '    ')
         if (len(ele) + len(tmp)) >= line_length:
             result.append(tmp)
-            tmp = '%s%s' % (cindent, ele)
+            tmp = '{0}{1}'.format(cindent, ele)
             cindent = indent
         else:
-            tmp = "%s %s" % (tmp, ele)
+            tmp = "{0} {1}".format(tmp, ele)
     result.append(tmp)
     result = result[1:]
     return "\n".join(result)

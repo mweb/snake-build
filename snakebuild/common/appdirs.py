@@ -49,6 +49,7 @@
 import os
 import tempfile
 
+from snakebuild.i18n import _
 from snakebuild.common import platform, singleton
 
 
@@ -112,26 +113,26 @@ class AppDirs(object):
     def user_data_dir(self):
         ''' Get the user data directory. The appname must be initialized. '''
         if self.appname is None:
-            raise AppDirsException('AppDirs object not yet initialized')
+            raise AppDirsException(_('AppDirs object not yet initialized'))
         return user_data_dir(self.appname, self.appauthor, self.version,
                 self.roaming)
 
     def shared_data_dir(self):
         ''' Get the user data directory. The appname must be initialized. '''
         if self.appname is None:
-            raise AppDirsException('AppDirs object not yet initialized')
+            raise AppDirsException(_('AppDirs object not yet initialized'))
         return shared_data_dir(self.appname, self.appauthor, self.version)
 
     def shared_config_dir(self):
         ''' Get the user data directory. The appname must be initialized. '''
         if self.appname is None:
-            raise AppDirsException('AppDirs object not yet initialized')
+            raise AppDirsException(_('AppDirs object not yet initialized'))
         return shared_config_dir(self.appname, self.appauthor, self.version)
 
     def log_dir(self):
         ''' Get the user data directory. The appname must be initialized. '''
         if self.appname is None:
-            raise AppDirsException('AppDirs object not yet initialized')
+            raise AppDirsException(_('AppDirs object not yet initialized'))
         return log_dir(self.appname, self.appauthor, self.version)
 
 
@@ -154,8 +155,8 @@ def user_data_dir(appname, appauthor=None, version=None, roaming=True):
     '''
     if platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
-            raise AppDirsException("On windows the 'appauthor' must be "
-                    "specified")
+            raise AppDirsException(_("On windows the 'appauthor' must be "
+                    "specified"))
         const = roaming and "CSIDL_APPDATA" or "CSIDL_LOCAL_APPDATA"
         path = os.path.join(_get_win_folder(const), appauthor, appname)
 
@@ -194,8 +195,8 @@ def shared_data_dir(appname, appauthor=None, version=None, roaming=False):
 
     elif platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
-            raise AppDirsException("On windows the 'appauthor' must be "
-                    "specified")
+            raise AppDirsException(_("On windows the 'appauthor' must be "
+                    "specified"))
         path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
                 appname)
 
@@ -208,6 +209,7 @@ def shared_data_dir(appname, appauthor=None, version=None, roaming=False):
         path = os.path.join(path, version)
 
     return path
+
 
 def shared_config_dir(appname, appauthor=None, version=None):
     ''' Get the global config file for this application. On windows this is
@@ -231,8 +233,8 @@ def shared_config_dir(appname, appauthor=None, version=None):
 
     elif platform.get_platform() == platform.WINDOWS:
         if appauthor is None:
-            raise AppDirsException("On windows the 'appauthor' must be "
-                    "specified")
+            raise AppDirsException(_("On windows the 'appauthor' must be "
+                    "specified"))
         path = os.path.join(_get_win_folder("CSIDL_COMMON_APPDATA"), appauthor,
                 appname)
     elif platform.get_platform() == platform.MACOS:
