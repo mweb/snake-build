@@ -25,6 +25,7 @@ import os
 import re
 import inspect
 
+from snakebuild.i18n import _, translate
 from snakebuild.common import output
 
 
@@ -148,7 +149,7 @@ def handle_cmd(cmd_args, options, config):
         return _call_command(cmd, cmd_args[1:], options, config,
                 SHELL_COMMANDS[cmd])
     else:
-        output.error('Unknown command: {0}'.format(cmd))
+        output.error(_('Unknown command: {0}').format(cmd))
         return False
 
 
@@ -173,13 +174,14 @@ def _call_command(cmd, args, options, config, cmd_info):
             min_cnt -= 1
     if not (min_cnt <= len(args) <= max_cnt):
         if min_cnt == max_cnt:
-            output.error('The number of parameters did not match the expected '
-                    'number of paramters. Got: %d, Expected: %d' %
-                    (len(args), max_cnt))
+            output.error(_('The number of parameters did not match the '
+                    'expected number of paramters. Got: {0:d}, Expected: '
+                    '{1:d}').format(len(args), max_cnt))
         else:
-            output.error('The number of parameters did not match the expected '
-                    'number of paramters. Got: %d, Expected between: %d and '
-                    '%d ' % (len(args), min_cnt, max_cnt))
+            output.error(_('The number of parameters did not match the '
+                    'expected number of paramters. Got: {0:d}, Expected '
+                    'between: {1:d} and {2:d}').format(len(args), min_cnt,
+                    max_cnt))
         _print_cmd_help_detail(cmd, cmd_info)
         return False
 
@@ -207,10 +209,10 @@ def _help(options, config, action=None):
 
 def _print_overview():
     ''' Print an overview over all the commands available. '''
-    output.message("This is the overview over all the supported commands for "
-            "the %s." % os.path.basename(sys.argv[0]))
+    output.message(_("This is the overview over all the supported commands "
+            "for the {0}.").format(os.path.basename(sys.argv[0])))
     print ""
-    print "Commands:"
+    print _("Commands:")
     for cmd, info in SHELL_COMMANDS.iteritems():
         _print_short_help(cmd, info)
 
@@ -228,8 +230,9 @@ def _print_short_help(cmd, info):
         space = (12 - i)
     else:
         space = 4 - (i % 4)
-    output.message("%s%s%s" % (cmd, " " * space, info[CMD_DESCRIPTION]),
-            indent='        ', first_indent="  ")
+    output.message("{0}{1}{2}".format(cmd, " " * space,
+            translate(info[CMD_DESCRIPTION])), indent=' ' * 8,
+            first_indent=" " * 2)
 
 
 def _print_cmd_help(cmd, config):
@@ -243,8 +246,7 @@ def _print_cmd_help(cmd, config):
     elif cmd == 'configfile':
         print "CONFIG FILE HELP"
     else:
-        output.error("The given command is unknwon: %s\n" % cmd)
-        _print_overview()
+        output.error(_("The given command is unknown: {0}\n").format(cmd))
         return False
 
     return True
@@ -256,18 +258,18 @@ def _print_cmd_help_detail(cmd, cmd_info):
         @param cmd_info: The command information from the COMMAND_LIST
     '''
     print ""
-    output.message(cmd_info[CMD_DESCRIPTION])
+    output.message(translate(cmd_info[CMD_DESCRIPTION]))
     print ""
-    print "  %s %s %s" % (os.path.basename(sys.argv[0]), cmd,
+    print "  {0} {1} {2}".format(os.path.basename(sys.argv[0]), cmd,
             " ".join([el[0] for el in cmd_info[CMD_PARAM_LIST]]))
     print ""
-    print "Parameters:"
+    print _("Parameters:")
     for key, desc in cmd_info[CMD_PARAM_LIST]:
         i = len(key)
         if i <= 8:
             space = (12 - i)
         else:
             space = 4 - (i % 4)
-        output.message("%s%s%s" % (key, " " * space, desc), indent="        ",
-                first_indent="  ")
+        output.message("{0}{1}{2}".format(key, " " * space, translate(desc)),
+                indent=" " * 8, first_indent=" " * 2)
         print ""
