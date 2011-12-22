@@ -39,4 +39,4 @@ def translate(message):
         else:
             translated.append('')
 
-    return translated
+    return "".join(translated)
