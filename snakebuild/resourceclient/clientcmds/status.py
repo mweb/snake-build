@@ -20,6 +20,7 @@
     server.
 '''
 
+from snakebuild.i18n import _
 from snakebuild.common import output
 from snakebuild.commands import command
 from snakebuild.communication import ClientCommunicationException
@@ -41,15 +42,15 @@ def status(options, config):
     try:
         answer = srvr.get_status_list()
     except ResourceServerRemoteError, exc:
-        output.error("Got error while talking with the server:\n "
-                "{0}".format(exc))
+        output.error(_("Got error while talking with the server:\n "
+                "{0}").format(exc))
         return False
     except ClientCommunicationException, exc:
         output.error(exc)
         return False
 
-    print "Name            | Slots/Free | Users"
+    print _("Name            | Slots/Free | Users")
     for resource in answer:
-        print ("{0[name]:<15s} |  {0[slots]:>4d}/{0[free]:<4d} | {1}".format(
-            resource, ", ".join(resource['users'])))
+        print _("{0[name]:<15s} |  {0[slots]:>4d}/{0[free]:<4d} | {1}").format(
+            resource, ", ".join(resource['users']))
     return True

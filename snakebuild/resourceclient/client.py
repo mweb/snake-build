@@ -19,8 +19,12 @@
 ''' This is the main entry for the resource client command line tool.
 '''
 
-from snakebuild.resourceclient.clientcmds import *
+from snakebuild.common import output
 from snakebuild.commands import handle_cmd
+from snakebuild.i18n import _
+
+from snakebuild.resourceclient.clientcmds import *
+
 
 def run_client(options, arguments, config):
     ''' Start the client command and see what the user wants.
@@ -31,12 +35,8 @@ def run_client(options, arguments, config):
         @param config: The loaded config object
         @return true or false depends on success or failure
     '''
-    if len(arguments) == 0:
-        print "Snake Build Resource Client"
-        return False
-
     try:
         return handle_cmd(arguments, options, config)
     except KeyboardInterrupt:
-        print('Abort by Keyboard Interrupt.')
+        output.error(_('Abort by Keyboard Interrupt.'))
         return False

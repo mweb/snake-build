@@ -20,6 +20,7 @@
     resource server.
 '''
 
+from snakebuild.i18n import _
 from snakebuild.common import output
 from snakebuild.communication import ClientCommunicationException
 from snakebuild.commands import command
@@ -40,17 +41,17 @@ def details(options, config, name):
     try:
         answer = srvr.get_resource_details(name)
     except ResourceServerRemoteError, exc:
-        output.error("Got error while talking with the server:\n "
-                "{0}".format(exc))
+        output.error(_("Got error while talking with the server:\n "
+                "{0}").format(exc))
         return False
     except ClientCommunicationException, exc:
         output.error(exc)
         return False
 
-    print "Resource: {0[name]}".format(answer)
-    print "Slots/Free: {0[slots]}/{0[free]}".format(answer)
-    print "Users: {0}".format(", ".join(answer['users']))
-    print "Keywords: {0}".format(", ".join(answer['keywords']))
-    print "Parameters:"
+    print _("Resource: {0[name]})").format(answer)
+    print _("Slots/Free: {0[slots]}/{0[free]}").format(answer)
+    print _("Users: {0}").format(", ".join(answer['users']))
+    print _("Keywords: {0}").format(", ".join(answer['keywords']))
+    print _("Parameters:")
 
     return True

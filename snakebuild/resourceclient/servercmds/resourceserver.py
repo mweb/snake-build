@@ -60,7 +60,8 @@ class ResourceServer(object):
         cmd, answ = self.client.send(Client.SJSON, 'status_list', None)
         if answ['status'] == SUCCESS:
             return answ['resources']
-        raise ResourceServerRemoteError("[%s]: %s" % (cmd, answ['message']))
+        raise ResourceServerRemoteError("[{0}]: {1}".format(cmd,
+                answ['message']))
 
     def get_resource_details(self, name):
         ''' Get the detail information about one resource.
@@ -77,7 +78,9 @@ class ResourceServer(object):
             @return: If successfull it will return a dictionary with all the
                     information about a resource.
         '''
-        cmd, answ = self.client.send(Client.SJSON, 'resource_details', {'name': name})
+        cmd, answ = self.client.send(Client.SJSON, 'resource_details',
+                {'name': name})
         if answ['status'] == SUCCESS:
             return answ['resource']
-        raise ResourceServerRemoteError("[%s]: %s" % (cmd, answ['message']))
+        raise ResourceServerRemoteError("[{0}]: {1}".format(cmd,
+                answ['message']))
