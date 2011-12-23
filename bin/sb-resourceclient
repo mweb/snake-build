@@ -32,6 +32,7 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY,
     # add the common library from the dev path
     os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY)  # for subprocesses
 
+from snakebuild.i18n import _
 from snakebuild.common import create_logger, Config, \
         set_logging_to_config_values, AppDirs
 from snakebuild import __version__
@@ -51,15 +52,15 @@ if __name__ == '__main__':
         if os.path.isfile(options.configfile):
             config.load(options.configfile)
         else:
-            print("Error: The specified config file does not exist:")
+            print(_("Error: The specified config file does not exist:"))
             print(options.configfile)
             exit(-1)
 
     set_logging_to_config_values(config, 'ResourceClient')
-    LOG.debug('Config file loaded start the server.')
+    LOG.debug(_('Config file loaded start the server.'))
 
     if options.version:
-        print 'SnakeBuild-ResrouceClient: %s' % __version__
+        print _('SnakeBuild-ResrouceClient: {0}').format(__version__)
         sys.exit(0)
 
     # this is a linux only solution this should be fixed for windows
@@ -68,4 +69,4 @@ if __name__ == '__main__':
 
     run_client(options, args, config)
 
-    LOG.debug('finished')
+    LOG.debug(_('finished'))
