@@ -24,6 +24,8 @@ import threading
 import json
 import logging
 
+from snakebuild.i18n import _
+
 LOG = logging.getLogger('snakebuild.resourceserver.resource')
 
 
@@ -98,14 +100,14 @@ def init_resource_from_obj(obj):
     if type(obj['name']) is str or type(obj['name']) is unicode:
         resource = Resource(obj['name'])
     else:
-        raise ResourceException('The name type must be a string. Got: %s' %
-                obj['name'])
+        raise ResourceException(_('The name type must be a string. Got: '
+                '{0}').format(obj['name']))
     if type(obj['keywords']) is list:
         for key in obj['keywords']:
             if type(key) is str or type(key) is unicode:
                 if key.lower() in resource.keywords:
-                    LOG.warning('Duplicated keywords (%s) for resource (%s)' %
-                            (key, resource.name))
+                    LOG.warning(_('Duplicated keywords ({0}) for resource '
+                            '({0})').format(key, resource.name))
                 else:
                     resource.keywords.append(key.lower())
     if type(obj['parallel_count']) is int:
@@ -114,14 +116,14 @@ def init_resource_from_obj(obj):
         try:
             resource.parallel_count = int(obj['parallel_count'])
         except ValueError:
-            raise ResourceException('The parallel_count is not an int value:'
-                    ' %s', obj['parallel_count'])
+            raise ResourceException(_('The parallel_count is not an int value:'
+                    ' {0}').format(obj['parallel_count']))
 
     if type(obj['parameters']) is dict:
         resource.parameters = obj['parameters']
     else:
-        raise ResourceException('The parameters is not of type dict: %s' %
-                obj['parameters'])
+        raise ResourceException(_('The parameters is not of type dict: '
+                '{0}').format(obj['parameters']))
 
     return resource
 
@@ -174,12 +176,13 @@ class Resource(object):
             @param value: The new value to set
         '''
         if type(value) is not int:
-            raise ResourceException('Wrong type for parallel_count must be an '
-                    'integer. Got: %s (%s)' % (value, type(value)))
+            raise ResourceException(_('Wrong type for parallel_count must '
+                    'be an integer. Got: {0} ({1})').format(value,
+                    type(value)))
 
         if value <= 0:
-            raise ResourceException('Illegal value for parallel count must be '
-                    '>0. Got: %d' % value)
+            raise ResourceException(_('Illegal value for parallel count must '
+                    'be >0. Got: {0:d}').format(value))
             self._parallel_count = value
 
         self.count_lock.acquire()
@@ -262,20 +265,20 @@ class Resource(object):
         '''
         self.count_lock.acquire()
         if not uname in self.users:
-            LOG.error("A user (%s) tried to release a resource which he "
-                    "didn't acquire before.")
+            LOG.error(_("A user (%s) tried to release a resource which he "
+                    "didn't acquire before."))
             self.count_lock.release()
-            raise ResourceException("Tried to release resource with the wrong "
-                    'user: %s' % uname)
+            raise ResourceException(_("Tried to release resource with the "
+                    'wrong user: {0}').format(uname))
 
         if exclusive:
             if not self.exclusive:
-                LOG.error("A user (%s) tried to free exclusive usage only for "
-                        "a resource which is not acquired exclusively." %
-                        uname)
+                LOG.error(_("A user ({0}) tried to free exclusive usage only "
+                        "for a resource which is not acquired "
+                        "exclusively.").format(uname))
                 self.count_lock.release()
-                raise ResourceException('Resource not acquired exclusively '
-                        'before.')
+                raise ResourceException(_('Resource not acquired exclusively '
+                        'before.'))
             self._current_count = self._parallel_count - 1
             self.exclusive = False
             self.count_lock.release()
@@ -297,6 +300,6 @@ class Resource(object):
             rejected.
         '''
         self.run = False
-        LOG.info("Received shutdown signal. Currently used resources: %s" %
-                (self._parallel_count - self._current_count))
+        LOG.info(_("Received shutdown signal. Currently used resources: "
+                "{0}").format(self._parallel_count - self._current_count))
         self.release_listener.set()

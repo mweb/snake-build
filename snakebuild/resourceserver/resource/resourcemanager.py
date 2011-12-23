@@ -26,6 +26,7 @@ import os.path
 import logging
 import json
 
+from snakebuild.i18n import _
 from snakebuild.resourceserver.resource import init_resource_from_obj
 from snakebuild.resourceserver.resource import ResourceException
 
@@ -51,7 +52,7 @@ class ResourceManager(object):
             @param: The name of the directory to get the config files from for
                     the resources
         '''
-        LOG.debug('Initialize ResourceManager')
+        LOG.debug(_('Initialize ResourceManager'))
         self.resources = {}
         self.release_listener = threading.Event()
         self.keywords = {}
@@ -65,9 +66,10 @@ class ResourceManager(object):
                 if keyword in self.keywords:
                     if name in self.keywords[keyword]:
                         # it is already here why?
-                        LOG.warning('A dupplicate keyword, resource name, this'
-                                ' should not happend. Ignore it: Keyword=%s, '
-                                'ResoruceName=%s' % (keyword, name))
+                        LOG.warning(_('A dupplicate keyword, resource name, '
+                                'this should not happend. Ignore it: '
+                                'Keyword={0}, ResoruceName={1}').format(
+                                keyword, name))
                         continue
                     self.keywords[keyword].append(name)
                 else:
@@ -77,7 +79,7 @@ class ResourceManager(object):
         ''' Shut down the resource manager. If there are any request waiting
             wake up the given thread and decline all questions for resources.
         '''
-        LOG.info('Recieved shutdown signal.')
+        LOG.info(_('Recieved shutdown signal.'))
         self.run = False
         self.release_listener.set()
         for resource in self.resources.itervalues():
@@ -97,9 +99,9 @@ class ResourceManager(object):
         '''
         keyword = keyword.lower()
         if not keyword in self.keywords:
-            LOG.warning('The user (%s) tried to access a resouce with the '
-                    'keyword "%s". But this keyword does not exist.' %
-                    (uname, keyword))
+            LOG.warning(_('The user ({0}) tried to access a resouce with the '
+                    'keyword "{0}". But this keyword does not exist.').format(
+                    uname, keyword))
             return None
 
         while self.run:
@@ -128,10 +130,11 @@ class ResourceManager(object):
                     raised
         '''
         if not resourcename in self.resources:
-            LOG.error('Release command called for a not existing resource %s'
-                    ' User: %s' % (resourcename, uname))
-            raise ResourceException('Release command called for a not existing'
-                    ' resource %s User: %s' % (resourcename, uname))
+            LOG.error(_('Release command called for a not existing resource '
+                    '{0} User: {1}').format(resourcename, uname))
+            raise ResourceException(_('Release command called for a not '
+                    'existing resource {0} User: {1}').format(resourcename, 
+                    uname))
 
         self.resources[resourcename].release(uname, exclusive)
         self.release_listener.set()
@@ -142,7 +145,7 @@ class ResourceManager(object):
 
             @param dirname: The full path to the resource to load
         '''
-        LOG.info('Loading resources from: %s' % dirname)
+        LOG.info(_('Loading resources from: {0}').format(dirname))
         for element in os.listdir(dirname):
             if element.startswith('.') or element.endswith('bkp'):
                 # ignore hidden files
@@ -155,14 +158,16 @@ class ResourceManager(object):
 
             @param filename: The name of the file (full path)
         '''
-        LOG.debug('Load resource from file: %s' % filename)
+        LOG.debug(_('Load resource from file: {0}').format(filename))
         resource_desc = json.load(open(filename, 'r'))
         resource = init_resource_from_obj(resource_desc)
         if resource is not None:
             if resource.name in self.resources:
-                LOG.warning('A resource with name "%s" already exists. Ignore '
-                        'it. Filename: %s' % (resource.name, filename))
+                LOG.warning(_('A resource with name "{0}" already exists. '
+                        'Ignore it. Filename: {1}').format(resource.name, 
+                        filename))
                 return
             self.resources[resource.name] = resource
         else:
-            LOG.error('Could not load resource from given file: %s' % filename)
+            LOG.error(_('Could not load resource from given file: '
+                    '{0}').format(filename))
