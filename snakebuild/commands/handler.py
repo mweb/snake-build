@@ -93,7 +93,7 @@ def _get_documentation(doc):
             break
         cnt += 1
         if len(line) == 0:
-            desc = '{0}\n'.format(desc)
+            desc = '{0}\n'.format(desc.strip())
         else:
             if desc.endswith('\n'):
                 desc = '{0}{1}'.format(desc, line.strip())
@@ -231,7 +231,7 @@ def _print_short_help(cmd, info):
     else:
         space = 4 - (i % 4)
     output.message("{0}{1}{2}".format(cmd, " " * space,
-            translate(info[CMD_DESCRIPTION])), indent=' ' * 8,
+            translate(info[CMD_DESCRIPTION].strip())), indent=' ' * 8,
             first_indent=" " * 2)
 
 
@@ -258,7 +258,7 @@ def _print_cmd_help_detail(cmd, cmd_info):
         @param cmd_info: The command information from the COMMAND_LIST
     '''
     print ""
-    output.message(translate(cmd_info[CMD_DESCRIPTION]))
+    output.message(translate(cmd_info[CMD_DESCRIPTION].strip()))
     print ""
     print "  {0} {1} {2}".format(os.path.basename(sys.argv[0]), cmd,
             " ".join([el[0] for el in cmd_info[CMD_PARAM_LIST]]))
@@ -270,6 +270,6 @@ def _print_cmd_help_detail(cmd, cmd_info):
             space = (12 - i)
         else:
             space = 4 - (i % 4)
-        output.message("{0}{1}{2}".format(key, " " * space, translate(desc)),
-                indent=" " * 8, first_indent=" " * 2)
+        output.message("{0}{1}{2}".format(key, " " * space,
+                translate(desc.strip())), indent=" " * 8, first_indent=" " * 2)
         print ""

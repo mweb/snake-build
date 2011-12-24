@@ -73,7 +73,7 @@ def poentry(binary, cmd, param, value):
         @param value: The text to translate.
         @return a printable string
     '''
-    return ('#: {0}:{1}-{2}\n'
+    return ('#: {0}_{1}-{2}:1\n'
             'msgid {3}\n'
             'msgstr ""\n'.format(binary, cmd, param, normalize(value)))
 

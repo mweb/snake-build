@@ -20,7 +20,7 @@
 
 import gettext
 
-TRANS = gettext.translation('snakebuild', fallback=True)
+TRANS = gettext.translation('snakebuild', 'locale', fallback=True)
 _ = TRANS.ugettext
 
 def translate(message):
