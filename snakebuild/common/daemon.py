@@ -180,7 +180,7 @@ class Daemon(object):
             pid = None
         if action == self.STOP or action == self.RESTART:
             if not pid:
-                LOG.error(_("Could not stop, pid file '%s' missing.").format(
+                LOG.error(_("Could not stop, pid file '{0}' missing.").format(
                         self.instance.pidfile))
                 sys.exit(1)
             try:
@@ -201,7 +201,7 @@ class Daemon(object):
                     sys.exit(1)
         if action == self.START:
             if pid:
-                LOG.error(_("Start aborted since pid file '%s' "
+                LOG.error(_("Start aborted since pid file '{0}' "
                         "exists.").format(self.instance.pidfile))
                 sys.exit(1)
             self.deamonize()

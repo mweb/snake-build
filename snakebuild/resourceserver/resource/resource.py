@@ -265,8 +265,8 @@ class Resource(object):
         '''
         self.count_lock.acquire()
         if not uname in self.users:
-            LOG.error(_("A user (%s) tried to release a resource which he "
-                    "didn't acquire before."))
+            LOG.error(_("A user ({0}) tried to release a resource which he "
+                    "didn't acquire before.").format(uname))
             self.count_lock.release()
             raise ResourceException(_("Tried to release resource with the "
                     'wrong user: {0}').format(uname))
