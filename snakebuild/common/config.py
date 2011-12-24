@@ -113,13 +113,13 @@ class Config(object, ConfigParser.SafeConfigParser):
         ''' Load the default config files.
             First the global config file then the user config file.
         '''
-        self.load(AppDirs().get_shared_config_file("%s.conf" %
-                self.application_name.lower()))
+        self.load(AppDirs().get_shared_config_file("{0}.conf".format(
+                self.application_name.lower())))
         if os.getuid() > 0:
-            config_path = AppDirs().get_user_file('.%s' %
-                    self.application_name.lower())
-            config_file = os.path.join(config_path, "%s.conf" %
-                            self.application_name)
+            config_path = AppDirs().get_user_file('.{0}'.format(
+                    self.application_name.lower()))
+            config_file = os.path.join(config_path, "{0}.conf".format(
+                            self.application_name))
             if os.path.exists(config_file):
                 self.load(config_file)
 
@@ -183,7 +183,7 @@ class Config(object, ConfigParser.SafeConfigParser):
                         raise ConfigValueException(_('Could not convert '
                                 'boolean type: {0}').format(value))
                 except:
-                    raise ConfigValueException(_('Could not convert %s to '
+                    raise ConfigValueException(_('Could not convert {0} to '
                             'type boolean').format(value))
             else:
                 value = value_type(value)
@@ -208,8 +208,8 @@ class Config(object, ConfigParser.SafeConfigParser):
                 if not self.application_name in self.config_description:
                     self.config_description[self.application_name] = {}
                 value = os.path.join(os.path.expanduser('~'),
-                        '.%s' % self.application_name, '%s.conf' %
-                        self.application_name)
+                        '.{0}'.format(self.application_name),
+                        '{0}.conf'.format(self.application_name))
                 if not self.has_option(self.application_name, 'config_file'):
                     self.set(self.application_name, 'config_file', value)
                 if not ('config_file' in
@@ -257,19 +257,19 @@ class Config(object, ConfigParser.SafeConfigParser):
             if section.lower() == '' or section.lower() == 'hidden':
                 continue
             desc.append("")
-            desc.append('[%s]' % section)
+            desc.append('[{0}]'.format(section))
             for key in self.options(section):
                 descr, value_type, default = self.get_description(section, key)
                 if verbose:
                     desc.append(output.format_message(descr, "# ", 78))
-                    desc.append("# Type: [%s]" % str(value_type))
-                    desc.append("# %s=%s" % (key, default))
+                    desc.append("# Type: [{0}]".format(str(value_type)))
+                    desc.append("# {0}={1}".format(key, default))
                 if not self.get_s(section, key) == default:
-                    desc.append('%s=%s' % (key, self.get_s(section, key)))
+                    desc.append('{0}={1}'.format(key, self.get_s(section, key)))
                 if verbose:
                     desc.append("")
 
-        filedesc.write("%s\n" % ("\n".join(desc[1:])))
+        filedesc.write("{0}\n".format("\n".join(desc[1:])))
 
     def _add_section_default(self, section, parameters):
         ''' Add the given section with the given paramters to the config. The
