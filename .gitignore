@@ -2,3 +2,5 @@
 *.swp
 .coverage
 htmlcov
+locale
+*.pot
