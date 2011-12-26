@@ -131,7 +131,7 @@ def _receive(sock):
     else:
         sock.close()
         raise ClientCommunicationException(_('Received an unsuported '
-            'communication type. Got: 0x{0:%02x').format(ord(mtype)))
+            'communication type. Got: 0x{0:02x}').format(ord(mtype)))
 
 
 def _parse_sjson_data(sock):
