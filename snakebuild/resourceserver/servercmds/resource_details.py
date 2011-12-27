@@ -22,6 +22,7 @@
 
 import logging
 
+from snakebuild.i18n import _
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
 from snakebuild.resourceserver.servercommands import command
@@ -40,8 +41,8 @@ def resource_details(res_mgr, name):
         @return: the answer object to return to the client
     '''
     if not(type(name) == str or type(name) == unicode):
-        return prepare_error('Illegal value for the name. Expected a string '
-                'but got {0}'.format(type(name)))
+        return prepare_error(_('Illegal value for the name. Expected a string '
+                'but got {0}').format(type(name)))
 
     answer = prepare_answer()
     if name in res_mgr.resources:
@@ -56,5 +57,5 @@ def resource_details(res_mgr, name):
         answer['resource'] = values
         return answer
     else:
-        return prepare_error('The expected resource does not exist: '
-                '{0}'.format(name))
+        return prepare_error(_('The expected resource does not exist: '
+                '{0}').format(name))

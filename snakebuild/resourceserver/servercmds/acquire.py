@@ -22,6 +22,7 @@
 
 import logging
 
+from snakebuild.i18n import _
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
 from snakebuild.resourceserver.servercommands import command
@@ -44,8 +45,8 @@ def acquire(res_mgr, name, tag, exclusive=False):
     '''
     resource = res_mgr.acquire(name, tag, exclusive)
     if resource is None:
-        return prepare_error("No resource with the given tag ({0}) could be "
-                "acquired.".format(tag))
+        return prepare_error(_("No resource with the given tag ({0}) could be "
+                "acquired.").format(tag))
 
     answer = prepare_answer()
     answer['resource'] = resource
