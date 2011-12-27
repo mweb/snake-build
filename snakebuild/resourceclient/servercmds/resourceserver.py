@@ -157,7 +157,7 @@ class ResourceServer(object):
                     'must be a boolean value and not: {0}').format(
                     type(exclusive)))
 
-        cmd, answ = self.client.send(Client.SJSON, 'resource',
+        cmd, answ = self.client.send(Client.SJSON, 'release',
                 {'name': name, 'resource_name': resource,
                 'exclusive': exclusive})
         if answ['status'] == SUCCESS:

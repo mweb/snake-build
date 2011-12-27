@@ -69,6 +69,7 @@ class TestServerCmds(unittest.TestCase):
         time.sleep(0.2)
 
         self.assertTrue(type(rsrc_srvr.get_status_list()) == list)
+        # TODO check in more details
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
@@ -87,8 +88,41 @@ class TestServerCmds(unittest.TestCase):
         time.sleep(0.2)
 
         self.assertTrue(type(rsrc_srvr.get_resource_details('Test1')) == dict)
+        # TODO check in more details
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
+
+    def test_acquire_releaes_resource(self):
+        ''' Test the acquire_resource and release_resource commands.
+        '''
+        rsrc_srvr = ResourceServer('localhost', _NETWORK_PORT)
+        with self.assertRaises(ClientCommunicationException):
+            rsrc_srvr.acquire_resource('mytest', 'test1', False)
+
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource(12.2, 'test1', False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource('mytest', True, False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource('mytest', 'test1', 12)
+
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
+                '--background', '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        time.sleep(0.2)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource(12.2, 'test1', False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource('mytest', True, False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.acquire_resource('mytest', 'test1', 12)
+
+        name = rsrc_srvr.acquire_resource('mytest', 'test1', False)
+        self.assertTrue(name == 'Test1')
+        name = rsrc_srvr.release_resource('mytest', name, False)
+
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
+
 
 
 _NETWORK_PORT = 9998
