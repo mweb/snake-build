@@ -86,6 +86,11 @@ class TestCommands(unittest.TestCase):
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
+    def test_acquire_release_cmd(self):
+        ''' Test the acquire and the release command functions.
+        '''
+        pass
+
 
 _NETWORK_PORT = 9999
 

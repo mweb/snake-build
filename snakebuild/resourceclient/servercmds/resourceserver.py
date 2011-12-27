@@ -20,12 +20,23 @@
     with the ResourceServer without the need to now the detailed commands.
 '''
 
+from snakebuild.i18n import _
 from snakebuild.communication.client import Client
 from snakebuild.communication.commandstructure import SUCCESS
 
 
-class ResourceServerRemoteError(BaseException):
+class ResourceServerError(BaseException):
+    ''' The base execpetion for all errors thrown within the ResourceServer
+        class.
+    '''
+
+
+class ResourceServerRemoteError(ResourceServerError):
     ''' The base exception of the errors of the remote server. '''
+
+
+class ResourceServerIllegalParameterError(ResourceServerError):
+    ''' The error thrown if a method is called with an illegal paramter. '''
 
 
 class ResourceServer(object):
@@ -78,8 +89,77 @@ class ResourceServer(object):
             @return: If successfull it will return a dictionary with all the
                     information about a resource.
         '''
+        if not (type(name) is str or type(name) is unicode):
+            raise ResourceServerIllegalParameterError(_('name parameter '
+                    'requires a string as the value. {0}').format(type(name)))
+
         cmd, answ = self.client.send(Client.SJSON, 'resource_details',
                 {'name': name})
+        if answ['status'] == SUCCESS:
+            return answ['resource']
+        raise ResourceServerRemoteError("[{0}]: {1}".format(cmd,
+                answ['message']))
+
+    def acquire_resource(self, name, tag, exclusive=False):
+        ''' Acquire a resource with a givne tag name. The name for the user to
+            acquire the resource must be given. With the exclusive flag it is
+            possible to acquire a resource exclusivly.
+
+            @param name: The name of the user to acquire the given resource
+            @param tag: The tag of the resource to get.
+            @param exclusive: If set to true then the resource is needed for
+                exclusive usage. Otherwise the number of parallel users is
+                specified within the config.
+
+            @return: If successfull it will return the name of the resource
+        '''
+        if not (type(name) is str or type(name) is unicode):
+            raise ResourceServerIllegalParameterError(_('name parameter '
+                    'requires a string as the value. {0}').format(type(name)))
+        if not (type(tag) is str or type(tag) is unicode):
+            raise ResourceServerIllegalParameterError(_('tag parameter '
+                    'requires a string as the value. {0}').format(type(tag)))
+        if type(exclusive) is not bool:
+            raise ResourceServerIllegalParameterError(_('exclusive parameter '
+                    'must be a boolean value and not: {0}').format(
+                    type(exclusive)))
+
+        cmd, answ = self.client.send(Client.SJSON, 'acquire',
+                {'name': name, 'tag': tag, 'exclusive': exclusive})
+        if answ['status'] == SUCCESS:
+            return answ['resource']
+        raise ResourceServerRemoteError("[{0}]: {1}".format(cmd,
+                answ['message']))
+
+    def release_resource(self, name, resource, exclusive=False):
+        ''' Release the given resource. The name of the user that acquired the
+            resource must be given and the exclusive flag defines if the
+            resource should be release entirely or if only the exclusive lock
+            should be released and one "normal" lock on the resource should be
+            kept.
+
+            @param name: The name of the user to release the given resource
+            @param resource: The name of the resource to release.
+            @param exclusive: If set to true then only release the exclusive
+                lock but keep a "normal" lock.
+
+            @return: If successfull it will return the name of the resource
+        '''
+        if not (type(name) is str or type(name) is unicode):
+            raise ResourceServerIllegalParameterError(_('name parameter '
+                    'requires a string as the value. {0}').format(type(name)))
+        if not (type(resource) is str or type(resource) is unicode):
+            raise ResourceServerIllegalParameterError(_('resource parameter '
+                    'requires a string as the value. {0}').format(
+                    type(resource)))
+        if type(exclusive) is not bool:
+            raise ResourceServerIllegalParameterError(_('exclusive parameter '
+                    'must be a boolean value and not: {0}').format(
+                    type(exclusive)))
+
+        cmd, answ = self.client.send(Client.SJSON, 'resource',
+                {'name': name, 'resource_name': resource,
+                'exclusive': exclusive})
         if answ['status'] == SUCCESS:
             return answ['resource']
         raise ResourceServerRemoteError("[{0}]: {1}".format(cmd,

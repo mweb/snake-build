@@ -21,4 +21,5 @@
 '''
 
 from snakebuild.resourceclient.servercmds.resourceserver import \
-        ResourceServer, ResourceServerRemoteError
+        ResourceServer, ResourceServerRemoteError, \
+        ResourceServerIllegalParameterError
