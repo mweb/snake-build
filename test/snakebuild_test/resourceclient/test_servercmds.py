@@ -28,7 +28,6 @@ import json
 from snakebuild.resourceclient.servercmds import ResourceServer, \
         ResourceServerRemoteError, ResourceServerIllegalParameterError
 from snakebuild.communication.client import ClientCommunicationException
-from snakebuild.common import Config
 
 
 class TestServerCmds(unittest.TestCase):
@@ -90,6 +89,11 @@ class TestServerCmds(unittest.TestCase):
         self.assertTrue(type(rsrc_srvr.get_resource_details('Test1')) == dict)
         # TODO check in more details
 
+        # not existing resource should get an error back
+        with self.assertRaises(ResourceServerRemoteError):
+            rsrc_srvr.get_resource_details('Test11')
+        # TODO check in more details
+
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
     def test_acquire_releaes_resource(self):
@@ -120,6 +124,15 @@ class TestServerCmds(unittest.TestCase):
         name = rsrc_srvr.acquire_resource('mytest', 'test1', False)
         self.assertTrue(name == 'Test1')
         name = rsrc_srvr.release_resource('mytest', name, False)
+
+        with self.assertRaises(ResourceServerRemoteError):
+            name = rsrc_srvr.acquire_resource('mytest', 'test11', False)
+        with self.assertRaises(ResourceServerRemoteError):
+            name = rsrc_srvr.release_resource('mytest2', 'test1', False)
+        with self.assertRaises(ResourceServerRemoteError):
+            name = rsrc_srvr.release_resource('mytest', 'test11', False)
+        with self.assertRaises(ResourceServerRemoteError):
+            name = rsrc_srvr.release_resource('mytest', 'test1', False)
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 

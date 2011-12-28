@@ -125,7 +125,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(resource['parameters']['value1'] == 'arther')
 
         # test with not existing resource
-        result = COMMANDS['resource_details'][FUNCTION](mgr, ['Arther'])
+        result = COMMANDS['resource_details'][FUNCTION](mgr, ['Test11'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -138,7 +138,6 @@ class TestCommands(unittest.TestCase):
         '''
         mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
 
-        # test before any action
         result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test1')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -155,6 +154,34 @@ class TestCommands(unittest.TestCase):
         resource = result['resource']
         self.assertTrue(type(resource) == str or type(resource) == unicode)
         # TODO add more tests here and check the status of the resources
+
+        # not existing resource
+        result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test11')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # not existing resource
+        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test11')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # not existing user
+        result = COMMANDS['release'][FUNCTION](mgr, 'Pingu', 'Test1')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # not acquired
+        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
 
     def test_shutdown_cmd(self):
         ''' Test the private shutdown function. '''
