@@ -33,6 +33,9 @@ def parse_command_line():
         help=_('The configfile to load. This will be the last file to be '
         'loaded and it will be overwritten for storing a new '
         'configuration.'), default=None)
+    parser.add_option('--name', dest="username", help=_("Specify the name of "
+        'the user to use for talking with the resource server. If nothing is '
+        'specified the value from the config file is taken.'), default=None)
     parser.add_option('-v', '--version', dest='version', action='store_true',
             help=_('Ask for the version.'), default=False)
 

@@ -19,5 +19,6 @@
 ''' The package with all the client command handler functions.
 '''
 
-from snakebuild.resourceclient.clientcmds.details import details
-from snakebuild.resourceclient.clientcmds.status import status
+import acquire
+import details
+import status
