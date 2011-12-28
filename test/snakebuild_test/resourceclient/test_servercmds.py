@@ -54,7 +54,6 @@ class TestServerCmds(unittest.TestCase):
         ''' Ensure that the server is stoped. '''
         subprocess.call([self.server_bin, 'stop'])
 
-
     def test_status_list_cmd(self):
         ''' Test the status list command function.
         '''
@@ -103,13 +102,22 @@ class TestServerCmds(unittest.TestCase):
         with self.assertRaises(ClientCommunicationException):
             rsrc_srvr.acquire_resource('mytest', 'test1', False)
 
+        # test if the parameters checks are in place
         with self.assertRaises(ResourceServerIllegalParameterError):
             rsrc_srvr.acquire_resource(12.2, 'test1', False)
         with self.assertRaises(ResourceServerIllegalParameterError):
             rsrc_srvr.acquire_resource('mytest', True, False)
         with self.assertRaises(ResourceServerIllegalParameterError):
             rsrc_srvr.acquire_resource('mytest', 'test1', 12)
+        # the same for the release command
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.release_resource(12.2, 'test1', False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.release_resource('mytest', True, False)
+        with self.assertRaises(ResourceServerIllegalParameterError):
+            rsrc_srvr.release_resource('mytest', 'test1', 12)
 
+        # now do the tests with the server running
         self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
                 '--background', '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
@@ -135,7 +143,6 @@ class TestServerCmds(unittest.TestCase):
             name = rsrc_srvr.release_resource('mytest', 'test1', False)
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
-
 
 
 _NETWORK_PORT = 9998

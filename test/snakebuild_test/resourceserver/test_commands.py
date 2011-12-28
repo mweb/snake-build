@@ -125,6 +125,15 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(resource['parameters']['value1'] == 'arther')
 
         # test with not existing resource
+        result = COMMANDS['resource_details'][FUNCTION](mgr, 'Test11')
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(type(result) == dict)
+        self.assertTrue('status' in result)
+        self.assertTrue('message' in result)
+        self.assertTrue(result['status'] == ERROR)
+        self.assertTrue(len(result['message']) > 0)
+
+        # test with illegal parameter
         result = COMMANDS['resource_details'][FUNCTION](mgr, ['Test11'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -132,6 +141,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue('message' in result)
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
+
 
     def test_acquire_release_cmds(self):
         ''' Test the acquire and the release functions of the resource server.
