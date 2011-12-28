@@ -60,3 +60,10 @@ class TestOutput(unittest.TestCase):
                 first_indent="#!/bin/sh ")
         self.assertTrue(value == "#!/bin/sh Test\n# to print\n# a longer\n#"
                 " text")
+
+    def test_formatted_output(self):
+        ''' Test if the formatted output is working properly (without errors
+            wuring call.
+        '''
+        output.warning("Test warning message")
+        output.error("Test error message")

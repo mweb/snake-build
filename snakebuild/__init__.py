@@ -21,3 +21,5 @@
 __author__ = """Mathias Weber <mathew.weber@gmail.com>"""
 __version__ = 0.0
 __docformat__ = 'plaintext'
+__license__ = 'Mathias Weber, 2006-2011'
+__license__ += 'GPL'
