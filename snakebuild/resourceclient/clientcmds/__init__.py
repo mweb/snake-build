@@ -20,5 +20,6 @@
 '''
 
 import acquire
+import release
 import details
 import status
