@@ -31,10 +31,8 @@ LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
 @command('release', False)
-def acquire(res_mgr, name, resource_name, exclusive=False):
-    ''' This command acquires a resource of the given tag. If the tag or
-        resource doesn't exist it will return an error. This command might
-        wait if no resource is available.
+def release(res_mgr, name, resource_name, exclusive=False):
+    ''' This command releases a resource which where acquired before.
 
         The exclusive boolean is to release the exclusive lock from a
         resource. The user will keep a normal lock of the resource till he
@@ -51,7 +49,7 @@ def acquire(res_mgr, name, resource_name, exclusive=False):
     try:
         res_mgr.release(resource_name, name, exclusive)
     except ResourceException, exc:
-        return prepare_error(exc)
+        return prepare_error(str(exc))
 
     answer = prepare_answer()
     answer['resource'] = resource_name
