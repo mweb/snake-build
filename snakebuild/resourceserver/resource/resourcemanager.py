@@ -99,8 +99,8 @@ class ResourceManager(object):
         '''
         keyword = keyword.lower()
         if not keyword in self.keywords:
-            LOG.warning(_('The user ({0}) tried to access a resouce with the '
-                    'keyword "{0}". But this keyword does not exist.').format(
+            LOG.warning(_('The user ({0}) tried to access a resource with the '
+                    'keyword "{1}". But this keyword does not exist.').format(
                     uname, keyword))
             return None
 
