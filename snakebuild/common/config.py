@@ -27,7 +27,7 @@ import logging
 import ConfigParser
 
 # common imports
-from snakebuild.i18n import _
+from snakebuild.i18n import _, translate
 from snakebuild.common import output
 from snakebuild.common.appdirs import AppDirs
 
@@ -89,7 +89,9 @@ class Config(object, ConfigParser.SafeConfigParser):
         '''
         if section in self.config_description:
             if key in self.config_description[section]:
-                return self.config_description[section][key]
+                desc, value_type, default = \
+                        self.config_description[section][key]
+                return (translate(desc), value_type, default)
             else:
                 if self.has_option(section, key):
                     # return an empty string since it is possible that a
