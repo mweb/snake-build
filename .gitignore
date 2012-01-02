@@ -4,3 +4,7 @@
 htmlcov
 locale
 *.pot
+build_pkg
+build
+dist
+MANIFEST

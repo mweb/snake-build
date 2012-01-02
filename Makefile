@@ -10,31 +10,43 @@ BINARY_PYFILES:=$(ls bin/)
 help:
 	@echo 'Possible targets:'
 	@echo '  all'
-	@echo '  build'
-	@echo '  install'
-	@echo '  clean'
-	@echo '  build-pkg
-	@echo '  update-pot'
+	@echo '  source - Create source package'
+	@echo '  install - Install on local system'
+	@echo '  clean - Get rid of scratch and byte files'
+	@echo '  buildrpm - Generate a rpm package'
+	@echo '  builddeb - Generate a deb package'
+	@echo '  update-pot - Generate the pot files'
 
-all: build
+all: source
 
-build:
-	${PYTHON} setup.py build
+source:
+	${PYTHON} setup.py sdist ${COMPILE}
+
+install:
+	${PYTHON} setup.py install --root ${DESTDIR} ${COMPILE}
+
+buildrpm:
+	${PYTHON} setup.py bdist_rpm --post-install=rpm/postinstall --pre-uninstall=rpm/preuninstall
+
+builddeb:
+	# build the source package in the parent diretory
+	# then rename it to project_version.orig.tar.gz
+	${PYTHON} setup.py sdist $(COMPILE) --dist-dir=../ --prune
+	rename -f 's/${PROJECT}-(.*)\.tar\.gz/${PROJECT}_$$1\.orig\.tar\.gz/' ../*
+	# build the package
+	dpkg-buildpackage -i\.git\|.*png -rfakeroot
 
 build-pkg: clean
-	mkdir build
-	cp * -rf build
-	cd build
-	make clean
+	mkdir build_pkg
+	-cp * -rf build_pkg
+	cd build_pkg
 	dpkg-buildpackage
 
 clean:
 	-$(PYTHON) setup.py clean --all
+	${MAKE} -f ${CURDIR}/debian/rules clean
 	find . \( -name '*.py[cdo]' -o -name '*.so' \) -exec rm -f '{}' ';'
-	rm -f build
-
-install:
-	${PYTHON} setup.py install --root="$(DESTDIR)/" --prefix="$(PREFIX)" --force
+	-rm -rf build MANIFEST
 
 test:
 	cd tests && $(PYTHON) run-tests.py
@@ -60,4 +72,4 @@ i18n/snakebuild.pot:
 %.po: i18n/snakebuild.pot
 	msgmerge --no-location --update $@ $^
 
-.PHONY: help all build clean install build-pkg tests update-pot
+.PHONY: help all source clean install builddeb buildrmp tests update-pot

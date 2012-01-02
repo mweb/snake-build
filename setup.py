@@ -106,8 +106,8 @@ class InstallAndUpdateDataDirectory(install):
 ##############################################################################
 
 setup(
-    name='snakebuild-common',
-    version='0.01.00',
+    name='snakebuild',
+    version='0.1.0',
     license='GPL v3.0',
     author='Mathias Weber',
     author_email='mathew.weber@gmail.com',
@@ -119,7 +119,7 @@ setup(
     cmdclass={'install': InstallAndUpdateDataDirectory},
     packages=find_packages('snakebuild'),
     install_requires=[],
-    scripts=[],
+    scripts=['bin/sb-resourceclient', 'bin/sb-resourceserver'],
     data_files=(find_data('data', 'share/snakebuild') +
             find_data('etc', '/etc')),
     )
