@@ -48,6 +48,7 @@ update-pot: i18n/snakebuild.pot
 i18n/snakebuild.pot:
 	$(PYTHON) i18n/snakebuildgettext sb-resourceclient \
 		snakebuild/resourceclient/clientcmds > i18n/snakebuild.pot
+	$(PYTHON) i18n/configgettext data/*.conf >> i18n/snakebuild.pot
 	echo $(PYFILES) $(BINARY_PYFILES) | xargs \
 		xgettext --package-name "snakebuild" \
 		--msgid-bugs-address "<mathew.weber@gmail.com>" \

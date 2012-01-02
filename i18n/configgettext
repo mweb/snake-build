@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+#
+# snakebuildgettext - carefully extract docstrings for Snakebuild
+#
+# Copyright 2011 Mathias Weber <mathew.weber@gmail.com> originally take from
+# Mercurial project:
+#
+# Copyright 2009 Matt Mackall <mpm@selenic.com> and others
+#
+# This software may be used and distributed according to the terms of the
+# GNU General Public License version 2 or any later version.
+
+# The normalize function is taken from pygettext which is distributed
+# with Python under the Python License, which is GPL compatible.
+
+"""Extract docstrings from Snakebuild commands.
+
+Compared to pygettext, this script knows about the cmdtable and table
+dictionaries used by Mercurial, and will only extract docstrings from
+functions mentioned therein.
+
+Use xgettext like normal to extract strings marked as translatable and
+join the message cataloges to get the final catalog.
+"""
+
+import os
+import sys
+import json
+
+
+def escape(value):
+    ''' Escape special characters.
+
+        @param value: The value to escape
+        @return: The string with the special characters escaped.
+    '''
+    # The order is important, the backslash must be escaped first
+    # since the other replacements introduce new backslashes
+    # themselves.
+    value = value.replace('\\', '\\\\')
+    value = value.replace('\n', '\\n')
+    value = value.replace('\r', '\\r')
+    value = value.replace('\t', '\\t')
+    value = value.replace('"', '\\"')
+    return value
+
+
+def normalize(value):
+    ''' This converts the various Python string types into a format that
+        is appropriate for .po files, namely much closer to C style.
+
+        @param value: The string to translate
+        @return: The string normalized
+    '''
+    lines = value.split('\n')
+    if len(lines) == 1:
+        value = '"' + escape(value) + '"'
+    else:
+        if not lines[-1]:
+            del lines[-1]
+            lines[-1] = lines[-1] + '\n'
+        lines = map(escape, lines)
+        lineterm = '\\n"\n"'
+        value = '""\n"' + lineterm.join(lines) + '"'
+    return value
+
+
+def poentry(binary, config, value):
+    ''' Get the poentry for print it to the console
+
+        @param binary: The name of the binary that uses this translation
+        @param config: The key of the config value
+        @param value: The text to translate.
+
+        @return a printable string
+    '''
+    return ('#: Config_{0}_{1}:1\n'
+            'msgid {2}\n'
+            'msgstr ""\n'.format(binary, config, normalize(value)))
+
+
+def docstrings(path):
+    """Extract all the documentation string of the default config values.
+
+        @param path: The path of the config file to parse
+    """
+    data = json.loads(open(path).read())
+
+    for app_key, app_value in data.iteritems():
+        if type(app_value) is dict:
+            for key, value in app_value.iteritems():
+                if 'description' in value:
+                    print poentry(app_key, key, value['description'].strip())
+
+
+if __name__ == "__main__":
+    # It is very important that we import the Snakebuild modules from
+    # the source tree where snakebuildgettext is executed. Otherwise we
+    # might accidentally import and extract strings from a Snakebuild
+    # installation mentioned in PYTHONPATH.
+    sys.path.insert(0, os.getcwd())
+    if len(sys.argv) <= 1:
+        print "Give all the config files"
+        exit(-1)
+    for path in sys.argv[1:]:
+        if os.path.isfile(path):
+            docstrings(path)
+        else:
+            print "The given file is not a valid path: %s" % path
