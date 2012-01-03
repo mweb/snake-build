@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+# Copyright (C) 2006-2012 Mathias Weber <mathew.weber@gmail.com>
 #
 # This file is part of Snake-Build.
 #
@@ -19,7 +19,7 @@
 ''' The snakebuild package '''
 
 __author__ = """Mathias Weber <mathew.weber@gmail.com>"""
-__version__ = 0.0
+__version__ = '0.1.0'
 __docformat__ = 'plaintext'
-__license__ = 'Mathias Weber, 2006-2011'
+__license__ = 'Mathias Weber, 2006-2012'
 __license__ += 'GPL'
