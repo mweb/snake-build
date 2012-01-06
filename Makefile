@@ -6,49 +6,37 @@ export PREFIX
 PYTHON=python
 PYFILES:=$(shell find snakebuild -name '*.py')
 BINARY_PYFILES:=$(ls bin/)
+DOCFILES="doc/*.png doc/*.html"
 
 help:
-	@echo 'Possible targets:'
-	@echo '  all'
-	@echo '  source - Create source package'
-	@echo '  install - Install on local system'
-	@echo '  clean - Get rid of scratch and byte files'
-	@echo '  buildrpm - Generate a rpm package'
-	@echo '  builddeb - Generate a deb package'
+	@echo 'Possible make targets:'
+	@echo '  all        - build the app and the documentation'
+	@echo '  source     - Create source package'
+	@echo '  install    - Install app and doc in respect to PREFIX ($(PREFIX))'
+	@echo '  clean      - Clean build remobe all files created by other targets'
 	@echo '  update-pot - Generate the pot files'
 
-all: source
+all: source doc
 
 source:
-	${PYTHON} setup.py sdist ${COMPILE}
+	${PYTHON} setup.py sdist
+
+doc:
+	echo "TODO"
 
 install:
-	${PYTHON} setup.py install --root ${DESTDIR} ${COMPILE}
-
-buildrpm:
-	${PYTHON} setup.py bdist_rpm --post-install=rpm/postinstall --pre-uninstall=rpm/preuninstall
-
-builddeb:
-	# build the source package in the parent diretory
-	# then rename it to project_version.orig.tar.gz
-	${PYTHON} setup.py sdist $(COMPILE) --dist-dir=../ --prune
-	rename -f 's/${PROJECT}-(.*)\.tar\.gz/${PROJECT}_$$1\.orig\.tar\.gz/' ../*
-	# build the package
-	dpkg-buildpackage -i\.git\|.*png -rfakeroot
-
-build-pkg: clean
-	mkdir build_pkg
-	-cp * -rf build_pkg
-	cd build_pkg
-	dpkg-buildpackage
+	${PYTHON} setup.py ${PURE} install --root="${DESTDIR}/" --prefix="${PREFIX}"
 
 clean:
 	-$(PYTHON) setup.py clean --all
-	${MAKE} -f ${CURDIR}/debian/rules clean
 	find . \( -name '*.py[cdo]' -o -name '*.so' \) -exec rm -f '{}' ';'
-	-rm -rf build MANIFEST
+	rm -f MANIFEST MANIFEST.in coverage/.coveragerc
+	rm -rf test/data/*
+	-rm -rf dist
 
-test:
+check: tests
+
+tests:
 	cd tests && $(PYTHON) run-tests.py
 
 coverage:
@@ -72,4 +60,4 @@ i18n/snakebuild.pot:
 %.po: i18n/snakebuild.pot
 	msgmerge --no-location --update $@ $^
 
-.PHONY: help all source clean install builddeb buildrmp tests update-pot
+.PHONY: help all source clean install tests update-pot
