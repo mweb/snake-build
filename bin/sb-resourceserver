@@ -48,6 +48,7 @@ if __name__ == '__main__':
             'resourceserver.conf'))
     create_logger(config, 'ResourceServer')
 
+    config.load_default()
     if options.configfile is not None:
         if os.path.isfile(options.configfile.strip()):
             config.load(options.configfile)

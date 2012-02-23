@@ -40,7 +40,7 @@ class ConfigValueException(BaseException):
 
 class Config(object, ConfigParser.SafeConfigParser):
     ''' This handles config files. The config files have the following
-        structure: (See doc/config.txt)
+        structure: (See doc/config.asciidoc)
         [SECTIONNAME]
         param1 = 'test'
         param2 = test
