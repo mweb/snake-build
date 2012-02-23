@@ -146,5 +146,6 @@ setup(
     install_requires=[],
     scripts=['bin/sb-resourceclient', 'bin/sb-resourceserver'],
     data_files=(find_data('data', 'share/snakebuild') +
-            find_data('etc', '/etc') + find_data('locale', 'locale')),
+            find_data('etc', '/etc') + find_data('locale', 'locale') +
+            find_data('doc', 'share/doc/snakebuild')),
     )

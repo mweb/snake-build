@@ -7,6 +7,7 @@ Snake Build was started to get an easy to use Continuous Integration server for
 embedded projects. There are several Ci solutions available but most of them
 are build for either Java or .NET and not for embedded targets or other C/C++
 builds.
+
 Most of them allow building C/C++ applications but this is usually rather clumsy
 or difficult to use.
 

@@ -13,15 +13,16 @@ help:
 	@echo '  all        - build the app and the documentation'
 	@echo '  source     - Create source package'
 	@echo '  install    - Install app and doc in respect to PREFIX ($(PREFIX))'
+	@echo '  documentation - Create the documentaion from the asciidoc'
 	@echo '  clean      - Clean build remobe all files created by other targets'
 	@echo '  update-pot - Generate the pot files'
 
-all: source doc
+all: documentation source
 
 source:
 	${PYTHON} setup.py sdist
 
-doc: doc/snake-build.asciidoc \
+documentation: doc/snake-build.asciidoc \
    doc/snake-build-dev.asciidoc \
    doc/config.asciidoc \
    doc/communication.asciidoc\
@@ -38,6 +39,7 @@ clean:
 	rm -f MANIFEST MANIFEST.in coverage/.coveragerc
 	rm -rf test/data/*
 	-rm -rf dist
+	-rm -rf doc/*.html
 
 check: tests
 
