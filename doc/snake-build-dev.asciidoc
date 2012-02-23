@@ -1,7 +1,7 @@
 Snake-Build Development
 =======================
 Mathias Weber <mathew.weber@gmail.com>
-v0.1, June 2010: Document Started
+v0.1, Februrary 2011: Document Started
 
 This document provides all the information necessary to extend and improve the
 Snake-Build build server. This includes all the network protocols used and a
@@ -9,11 +9,13 @@ simple overview of the architecture of Snake-Build and its subcomponents.
 
 == Overview
 
-Snake-Build is not one server that can be run and then everything is ready to 
-use. It is separated into several submodules. 
-TODO give overview over the different modules
+Snake-Build is not one server that can be run and then everything is ready to
+use. It is separated into several submodules. See the users documentation for
+more information about the modules and how they are used.
 
-include::config.txt[]
+include::config.asciidoc[]
 
-include::communication.txt[]
+include::communication.asciidoc[]
+
+include::development.asciidoc[]
 

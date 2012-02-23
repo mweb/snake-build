@@ -1,12 +1,13 @@
 Snake Build
 ===========
 Mathias Weber <mathew.weber@gmail.com>
-v0.1, June 2010: Document Started
+v0.1, February 2012: Document Started
 
 Snake Build was started to get an easy to use Continuous Integration server for
 embedded projects. There are several Ci solutions available but most of them
-are build for Java or .NET and not for embedded targets or other C++ builds.
-Most of them allow building native applications but this is usually rather clumsy
+are build for either Java or .NET and not for embedded targets or other C/C++
+builds.
+Most of them allow building C/C++ applications but this is usually rather clumsy
 or difficult to use.
 
 There are other solutions that work rather well with C/C++ or embedded targets
@@ -15,4 +16,9 @@ but they are not very intuitive and therefore hard to get started.
 The goal of this project is to provide a build server which is easy to set up,
 configure and to use.
 
+include::status.asciidoc[]
+
+include::introduction.asciidoc[]
+
+include::usage.asciidoc[]
 

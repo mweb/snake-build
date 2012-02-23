@@ -1,8 +1,0 @@
-[run]
-branche=True
-source=
-    ../snakebuild
-omit=
-    /usr/*
-    ../test/*
-    ../snakebuild/web/*

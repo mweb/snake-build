@@ -11,6 +11,8 @@ import sys
 
 from distutils.core import setup
 from distutils.command.install import install
+from distutils.command.build import build
+from distutils.spawn import find_executable, spawn
 
 
 def find_packages(path='.'):
@@ -97,8 +99,33 @@ class InstallAndUpdateDataDirectory(install):
     def run(self):
         update_installed_flag(True)
         update_version_file(self.distribution.get_version())
+        self.build_mo()
         install.run(self)
         update_installed_flag(False)
+
+    def build_mo(self):
+        print "HERE"
+        if not find_executable('msgfmt'):
+            self.warn("msgfmt executable could not be found -> no "
+                    'translations will be built')
+
+        podir = 'i18n'
+        if not os.path.isdir(podir):
+            self.warn('could not find %s directory' % podir)
+            return
+
+        for po in os.listdir(podir):
+            if not po.endswith('.po'):
+                continue
+            pofile = os.path.join(podir, po)
+            modir = os.path.join('locale', po[:-3], 'LC_MESSAGES')
+            mofile = os.path.join(modir, 'snakebuild.mo')
+            mobuildfile = os.path.join('snakebuild', mofile)
+            cmd = ['msgfmt' , '-v', '-o', mobuildfile, pofile, '-c']
+            print "HERE: modir: %s" % modir
+            self.mkpath(os.path.join('snakebuild', modir))
+            self.make_file([pofile], mobuildfile, spawn, (cmd,))
+
 
 
 ##############################################################################
@@ -111,15 +138,13 @@ setup(
     license='GPL v3.0',
     author='Mathias Weber',
     author_email='mathew.weber@gmail.com',
-    description='The common libraries for the snake-build build server '
-            'components.',
-    long_description='The common libraries which are used by all components '
-            'of the snake-build build server. This includes config and helper '
-            'tools.',
+    description='The snake-build build server with all its components',
+    long_description='The snake-build build server is a build server which '
+            'provides fully versioned config and build instructions.',
     cmdclass={'install': InstallAndUpdateDataDirectory},
     packages=find_packages('snakebuild'),
     install_requires=[],
     scripts=['bin/sb-resourceclient', 'bin/sb-resourceserver'],
     data_files=(find_data('data', 'share/snakebuild') +
-            find_data('etc', '/etc')),
+            find_data('etc', '/etc') + find_data('locale', 'locale')),
     )

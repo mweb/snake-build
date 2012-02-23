@@ -1,6 +1,0 @@
-Development
-
-The current packages are required for development/testing:
-
-* python-minimock
-* python-coverage

@@ -1,0 +1,184 @@
+== Usage
+
+Since there are different modules to be used we describe them seperatly. If
+there are all components available then there will be a description how to get
+everything working at once.
+
+But for the moment only the working components are described.
+
+=== Resources
+
+The resource component is the component to be used for handling resources and
+to make sure that are used within their limits.
+
+The resources components can be used without the other modules. It could be
+used to handle the test resources within an other build server. This might be
+necessary if the used build server does not support handling a given type of
+resource.
+
+The resources components consits out of three components. The resources it
+self, the resource server and the resource client. The resource client is used
+by the user of a test resource. With the resource client a resource can be
+requested from the resource server or beeing freed.
+The resource server is the component knowing about all the resources and
+handling the access to the resources. The resources it self do not need to have
+any component running on them since they just need to be configured within
+the resource server and provides some kind of access method so that the users
+has a chance to use a given resource.
+
+==== Resource Server
+
+The resource server can be started directly with the sb-resourceserver command
+or via the init script stored within the /etc/init.d/ directory.
+
+===== Resource Server Configuration
+
+It is important that the configuration of the resource server es set to the
+values expected during runtime and that all the resources are configured before
+the server gets started. Otherwise the server thas to be restarted for the
+moment. This might change in a future version.
+
+The configuration file for the resourceserver has an ini file structure. The
+default location for the config file are and each of this files will be read
+in this order if it exists.
+
+* /etc/snakebuild/resourceserver.conf
+* \~/.snakebuild/resourceserver.conf
+* The specified config file (--configfile)
+
+The following config file is an example config file for the server that
+describes all the possible values for the resourceserver. The values given
+bellow are the default values.
+
+.Example Server Config File
+----
+[resourceserver]
+logging=stdout
+logging_dir=/var/log/snakebuild
+logging_level=warning
+hosname=
+port=4224
+resources_directory=/var/config/snakebuild/resources
+----
+
+
+===== Resources Configuration
+
+Make sure that the resources directory is set correctly to the path where the
+resources can be found.
+
+Each resource needs to have a seperate config file stored at the previously
+configured location and each of this files need to provide the following
+informations:
+
+.Example Resource Config
+----
+{
+    "name": "BusinessEnd",
+    "keywords": ["h2g2", "destroyer"],
+    "parallel_count": 4,
+    "parameters": {"traveler": "Vogons"}
+}
+----
+
+Each resrouce config must provide the four keywords: _name_, _keywords_,
+_parallel_count_, _parameters_. 
+
+name;;
+  The name must be a string and represents the name of the resource this has
+  to be unique for the resource server.
+keywords;;
+  This must be a list with all the names with which this resource can be
+  associated. This is helpfull if multiple resource can be used for the same
+  test but it should just take the one that is free. Just give both the same
+  keyword.
+parallel_count;;
+  This must be an integer and describes how many test/builds can be run in
+  parallel on this resource.
+parameters;;
+  This can take any valid json value and will be returned just like it is
+  represented within the config file to the client. This is helpfull to provied
+  the access information for a given resource.
+
+
+===== Starting the Resource Server
+
+There are currently two way of running the server one is running it in the
+foreground or running it in the background.
+
+.Running in Foreground
+----
+$ sb-resourceserver
+----
+
+.Running in Background
+----
+$ sb-resourceserver --background
+----
+
+Or use the init script
+
+.Running with the Init Script
+----
+$ sudo /etc/init.d/sb-resourceserver start
+----
+
+To stop the server running the background the following two version are
+working.
+
+.Stopping Server
+----
+$ sb-resourceserver stop
+----
+
+or
+
+.Stopping Server with the Init Script
+----
+$ sudo /etc/init.d/sb-resourceserver stop
+----
+
+IMPORTANT: If the server is run in background make sure that you have
+configured the logging correctly since otherwise you might not get any log
+information.
+
+==== Resource Client
+
+The resource client can be used to interact with the resource server. Currently
+onle one resource server can be access and this has to be configured within the
+config file. The following config files will be read in the given order:
+
+* /etc/snakebuild/resourceclient.conf
+* \~/.snakebuild/resourceclient.conf
+* The specified config file (--configfile)
+
+The format of the config file is the same as for the resource server it uses
+the ini file syntax. The following example config file shows the default config
+values for all configurable values.
+
+.Example Client Config File
+----
+[resourceclient]
+logging=stdout
+logging_dir=/var/log/snakebuild
+logging_level=warning
+hosname=
+port=4224
+clientname=Nobody
+----
+
+The _clientname_ is currently the only parameter that can be overwritten with
+parameters. all others will be taken from the config file.
+
+To get a list with all the possible commands see the help command:
+
+----
+$ sb-resourceclient help
+----
+
+or the help command for each command
+
+----
+$ sb-resourceclient help status
+----
+

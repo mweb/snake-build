@@ -1,5 +1,4 @@
-Snake Build
------------
+== Introduction
 
 Snake Build has the goal to provide a build server for C/C\++ projects
 including embedded projects. It should not be limited to C/C++ but this
@@ -10,8 +9,7 @@ that all the configuration and build instructions for a project should be
 stored within a version control system. This could be http://git-scm.com/[GIT]
 or http://mercurial.selenic.com/[Mercurial] but should not be limited to those.
 
-Overview
-~~~~~~~~~
+=== Overview
 
 The build server itself should consist of several separated modules. By 
 dividing it into several separate applications it is possible to have this 
@@ -66,8 +64,7 @@ Build Client;;
     necessary. The build clients sends the build results to the reporting
     server.
 
-Build Scripts
-~~~~~~~~~~~~~
+=== Build Scripts
 
 The build scripts are stored within a source repository which allows to develop
 new build steps without affecting current builds which are still running on the

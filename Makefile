@@ -21,8 +21,13 @@ all: source doc
 source:
 	${PYTHON} setup.py sdist
 
-doc:
-	echo "TODO"
+doc: doc/snake-build.asciidoc \
+   doc/snake-build-dev.asciidoc \
+   doc/config.asciidoc \
+   doc/communication.asciidoc\
+   doc/development.asciidoc
+	asciidoc doc/snake-build.asciidoc
+	asciidoc doc/snake-build-dev.asciidoc
 
 install:
 	${PYTHON} setup.py ${PURE} install --root="${DESTDIR}/" --prefix="${PREFIX}"

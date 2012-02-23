@@ -69,7 +69,7 @@ searched in the following order on Linux:
 
 . `/etc/${APPLICATION_NAME}/${APPLICATION_NAME}.conf`
 . `~/.${APPLICATION_NAME}/${APPLICATION_NAME}.conf`
-. specified with the `--config-file parameter`
+. specified with the `--configfile parameter`
 
 On Windows this order is slightly different:
 

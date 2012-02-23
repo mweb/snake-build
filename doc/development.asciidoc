@@ -1,0 +1,14 @@
+== Setup Developement Environment
+
+TODO
+
+=== Dependencies
+
+The current packages are required for development/testing:
+
+* python-coverage
+
+To build the documentation the following packages are required:
+
+* asciidoc
+* source-highlight
