@@ -1,5 +1,6 @@
 *.pyc
 *.swp
+*~
 .coverage
 htmlcov
 locale
@@ -8,3 +9,4 @@ build_pkg
 build
 dist
 MANIFEST
+debian
