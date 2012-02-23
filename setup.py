@@ -8,9 +8,9 @@
 
 import os
 import sys
+import shutil
 
 from distutils.core import setup
-from distutils.command.install import install
 from distutils.command.build import build
 from distutils.spawn import find_executable, spawn
 
@@ -95,16 +95,15 @@ def update_installed_flag(installed):
         sys.exit(1)
 
 
-class InstallAndUpdateDataDirectory(install):
+class InstallAndUpdateDataDirectory(build):
     def run(self):
         update_installed_flag(True)
         update_version_file(self.distribution.get_version())
         self.build_mo()
-        install.run(self)
+        build.run(self)
         update_installed_flag(False)
 
     def build_mo(self):
-        print "HERE"
         if not find_executable('msgfmt'):
             self.warn("msgfmt executable could not be found -> no "
                     'translations will be built')
@@ -122,10 +121,12 @@ class InstallAndUpdateDataDirectory(install):
             mofile = os.path.join(modir, 'snakebuild.mo')
             mobuildfile = os.path.join('snakebuild', mofile)
             cmd = ['msgfmt' , '-v', '-o', mobuildfile, pofile, '-c']
-            print "HERE: modir: %s" % modir
+
             self.mkpath(os.path.join('snakebuild', modir))
             self.make_file([pofile], mobuildfile, spawn, (cmd,))
-
+        if os.path.isdir('locale'):
+            shutil.rmtree('locale')
+        shutil.move(os.path.join('snakebuild', 'locale'), 'locale')
 
 
 ##############################################################################
@@ -141,9 +142,8 @@ setup(
     description='The snake-build build server with all its components',
     long_description='The snake-build build server is a build server which '
             'provides fully versioned config and build instructions.',
-    cmdclass={'install': InstallAndUpdateDataDirectory},
+    cmdclass={'build': InstallAndUpdateDataDirectory},
     packages=find_packages('snakebuild'),
-    install_requires=[],
     scripts=['bin/sb-resourceclient', 'bin/sb-resourceserver'],
     data_files=(find_data('data', 'share/snakebuild') +
             find_data('etc', '/etc') + find_data('locale', 'locale') +

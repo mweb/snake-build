@@ -20,6 +20,7 @@ help:
 all: documentation source
 
 source:
+	${PYTHON} setup.py build
 	${PYTHON} setup.py sdist
 
 documentation: doc/snake-build.asciidoc \
@@ -40,6 +41,8 @@ clean:
 	rm -rf test/data/*
 	-rm -rf dist
 	-rm -rf doc/*.html
+	-rm -rf locale
+	-rm -rf  snakebuild/locale
 
 check: tests
 
