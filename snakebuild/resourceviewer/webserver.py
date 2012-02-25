@@ -47,7 +47,7 @@ class WebServer(object):
         ''' Start the web server. This method does not return until the server
             gets stopped.
         '''
-        app = web.application(urlhandlers.urls, globals())
+        app = web.application(urlhandlers.urls, locals())
 
         host = self.config.get_s('resourceviewer', 'hostname')
         port = self.config.get_s('resourceviewer', 'port')
