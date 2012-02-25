@@ -38,8 +38,8 @@ def start_server(options, arguments, config):
     '''
     stop = False
     if not (len(arguments) == 0 or len(arguments) == 1):
-        print("Could not start the resource server illegal arguments. "
-                "Expected None or one argument but got: {0:d}".format(
+        print(_("Could not start the resource server illegal arguments. "
+                "Expected None or one argument but got: {0:d}").format(
                 len(arguments)))
         return False
 
