@@ -153,8 +153,18 @@ def WSGIServer(server_address, wsgi_app):
     """Creates CherryPy WSGI server listening at `server_address` to serve `wsgi_app`.
     This function can be overwritten to customize the webserver or use a different webserver.
     """
-    from wsgiserver import CherryPyWSGIServer
-    return CherryPyWSGIServer(server_address, wsgi_app, server_name="localhost")
+    import wsgiserver
+    
+    # Default values of wsgiserver.ssl_adapters uses cheerypy.wsgiserver
+    # prefix. Overwriting it make it work with web.wsgiserver.
+    wsgiserver.ssl_adapters = {
+        'builtin': 'web.wsgiserver.ssl_builtin.BuiltinSSLAdapter',
+        'pyopenssl': 'web.wsgiserver.ssl_pyopenssl.pyOpenSSLAdapter',
+    }
+    
+    server = wsgiserver.CherryPyWSGIServer(server_address, wsgi_app, server_name="localhost")
+    server.nodelay = not sys.platform.startswith('java') # TCP_NODELAY isn't supported on the JVM
+    return server
 
 class StaticApp(SimpleHTTPRequestHandler):
     """WSGI application for serving static files."""

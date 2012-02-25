@@ -583,8 +583,8 @@ class DB:
         
         try:
             a = time.time()
-            paramstyle = getattr(self, 'paramstyle', 'pyformat')
-            out = cur.execute(sql_query.query(paramstyle), sql_query.values())
+            query, params = self._process_query(sql_query)
+            out = cur.execute(query, params)
             b = time.time()
         except:
             if self.printing:
@@ -598,6 +598,14 @@ class DB:
         if self.printing:
             print >> debug, '%s (%s): %s' % (round(b-a, 2), self.ctx.dbq_count, str(sql_query))
         return out
+
+    def _process_query(self, sql_query):
+        """Takes the SQLQuery object and returns query string and parameters.
+        """
+        paramstyle = getattr(self, 'paramstyle', 'pyformat')
+        query = sql_query.query(paramstyle)
+        params = sql_query.values()
+        return query, params
     
     def _where(self, where, vars): 
         if isinstance(where, (int, long)):
@@ -683,13 +691,21 @@ class DB:
             <sql: 'SELECT * FROM foo WHERE bar_id = 3'>
             >>> db.where('foo', source=2, crust='dewey', _test=True)
             <sql: "SELECT * FROM foo WHERE source = 2 AND crust = 'dewey'">
+            >>> db.where('foo', _test=True)
+            <sql: 'SELECT * FROM foo'>
         """
-        where = []
+        where_clauses = []
         for k, v in kwargs.iteritems():
-            where.append(k + ' = ' + sqlquote(v))
+            where_clauses.append(k + ' = ' + sqlquote(v))
+            
+        if where_clauses:
+            where = SQLQuery.join(where_clauses, " AND ")
+        else:
+            where = None
+            
         return self.select(table, what=what, order=order, 
                group=group, limit=limit, offset=offset, _test=_test, 
-               where=SQLQuery.join(where, ' AND '))
+               where=where)
     
     def sql_clauses(self, what, tables, where, group, order, limit, offset): 
         return (
@@ -882,8 +898,8 @@ class DB:
         where = self._where(where, vars)
 
         q = 'DELETE FROM ' + table
-        if where: q += ' WHERE ' + where
         if using: q += ' USING ' + sqllist(using)
+        if where: q += ' WHERE ' + where
 
         if _test: return q
 
@@ -1056,6 +1072,16 @@ class MSSQLDB(DB):
         keywords['database'] = keywords.pop('db')
         self.dbname = "mssql"
         DB.__init__(self, db, keywords)
+
+    def _process_query(self, sql_query):
+        """Takes the SQLQuery object and returns query string and parameters.
+        """
+        # MSSQLDB expects params to be a tuple. 
+        # Overwriting the default implementation to convert params to tuple.
+        paramstyle = getattr(self, 'paramstyle', 'pyformat')
+        query = sql_query.query(paramstyle)
+        params = sql_query.values()
+        return query, tuple(params)
 
     def sql_clauses(self, what, tables, where, group, order, limit, offset): 
         return (
