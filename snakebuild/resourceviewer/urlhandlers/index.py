@@ -19,6 +19,14 @@
 ''' All the classes for handling the urls within the viewer.
 '''
 
+import snakebuild.web as web
+
+
 class index(object):
+    ''' This class is used as the index page. '''
+
     def GET(self):
-        return "<h1>Hello, world!</h1>"
+        ''' handle the get request of the webserver '''
+        renderer = web.template.render('data/templates/resourceview/',
+                base="base")
+        return renderer.content('test', 'text')

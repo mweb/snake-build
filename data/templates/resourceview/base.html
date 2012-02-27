@@ -1,0 +1,16 @@
+$def with (content)
+
+<html>
+    <head>
+        <title>$content.title</title>
+        <link rel="stylesheet" hred="static/resourceview.css" type="text/css" charset="utf-8"/>
+
+        $if content.javascriptfiles:
+            $for f in content.javascriptfiles.split():
+                <script href="$f" type="text/javascript"></script>
+
+    </head>
+    <body>
+        $:content
+    </body>
+</html>
