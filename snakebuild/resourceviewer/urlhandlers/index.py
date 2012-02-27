@@ -21,12 +21,30 @@
 
 import snakebuild.web as web
 
+from snakebuild.i18n import _
+from snakebuild.common import output
+from snakebuild.communication import ClientCommunicationException
+from snakebuild.resourceclient.servercmds import ResourceServer, \
+        ResourceServerRemoteError
+
 
 class index(object):
     ''' This class is used as the index page. '''
 
     def GET(self):
         ''' handle the get request of the webserver '''
+
+        srvr = ResourceServer('localhost', 4224)
+        try:
+            answer = srvr.get_status_list()
+        except ResourceServerRemoteError, exc:
+            output.error(_("Got error while talking with the server:\n "
+                    "{0}").format(exc))
+            return "ERROR"
+        except ClientCommunicationException, exc:
+            output.error(exc)
+            return "ERROR"
+
         renderer = web.template.render('data/templates/resourceview/',
                 base="base")
-        return renderer.content('test', 'text')
+        return renderer.content('test', answer)
