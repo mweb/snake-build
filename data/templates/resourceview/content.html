@@ -1,24 +1,35 @@
 $def with (title, elements)
 
 $var title: $title
-$var javascriptfiles: static/js/bootstrap-collapse.js static/js/boostrap-popover.js
+$var javascriptfiles: 
 
 
 $def element(value):
-    <h2>$value['name'] ($value['free']/$value['slots'])</h2>
-    Keywords:
-    <ul>
-    $for k in value['keywords']:
-        <li>$k</li>
-    </ul>
-    Users:
-    <ul>
-    $for k in value['users']:
-        <li>$k</li>
-    </ul>
+    <div class="accordion-group">
+    <div class="accordion-heading">
+        <a href="#$value['name']" data-parent="#elements" data-toggle="collapse" class="accordion-toggle" data-target="#$value['name']">
+            $value['name'] ($value['free']/$value['slots'])
+        </a>
+    </div>
+    <div class="accordion-body collapse" id="$value['name']">
+        <div class="accordion-inner">
+            Keywords:
+            <ul>
+            $for k in value['keywords']:
+                <li>$k</li>
+            </ul>
+            Users:
+            <ul>
+            $for k in value['users']:
+                <li>$k</li>
+            </ul>
+        </div>
+    </div>
+    </div>
 
 
-
+<div id="elements" class="accordion">
 $for f in elements:
     $:element(f)
 
+</div>
