@@ -1,13 +1,13 @@
 $def with (title, elements)
 
 $var title: $title
-$var javascriptfiles: 
+$var javascriptfiles: static/js/resourceview.js
 
 
 $def element(value):
     <div class="accordion-group">
     <div class="accordion-heading">
-        <a href="#$value['name']" data-parent="#elements" data-toggle="collapse" class="accordion-toggle" data-target="#$value['name']">
+        <a href="#$value['name']" data-toggle="collapse" class="accordion-toggle" data-target="#$value['name']">
             $value['name'] ($value['free']/$value['slots'])
         </a>
     </div>
@@ -33,3 +33,5 @@ $for f in elements:
     $:element(f)
 
 </div>
+<a href="#" id="getdata-button">Get JSON Data</a>
+<div id="showdata"></div>

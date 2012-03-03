@@ -20,7 +20,9 @@
 '''
 
 urls = (
-    '/', 'snakebuild.resourceviewer.urlhandlers.index'
+    '/', 'snakebuild.resourceviewer.urlhandlers.index',
+    '/resource.js', 'snakebuild.resourceviewer.urlhandlers.jsonprovider'
 )
 
 from index import index
+from jsonprovider import jsonprovider
