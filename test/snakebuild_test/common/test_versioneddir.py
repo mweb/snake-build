@@ -16,21 +16,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' Create the test suite for the common classes. '''
+''' The unit test for the versioned directory class '''
 
 import unittest
 
-from test_config import TestConfig
-from test_output import TestOutput
-from test_appdirs import TestAppdirs
-from test_versioneddir import TestVersionedDir
+import snakebuild.common.versioneddir as vd
 
 
-def suite():
-    ''' Get the test suite for the communication snakebuild classes. '''
-    conf = unittest.TestLoader().loadTestsFromTestCase(TestConfig)
-    out = unittest.TestLoader().loadTestsFromTestCase(TestOutput)
-    app = unittest.TestLoader().loadTestsFromTestCase(TestAppdirs)
-    verd = unittest.TestLoader().loadTestsFromTestCase(TestVersionedDir)
+class TestVersionedDir(unittest.TestCase):
+    ''' The unit test for the snake build common versioned dir classes. '''
+    def setUp(self):
+        ''' Setup the test case. '''
+        pass
 
-    return unittest.TestSuite([conf, out, app, verd])
+    def test_init(self):
+        ''' Test the initialisation of the versioned directory.
+        '''
+        pass
