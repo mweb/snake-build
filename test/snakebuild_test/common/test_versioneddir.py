@@ -33,3 +33,9 @@ class TestVersionedDir(unittest.TestCase):
         ''' Test the initialisation of the versioned directory.
         '''
         pass
+
+    def test_git_commands(self):
+        ''' Test the internal git command methods.
+        '''
+        versioned = vd.VersionedGitDir('/tmp/testrepos')
+        self.assertTrue(versioned._gitr('branch') == 0)
