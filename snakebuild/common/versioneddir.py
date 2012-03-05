@@ -23,12 +23,15 @@
 '''
 
 import os.path
+import sys
+import subprocess
 
 
 class VersionedDirException(BaseException):
     ''' The exception thrown if an error within the VersionedDir class
         occures.
     '''
+
 
 def get_versioned_directory(directory):
     ''' Get a versioned directory object. It will return an object matching
@@ -59,6 +62,7 @@ class VersionedGITDir(object):
             raise VersionedDirException('The given directory is not a git'
                     'repository: {0}'.format(directory))
         self.path = directory
+        self.prevdir = None
 
     def update(self, name):
         ''' Make sure that the given file is a the given tag/branch and that
@@ -102,3 +106,35 @@ class VersionedGITDir(object):
             @param name: The path within the repository to access.
         '''
         return os.path.join(self.path, name)
+
+    def _git(self, *args):
+        ''' call the git command and return the command it self to use the
+            stdout, stdin as pipes.
+
+            @*args: The arguments to give to the git command
+            @return: The Popen return value
+        '''
+        self._change_to_repo()
+
+        cmd = subprocess.Popen(['git'] + list(args), stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE, stderr=sys.stderr)
+
+        self._change_back()
+        return cmd
+
+    def _gitr(self, *args):
+        ''' call the git command and only read the return value. '''
+        cmd = self._git(*args)
+        stdout, stderr = cmd.communicate()
+        return cmd.returncode
+
+    def _change_to_repo(self):
+        ''' switch to the current repo directory to call the git commands. '''
+        self.prevdir = os.getcwd()
+        os.chdir(self.path)
+
+    def _change_back(self):
+        ''' switch back to the previous directory. '''
+        if self.prevdir is not None:
+            os.chdir(self.prevdir)
+            self.prevdir = None
