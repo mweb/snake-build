@@ -48,7 +48,7 @@ def get_versioned_directory(directory):
                 '{0}'.format(directory))
 
 
-class VersionedGITDir(object):
+class VersionedGitDir(object):
     ''' This class gives access to the files and helps to select a certain
         version and updating the files.
     '''
