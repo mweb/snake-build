@@ -128,6 +128,14 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.update('1234')
 
+        demofile = open(os.path.join(self.tempgitdir, 'kk'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        self.assertTrue(os.path.isfile(os.path.join(self.tempgitdir, 'kk')))
+        versioned.update('master')
+        self.assertFalse(os.path.isfile(os.path.join(self.tempgitdir, 'kk')))
+
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
