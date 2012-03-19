@@ -31,22 +31,54 @@ class TestVersionedDir(unittest.TestCase):
     ''' The unit test for the snake build common versioned dir classes. '''
     def setUp(self):
         ''' Setup the test case. '''
-        self.tempdir = os.path.join(tmp_data_dir(), 'snakebuild_test')
-        if os.path.isdir(self.tempdir):
-            shutil.rmtree(self.tempdir)
+        self.tempgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test')
+        self.tempnonedir = os.path.join(tmp_data_dir(), 'snakebuild_none_test')
 
-        os.makedirs(self.tempdir)
-        _init_git_repo(self.tempdir)
+        if os.path.isdir(self.tempgitdir):
+            shutil.rmtree(self.tempgitdir)
+        if os.path.isdir(self.tempnonedir):
+            shutil.rmtree(self.tempnonedir)
+
+        os.makedirs(self.tempgitdir)
+        os.makedirs(self.tempnonedir)
+        _init_git_repo(self.tempgitdir)
 
     def test_init(self):
-        ''' Test the initialisation of the versioned directory.
+        ''' Test the initialisation of a new versioned directory.
         '''
-        pass
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        self.assertTrue(type(versioned) is vd.VersionedGitDir)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned = vd.get_versioned_directory(self.tempnonedir)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned = vd.get_versioned_directory(os.path.join(
+                    self.tempnonedir, 'munchkin'))
+
+
+    def test_get_branchs_command(self):
+        ''' Test the get_branchs command. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        branchs = versioned.get_branchs()
+        self.assertTrue(len(branchs) == 2)
+        self.assertTrue('master' in branchs)
+        self.assertTrue('v1.x' in branchs)
+
+    def test_get_tags_command(self):
+        ''' Test the get_tags command. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        tags = versioned.get_tags()
+        self.assertTrue(len(tags) == 3)
+        self.assertTrue('v1.0' in tags)
+        self.assertTrue('v1.1' in tags)
+        self.assertTrue('v2.0' in tags)
+
 
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
-        versioned = vd.VersionedGitDir(self.tempdir)
+        versioned = vd.VersionedGitDir(self.tempgitdir)
         self.assertTrue(versioned._gitr('branch') == 0)
 
 

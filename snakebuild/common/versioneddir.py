@@ -47,6 +47,12 @@ def get_versioned_directory(directory):
         raise VersionedDirException('The given directory does not exist: '
                 '{0}'.format(directory))
 
+    if os.path.isdir(os.path.join(directory, '.git')):
+        return VersionedGitDir(directory)
+    else:
+        raise VersionedGitDir('The given directory uses no VCS or the given '
+                'VCS is not supported. {0}'.format(directory))
+
 
 class VersionedGitDir(object):
     ''' This class gives access to the files and helps to select a certain
@@ -63,6 +69,23 @@ class VersionedGitDir(object):
                     'repository: {0}'.format(directory))
         self.path = directory
         self.prevdir = None
+
+    def get_tags(self):
+        ''' Get all tag names of the repository. '''
+        cmd = self._git('tag')
+        stdout, stderr = cmd.communicate()
+        tags = [value for value in stdout.split()]
+        return tags
+
+    def get_branchs(self):
+        ''' Get all tag names of the repository. '''
+        cmd = self._git('branch')
+        stdout, stderr = cmd.communicate()
+        branchs = [value for value in stdout.split()]
+        # remove marker for current branch
+        while branchs.count('*') > 0:
+            branchs.remove('*')
+        return branchs
 
     def update(self, name):
         ''' Make sure that the given file is a the given tag/branch and that
