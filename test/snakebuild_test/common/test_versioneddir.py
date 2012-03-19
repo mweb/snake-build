@@ -56,6 +56,10 @@ class TestVersionedDir(unittest.TestCase):
             versioned = vd.get_versioned_directory(os.path.join(
                     self.tempnonedir, 'munchkin'))
 
+        with self.assertRaises(vd.VersionedDirException):
+            versioned = vd.VersionedGitDir(self.tempnonedir)
+
+
     def test_get_branchs_command(self):
         ''' Test the get_branchs command. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)

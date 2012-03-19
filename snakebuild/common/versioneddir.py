@@ -50,8 +50,8 @@ def get_versioned_directory(directory):
     if os.path.isdir(os.path.join(directory, '.git')):
         return VersionedGitDir(directory)
     else:
-        raise VersionedGitDir('The given directory uses no VCS or the given '
-                'VCS is not supported. {0}'.format(directory))
+        raise VersionedDirException('The given directory uses no VCS or the '
+                'given VCS is not supported. {0}'.format(directory))
 
 
 class VersionedGitDir(object):
