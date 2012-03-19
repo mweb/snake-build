@@ -152,6 +152,12 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
 
         versioned.add('test.out')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester <test@test>', 'test commit')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester <test@test.com>asdf', 'test commit')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester', 'test commit')
         versioned.commit('Tester <test@test.com>', 'test commit')
 
         # check log messages

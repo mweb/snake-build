@@ -24,6 +24,7 @@
 
 import os.path
 import sys
+import re
 import subprocess
 
 
@@ -157,6 +158,11 @@ class VersionedGitDir(object):
             @param author: The name of the author to commit under
             @param comment: The comment to provide with the commmit.
         '''
+        pattern_check = re.compile(".*<.*@.*\..*>$")
+        if re.match(pattern_check, author) == None:
+            raise VersionedDirException('The author name must have the '
+                    'following format: NAME <EMAIL> but got: {0}'.
+                    format(author))
         if self._gitr('commit', '--author', author, '-m', comment):
             raise VersionedDirException('Could not commit to the repository.')
 
