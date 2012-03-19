@@ -166,7 +166,7 @@ class VersionedGitDir(object):
         if self._gitr('commit', '--author', author, '-m', comment):
             raise VersionedDirException('Could not commit to the repository.')
 
-    def short_log(self, limit=None):
+    def short_log(self, name=None, limit=None):
         ''' Get the short log messages this will be tuples with all the
             messages.
             (Author, Email, Message, Date)
@@ -175,14 +175,16 @@ class VersionedGitDir(object):
                     limit it by the number given: For example use 1 to get
                     only the last commit or 3 for the last 3 commits.
         '''
-        if limit is None:
-            cmd = self._git('log', '--pretty=format:%an|||%ae|||%s|||%at|||%d')
-        elif type(limit) is int:
-            cmd = self._git('log', '--pretty=format:%an|||%ae|||%s|||%at|||%d',
-                    '-{0}'.format(limit))
-        else:
-            raise VersionedDirException('Illegal value for limit use an int. '
-                    '{0}'.format(limit))
+        params = ['log', '--pretty=format:%an|||%ae|||%s|||%at|||%d']
+        if name is not None:
+            params.append(name)
+        if limit is not None:
+            if type(limit) is int:
+                params.append('-{0}'.format(limit))
+            else:
+                raise VersionedDirException('Illegal value for limit use an '
+                        'int. {0}'.format(limit))
+        cmd = self._git(*params)
         stdout, stderr = cmd.communicate()
         results = []
         for line in stdout.split('\n'):

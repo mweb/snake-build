@@ -195,7 +195,7 @@ class TestVersionedDir(unittest.TestCase):
     def test_short_log_command(self):
         ''' Test the short log command to get a short log message. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)
-        logs = versioned.short_log(1)
+        logs = versioned.short_log(limit=1)
         self.assertTrue(len(logs) == 1)
         self.assertTrue(len(logs[0]) == 5)
 
@@ -212,7 +212,7 @@ class TestVersionedDir(unittest.TestCase):
         versioned.add('test.out')
         versioned.commit('Tester <test@test.com>', 'test commit')
 
-        logs = versioned.short_log(1)
+        logs = versioned.short_log(limit=1)
         self.assertTrue(len(logs) == 1)
         self.assertTrue(logs[0][0] == 'Tester')
         self.assertTrue(logs[0][1] == 'test@test.com')
@@ -222,9 +222,53 @@ class TestVersionedDir(unittest.TestCase):
 
         # test illegal value for history length
         with self.assertRaises(vd.VersionedDirException):
-            logs = versioned.short_log('1')
+            logs = versioned.short_log(limit='1')
         with self.assertRaises(vd.VersionedDirException):
-            logs = versioned.short_log(1.12)
+            logs = versioned.short_log(limit=1.12)
+
+    def test_short_log_command_for_file(self):
+        ''' Test the short log command to get a short log message. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        logs = versioned.short_log("one")
+        self.assertTrue(len(logs) == 1)
+        self.assertTrue(len(logs[0]) == 5)
+
+        # add file with given author to check history
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester <test@test.com>', 'test commit')
+
+        logs = versioned.short_log("test.out")
+        self.assertTrue(len(logs) == 1)
+        self.assertTrue(logs[0][0] == 'Tester')
+        self.assertTrue(logs[0][1] == 'test@test.com')
+        self.assertTrue(logs[0][2] == 'test commit')
+        self.assertTrue(int(logs[0][3]) < time.time())
+        self.assertTrue(logs[0][4] == "(HEAD, master)")
+
+        # change file with given author to check history
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo2go')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester <test@test.com>', 'test commit')
+        logs = versioned.short_log("test.out")
+        self.assertTrue(len(logs) == 2)
+        for log in logs:
+            self.assertTrue(log[0] == 'Tester')
+            self.assertTrue(log[1] == 'test@test.com')
+            self.assertTrue(log[2] == 'test commit')
+            self.assertTrue(int(log[3]) < time.time())
+
+        self.assertTrue(logs[0][4] == "(HEAD, master)")
+        self.assertTrue(logs[1][4] == "")
+
+        logs = versioned.short_log("test.out", 1)
+        self.assertTrue(len(logs) == 1)
 
 
     def test_git_commands(self):
