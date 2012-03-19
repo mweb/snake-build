@@ -131,14 +131,25 @@ class VersionedGitDir(object):
             raise VersionedDirException('Could not checkout branch/tag from '
                     'git repository: {0}/{1}'.format(self.path, name))
 
-    def add_file(self, name):
+    def add(self, name):
         ''' Add a new file to the repository to be managed by this repo. This
             does not commit the change, only prepares it.
 
             @param name: The name of the file to add (path within the
                 repository
         '''
-        raise VersionedDirException('Not yet implemented.')
+        if not os.path.isfile(os.path.join(self.path, name)):
+            raise VersionedDirException('File to add to the repository does '
+                    'not exist: {0}'.format(name))
+
+        if self.get_current_branch() == None:
+            raise VersionedDirException('The current repository is not within '
+                    'a valid branch, therefore no add allowed. create a '
+                    'branch first.')
+
+        if self._gitr('add', name):
+            raise VersionedDirException('File to add to the repository could '
+                    'not be added: {0}'.format(name))
 
     def commit(self, author, comment):
         ''' Commit all open changes within the repository.
@@ -146,7 +157,8 @@ class VersionedGitDir(object):
             @param author: The name of the author to commit under
             @param comment: The comment to provide with the commmit.
         '''
-        raise VersionedDirException('Not yet implemented.')
+        if self._gitr('commit', '--author', author, '-m', comment):
+            raise VersionedDirException('Could not commit to the repository.')
 
     def push_remote(self, name):
         ''' Push all the changes to the configured remote repository.

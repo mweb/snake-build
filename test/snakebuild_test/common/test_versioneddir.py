@@ -61,7 +61,6 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned = vd.VersionedGitDir(self.tempnonedir)
 
-
     def test_get_branchs_command(self):
         ''' Test the get_branchs command. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)
@@ -137,6 +136,41 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.tempgitdir, 'kk')))
         versioned.update('master')
         self.assertFalse(os.path.isfile(os.path.join(self.tempgitdir, 'kk')))
+
+    def test_add_commmit(self):
+        ''' Test the add and the commit methods. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.add('test.out')
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester <test@test.com>', 'test commit')
+
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester <test@test.com>', 'test commit')
+
+        versioned.update('v1.0')
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.add('test.out')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester <test@test.com>', 'test commit')
+
+        versioned.update('v1.x')
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester <test@test.com>', 'test commit')
 
     def test_git_commands(self):
         ''' Test the internal git command methods.
