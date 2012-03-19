@@ -124,7 +124,12 @@ class VersionedGitDir(object):
 
             @param name: The name of the branch or tag to use for the update.
         '''
-        raise VersionedDirException('Not yet implemented.')
+        if self._gitr('clean', '-fdx'):
+            raise VersionedDirException('Could not clean git repository: {0}'.
+                    format(self.path))
+        if self._gitr('checkout', name):
+            raise VersionedDirException('Could not checkout branch/tag from '
+                    'git repository: {0}/{1}'.format(self.path, name))
 
     def add_file(self, name):
         ''' Add a new file to the repository to be managed by this repo. This

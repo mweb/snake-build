@@ -105,6 +105,25 @@ class TestVersionedDir(unittest.TestCase):
         versioned._gitr('checkout', 'master')
         self.assertTrue(versioned.get_current_tag() == 'v2.0')
 
+    def test_update(self):
+        ''' Test if the update command works as expected '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        self.assertTrue(versioned.get_current_tag() == 'v2.0')
+        versioned.update('v2.0')
+        self.assertTrue(versioned.get_current_tag() == 'v2.0')
+        versioned.update('master')
+        self.assertTrue(versioned.get_current_branch() == 'master')
+
+        versioned.update('v1.x')
+        self.assertTrue(versioned.get_current_tag() == None)
+        self.assertTrue(versioned.get_current_branch() == 'v1.x')
+
+        versioned.update('v1.1')
+        self.assertTrue(versioned.get_current_tag() == 'v1.1')
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.update('1234')
+
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
