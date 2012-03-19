@@ -20,6 +20,7 @@
 
 import unittest
 import os
+import time
 import shutil
 import subprocess
 
@@ -190,6 +191,41 @@ class TestVersionedDir(unittest.TestCase):
 
         versioned.add('test.out')
         versioned.commit('Tester <test@test.com>', 'test commit')
+
+    def test_short_log_command(self):
+        ''' Test the short log command to get a short log message. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        logs = versioned.short_log(1)
+        self.assertTrue(len(logs) == 1)
+        self.assertTrue(len(logs[0]) == 5)
+
+        # this might change if we change something on the setup and might be
+        # different for other repos types this currently only works for git
+        logs = versioned.short_log()
+        self.assertTrue(len(logs) == 3)
+
+        # add file with given author to check history
+        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester <test@test.com>', 'test commit')
+
+        logs = versioned.short_log(1)
+        self.assertTrue(len(logs) == 1)
+        self.assertTrue(logs[0][0] == 'Tester')
+        self.assertTrue(logs[0][1] == 'test@test.com')
+        self.assertTrue(logs[0][2] == 'test commit')
+        self.assertTrue(int(logs[0][3]) < time.time())
+        self.assertTrue(logs[0][4] == "(HEAD, master)")
+
+        # test illegal value for history length
+        with self.assertRaises(vd.VersionedDirException):
+            logs = versioned.short_log('1')
+        with self.assertRaises(vd.VersionedDirException):
+            logs = versioned.short_log(1.12)
+
 
     def test_git_commands(self):
         ''' Test the internal git command methods.

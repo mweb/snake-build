@@ -166,6 +166,30 @@ class VersionedGitDir(object):
         if self._gitr('commit', '--author', author, '-m', comment):
             raise VersionedDirException('Could not commit to the repository.')
 
+    def short_log(self, limit=None):
+        ''' Get the short log messages this will be tuples with all the
+            messages.
+            (Author, Email, Message, Date)
+
+            @param limit: If none then all the history is shown otherwise
+                    limit it by the number given: For example use 1 to get
+                    only the last commit or 3 for the last 3 commits.
+        '''
+        if limit is None:
+            cmd = self._git('log', '--pretty=format:%an|||%ae|||%s|||%at|||%d')
+        elif type(limit) is int:
+            cmd = self._git('log', '--pretty=format:%an|||%ae|||%s|||%at|||%d',
+                    '-{0}'.format(limit))
+        else:
+            raise VersionedDirException('Illegal value for limit use an int. '
+                    '{0}'.format(limit))
+        stdout, stderr = cmd.communicate()
+        results = []
+        for line in stdout.split('\n'):
+            results.append([value.strip() for value in line.split('|||')])
+
+        return results
+
     def push_remote(self, name):
         ''' Push all the changes to the configured remote repository.
 
