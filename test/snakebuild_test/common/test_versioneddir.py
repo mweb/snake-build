@@ -88,6 +88,23 @@ class TestVersionedDir(unittest.TestCase):
         versioned._gitr('checkout', 'master')
         self.assertTrue(versioned.get_current_branch() == 'master')
 
+    def test_get_current_tag(self):
+        ''' Test getting the current tag name. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        self.assertTrue(versioned.get_current_tag() == 'v2.0')
+
+        versioned._gitr('checkout', 'v1.x')
+        self.assertTrue(versioned.get_current_tag() == None)
+
+        versioned._gitr('checkout', 'v1.1')
+        self.assertTrue(versioned.get_current_tag() == 'v1.1')
+
+        versioned._gitr('checkout', 'v1.0')
+        self.assertTrue(versioned.get_current_tag() == 'v1.0')
+
+        versioned._gitr('checkout', 'master')
+        self.assertTrue(versioned.get_current_tag() == 'v2.0')
+
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
@@ -110,6 +127,7 @@ def _init_git_repo(path):
     _create_branch('v1.x')
     _add_git_file('three', '3')
     _add_tag('v1.1', 'branch tag')
+    _add_git_file('threehalf', '3.5')
     _checkout_branch('master')
     _add_git_file('four', '4')
     _add_tag('v2.0', 'add 2.0er tag')

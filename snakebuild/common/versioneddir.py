@@ -102,6 +102,18 @@ class VersionedGitDir(object):
 
         return None
 
+    def get_current_tag(self):
+        ''' Get the current tag name if the current repos is on a tag.
+            Otherwise None
+        '''
+        cmd = self._git('describe')
+        stdout, stderr = cmd.communicate()
+        tag = stdout.strip()
+        tags = self.get_tags()
+        if tag in tags:
+            return tag
+        return None
+
     def update(self, name):
         ''' Make sure that the given file is a the given tag/branch and that
             it is up to date. If there are uncommited changed overwrite them
