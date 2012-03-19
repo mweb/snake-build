@@ -154,6 +154,18 @@ class TestVersionedDir(unittest.TestCase):
         versioned.add('test.out')
         versioned.commit('Tester <test@test.com>', 'test commit')
 
+        # check log messages
+        cmd = versioned._git('log', "--pretty=format:%an", '-1')
+        stdout, stderr = cmd.communicate()
+        self.assertTrue(stdout == 'Tester')
+        cmd = versioned._git('log', "--pretty=format:%ae", '-1')
+        stdout, stderr = cmd.communicate()
+        self.assertTrue(stdout == 'test@test.com')
+        cmd = versioned._git('log', "--pretty=format:%s", '-1')
+        stdout, stderr = cmd.communicate()
+        self.assertTrue(stdout == 'test commit')
+
+        # add file to tag (not allowed)
         versioned.update('v1.0')
         demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
         demofile.write('demo')
@@ -164,6 +176,7 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.commit('Tester <test@test.com>', 'test commit')
 
+        # add file to branche (allowed)
         versioned.update('v1.x')
         demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
         demofile.write('demo')
