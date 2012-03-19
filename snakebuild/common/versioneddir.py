@@ -97,7 +97,6 @@ class VersionedGitDir(object):
         stdout, stderr = cmd.communicate()
         branchs = [value for value in stdout.split('\n')]
         for branch in branchs:
-            print "\n\n----\n%s\n\n" %branch
             if branch.startswith('*') and not branch == "* (no branch)":
                 return branch[2:].strip()
 

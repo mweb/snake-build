@@ -77,14 +77,12 @@ class TestVersionedDir(unittest.TestCase):
     def test_get_current_branch(self):
         ''' Test getting the current branch. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)
-        print "\n\n\n %s\n\n\n" % versioned.get_current_branch()
         self.assertTrue(versioned.get_current_branch() == 'master')
 
         versioned._gitr('checkout', 'v1.x')
         self.assertTrue(versioned.get_current_branch() == 'v1.x')
 
         versioned._gitr('checkout', 'v1.0')
-        print "\n\n\n %s \n\n\n" % versioned.get_current_branch()
         self.assertTrue(versioned.get_current_branch() == None)
 
         versioned._gitr('checkout', 'master')
