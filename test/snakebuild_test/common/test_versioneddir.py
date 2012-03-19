@@ -48,6 +48,8 @@ class TestVersionedDir(unittest.TestCase):
         '''
         versioned = vd.get_versioned_directory(self.tempgitdir)
         self.assertTrue(type(versioned) is vd.VersionedGitDir)
+        self.assertTrue(versioned.get_full_path('one') ==
+                os.path.join(self.tempgitdir, 'one'))
 
         with self.assertRaises(vd.VersionedDirException):
             versioned = vd.get_versioned_directory(self.tempnonedir)
