@@ -81,11 +81,27 @@ class VersionedGitDir(object):
         ''' Get all tag names of the repository. '''
         cmd = self._git('branch')
         stdout, stderr = cmd.communicate()
-        branchs = [value for value in stdout.split()]
-        # remove marker for current branch
-        while branchs.count('*') > 0:
-            branchs.remove('*')
+        branchs = []
+        for value in stdout.split('\n'):
+            if value.startswith('*'):
+                branchs.append(value[2:].strip())
+            elif len(value) > 0:
+                branchs.append(value.strip())
         return branchs
+
+    def get_current_branch(self):
+        ''' Get the current branch. If currently no branch is selected (not
+            ready to commit) None is returned
+        '''
+        cmd = self._git('branch')
+        stdout, stderr = cmd.communicate()
+        branchs = [value for value in stdout.split('\n')]
+        for branch in branchs:
+            print "\n\n----\n%s\n\n" %branch
+            if branch.startswith('*') and not branch == "* (no branch)":
+                return branch[2:].strip()
+
+        return None
 
     def update(self, name):
         ''' Make sure that the given file is a the given tag/branch and that

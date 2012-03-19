@@ -56,11 +56,11 @@ class TestVersionedDir(unittest.TestCase):
             versioned = vd.get_versioned_directory(os.path.join(
                     self.tempnonedir, 'munchkin'))
 
-
     def test_get_branchs_command(self):
         ''' Test the get_branchs command. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)
         branchs = versioned.get_branchs()
+
         self.assertTrue(len(branchs) == 2)
         self.assertTrue('master' in branchs)
         self.assertTrue('v1.x' in branchs)
@@ -74,6 +74,21 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue('v1.1' in tags)
         self.assertTrue('v2.0' in tags)
 
+    def test_get_current_branch(self):
+        ''' Test getting the current branch. '''
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        print "\n\n\n %s\n\n\n" % versioned.get_current_branch()
+        self.assertTrue(versioned.get_current_branch() == 'master')
+
+        versioned._gitr('checkout', 'v1.x')
+        self.assertTrue(versioned.get_current_branch() == 'v1.x')
+
+        versioned._gitr('checkout', 'v1.0')
+        print "\n\n\n %s \n\n\n" % versioned.get_current_branch()
+        self.assertTrue(versioned.get_current_branch() == None)
+
+        versioned._gitr('checkout', 'master')
+        self.assertTrue(versioned.get_current_branch() == 'master')
 
     def test_git_commands(self):
         ''' Test the internal git command methods.
