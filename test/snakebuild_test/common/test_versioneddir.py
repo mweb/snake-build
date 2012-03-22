@@ -270,12 +270,72 @@ class TestVersionedDir(unittest.TestCase):
         logs = versioned.short_log("test.out", 1)
         self.assertTrue(len(logs) == 1)
 
+    def test_git_push_pull_commands(self):
+        ''' Test if the interaction with the remote git repository works. '''
+        baredir = os.path.join(os.path.dirname(self.tempgitdir),
+                'snakebuild_git_test_bare')
+        clonedir1 = os.path.join(os.path.dirname(self.tempgitdir),
+                'snakebuild_git_test_clone1')
+        clonedir2 = os.path.join(os.path.dirname(self.tempgitdir),
+                'snakebuild_git_test_clone2')
+
+        _create_clone(self.tempgitdir, baredir, True)
+        _create_clone(baredir, clonedir1)
+        _create_clone(baredir, clonedir2)
+
+        clone1 = vd.get_versioned_directory(clonedir1)
+        clone2 = vd.get_versioned_directory(clonedir2)
+
+        demofile = open(os.path.join(clonedir1, 'clone1.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+        clone1.add('clone1.out')
+        clone1.commit('Tester <test@test.com>', 'test clone1 commit')
+        clone1.push_remote()
+
+        demofile = open(os.path.join(clonedir2, 'clone2.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+        clone2.add('clone2.out')
+        clone2.commit('Tester <test@test.com>', 'test clone1 commit')
+        with self.assertRaises(vd.VersionedDirException):
+            clone2.push_remote()
+        clone2.pull_remote()
+        clone2.push_remote()
+
+        self.assertTrue(os.path.isfile(os.path.join(clonedir2, 'clone1.out')))
+
+        self.assertFalse(os.path.isfile(os.path.join(clonedir1, 'clone2.out')))
+        clone1.pull_remote()
+        self.assertTrue(os.path.isfile(os.path.join(clonedir1, 'clone2.out')))
+
+        shutil.rmtree(baredir)
+        with self.assertRaises(vd.VersionedDirException):
+            clone1.pull_remote()
+        with self.assertRaises(vd.VersionedDirException):
+            clone1.push_remote()
+
 
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
         versioned = vd.VersionedGitDir(self.tempgitdir)
         self.assertTrue(versioned._gitr('branch') == 0)
+
+
+def _create_clone(origin, clonedir, bare=False):
+    ''' Create a clone from an existing repository. Remove the existing
+        directroy if the target directory already exists.
+    '''
+    if os.path.isdir(clonedir):
+        shutil.rmtree(clonedir)
+
+    os.makedirs(clonedir)
+
+    if bare:
+        subprocess.check_call(['git', 'clone', '--bare', origin, clonedir])
+    else:
+        subprocess.check_call(['git', 'clone', origin, clonedir])
 
 
 def _init_git_repo(path):

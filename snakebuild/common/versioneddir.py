@@ -192,12 +192,21 @@ class VersionedGitDir(object):
 
         return results
 
-    def push_remote(self, name):
+    def push_remote(self):
+        ''' Push all the changes to the configured remote repository.
+        '''
+        if self._gitr('push'):
+            raise VersionedDirException('Could not push git repository: {0}'.
+                    format(self.path))
+
+    def pull_remote(self):
         ''' Push all the changes to the configured remote repository.
 
             @param name: The name of the given remote repository.
         '''
-        raise VersionedDirException('Not yet implemented.')
+        if self._gitr('pull'):
+            raise VersionedDirException('Could not pull git repository: {0}'.
+                    format(self.path))
 
     def get_full_path(self, name):
         ''' Get the full path to the file stored within the file.
