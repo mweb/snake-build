@@ -273,7 +273,7 @@ class TestVersionedDir(unittest.TestCase):
     def test_git_push_pull_commands(self):
         ''' Test if the interaction with the remote git repository works. '''
         baredir = os.path.join(os.path.dirname(self.tempgitdir),
-                'snakebuild_git_test_bare')
+                'snakebuild_git_test_bare.git')
         clonedir1 = os.path.join(os.path.dirname(self.tempgitdir),
                 'snakebuild_git_test_clone1')
         clonedir2 = os.path.join(os.path.dirname(self.tempgitdir),
@@ -315,12 +315,46 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             clone1.push_remote()
 
-
     def test_git_commands(self):
         ''' Test the internal git command methods.
         '''
         versioned = vd.VersionedGitDir(self.tempgitdir)
         self.assertTrue(versioned._gitr('branch') == 0)
+
+    def test_create_git_repos(self):
+        ''' Test the _create_git_repo function '''
+        barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
+        if os.path.isdir(barename):
+            shutil.rmtree(barename)
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+
+        vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
+
+    def test_clone_git_repos(self):
+        ''' The the _clone_git_repo function '''
+        barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
+        clonename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        if os.path.isdir(barename):
+            shutil.rmtree(barename)
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+        if os.path.isdir(clonename):
+            shutil.rmtree(clonename)
+
+        vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
+        vd._clone_git_repo('snakebuild_git_test_bare', clonename, tmp_data_dir())
+
+
+    def test_create_new_repos(self):
+        ''' Create several new repositories to test the creat_new_repo fuction.
+        '''
+        pass
+
+    def test_clone_repos(self):
+        ''' Clone a repository to test the clone_repo fuction.
+        '''
+        pass
 
 
 def _create_clone(origin, clonedir, bare=False):

@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' This module provides acces to files which are stored within a directory
+''' This module provides access to files which are stored within a directory
     that use version control for the files.
     The main goal of this is to be able to get a controlled latest version and
     to add change comments if files change during usage.
@@ -25,6 +25,7 @@
 import os.path
 import sys
 import re
+import shutil
 import subprocess
 
 
@@ -53,6 +54,69 @@ def get_versioned_directory(directory):
     else:
         raise VersionedDirException('The given directory uses no VCS or the '
                 'given VCS is not supported. {0}'.format(directory))
+
+
+def create_new_repo(name, local_repos_config):
+    ''' Create a new respository on the share/server. This creates a new repos
+        to be access afterwards from a local repos. For GIT this is a bare
+        repos.
+
+        The given name must be unique other wise this function will throw an
+        exception.
+
+        @param name: The name of the new repository to create
+        @param local_repos_config: The configuration to access the local repos
+                to create the new repo (ReposConfig type)
+    '''
+    if local_repos_config.repo_type == local_repos_config.GIT:
+        _create_git_repo(name, local_repos_config.path)
+    else:
+        raise VersionedDirException('The given VCS type is not supported.')
+
+
+def clone_repo(name, directory, local_repos_config):
+    ''' Clone a given respository to start using it. The repos has to exist.
+
+        @param name: The name of the repos to access
+        @param directory: The directory to create
+        @param local_repos_config: The configuration to access the local repos
+                to clone the repo from (ReposConfig type)
+    '''
+    if local_repos_config.repo_type == local_repos_config.GIT:
+        _clone_git_repo(name, directory, local_repos_config.path)
+    else:
+        raise VersionedDirException('The given VCS type is not supported.')
+
+
+class ReposConfig(object):
+    ''' The repository config to use for creating or clonig repositories. '''
+
+    # the supported VCS currently only GIT
+    GIT, UNKNOWN = range(2)
+
+    def __init__(self, repo_type, path):
+        ''' Create the ReposConfig object. Currently on GIT is supported
+            @param repo_type: The type of the repository, use the types
+                    defined
+            @param path: The path where to find the repository.
+        '''
+        if repo_type >= self.UNKNOWN:
+            raise VersionedDirException('The given repository type is '
+                    'unknown: {0}'.format(repo_type))
+        self.repo_type = repo_type
+
+        if repo_type == self.GIT:
+            if os.path.isdir(path):
+                raise VersionedDirException('The given path is not a valid '
+                        'path for a local git repos has to be a local '
+                        'accessible path: {0}'.format(path))
+            try:
+                tfl = open(os.path.join(path, 'test.txt'), 'w')
+                tfl.close()
+            except IOError, exc:
+                raise VersionedDirException('The given path for the bar git '
+                        'repos is not writeable: {0}'.format(str(exc)))
+        self.path = path
 
 
 class VersionedGitDir(object):
@@ -246,3 +310,76 @@ class VersionedGitDir(object):
         if self.prevdir is not None:
             os.chdir(self.prevdir)
             self.prevdir = None
+
+
+def _create_git_repo(name, path):
+    ''' Create a new bare git respository on the give location.
+
+        The given name must be unique other wise this function will throw an
+        exception.
+
+        @param name: The name of the new repository to create
+        @param path: The path to where to create the bare repos
+    '''
+    if not os.path.isdir(path):
+        raise VersionedDirException('The given path for the git repos does '
+                'not exist: {0}'.format(path))
+    if os.access(os.path.join(path, name), os.W_OK | os.R_OK):
+        raise VersionedDirException('The given path for the bare git '
+                'repos is not read/writeable: {0}'.format(str(path)))
+
+    if os.path.exists(os.path.join(path, '{0}.git'.format(name))):
+        raise VersionedDirException('The given git repo already exists within '
+                'the path as a file or directory: {0}'.format(
+                os.path.join(path, name)))
+    if os.path.exists(os.path.join(path, name)):
+        raise VersionedDirException('The temporary directory for the git '
+                'repository alread exists: {0}'.format(
+                os.path.join(path, name)))
+
+    os.mkdir(os.path.join(path, name))
+    prevdir = os.getcwd()
+    os.chdir(os.path.join(path, name))
+    cmd = subprocess.Popen(['git', 'init'], stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=sys.stderr)
+    stdout, stderr = cmd.communicate()
+    os.chdir(prevdir)
+
+    if cmd.returncode != 0:
+        raise VersionedDirException('Could not initialize git repos: {0}'.
+                format(os.path.join(path, name)))
+
+    cmd = subprocess.Popen(['git', '--bare', 'clone', os.path.join(path, name),
+            os.path.join(path, '{0}.git'.format(name))], stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=sys.stderr)
+    stdout, stderr = cmd.communicate()
+
+    if cmd.returncode != 0:
+        raise VersionedDirException('Could not initialize bare git repos: {0}'.
+                format(os.path.join(path, name)))
+
+    shutil.rmtree(os.path.join(path, name))
+
+
+def _clone_git_repo(name, directory, path):
+    ''' Create a clone from a given central git repository.
+
+        @param name: The name of the repository to clone
+        @param directory: The directory to create
+        @param path: The path where the bare git repos is stored
+    '''
+    if not os.path.isdir(os.path.join(path, '{0}.git'.format(name))):
+        raise VersionedDirException('The given bare repo does not exist: '
+                '{0}'.format(os.path.join(path, '{0}.git'.format(name))))
+    if os.path.exists(directory):
+        raise VersionedDirException('The target directory already exists: '
+                '{0}'.format(directory))
+
+    cmd = subprocess.Popen(['git', 'clone', os.path.join(path,
+            '{0}.git'.format(name)), directory], stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=sys.stderr)
+    stdout, stderr = cmd.communicate()
+
+    if cmd.returncode != 0:
+        raise VersionedDirException('Could not clone bare git repos: {0}'.
+                format(os.path.join(path, name)))
