@@ -213,6 +213,7 @@ class VersionedGitDir(object):
                     'branch first.')
 
         if self._gitr('add', name):
+            # TODO provoke error within tests
             raise VersionedDirException('File to add to the repository could '
                     'not be added: {0}'.format(name))
 
@@ -259,6 +260,7 @@ class VersionedGitDir(object):
     def push_remote(self):
         ''' Push all the changes to the configured remote repository.
         '''
+        # TODO tags/branchs?
         if self._gitr('push'):
             raise VersionedDirException('Could not push git repository: {0}'.
                     format(self.path))
@@ -324,7 +326,7 @@ def _create_git_repo(name, path):
     if not os.path.isdir(path):
         raise VersionedDirException('The given path for the git repos does '
                 'not exist: {0}'.format(path))
-    if os.access(os.path.join(path, name), os.W_OK | os.R_OK):
+    if not os.access(path, os.W_OK | os.R_OK):
         raise VersionedDirException('The given path for the bare git '
                 'repos is not read/writeable: {0}'.format(str(path)))
 

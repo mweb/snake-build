@@ -331,6 +331,29 @@ class TestVersionedDir(unittest.TestCase):
 
         vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
 
+        # since directory already exists it will abort
+        with self.assertRaises(vd.VersionedDirException):
+            vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
+
+        # clean up
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+
+        # create temporary directory which should not be existing
+        os.makedirs(barename)
+        with self.assertRaises(vd.VersionedDirException):
+            vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
+        if os.path.isdir(barename):
+            shutil.rmtree(barename)
+
+        # clean up
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+
+        # test with not existing git repos location
+        with self.assertRaises(vd.VersionedDirException):
+            vd._create_git_repo('snakebuild', barename)
+
     def test_clone_git_repos(self):
         ''' The the _clone_git_repo function '''
         barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
@@ -344,7 +367,6 @@ class TestVersionedDir(unittest.TestCase):
 
         vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
         vd._clone_git_repo('snakebuild_git_test_bare', clonename, tmp_data_dir())
-
 
     def test_create_new_repos(self):
         ''' Create several new repositories to test the creat_new_repo fuction.
