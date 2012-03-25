@@ -202,7 +202,7 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.add('readonly.out')
         os.chmod(os.path.join(self.tempgitdir, 'readonly.out'),
-                stat.S_IWUSR|stat.S_IRUSR)
+                stat.S_IWUSR | stat.S_IRUSR)
 
     def test_short_log_command(self):
         ''' Test the short log command to get a short log message. '''
@@ -310,6 +310,8 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
         clone2.add('clone2.out')
         clone2.commit('Tester <test@test.com>', 'test clone1 commit')
+        # Expecting an error on push remote since we are currently not in
+        # sync with it. We use an older version
         with self.assertRaises(vd.VersionedDirException):
             clone2.push_remote()
         clone2.pull_remote()
