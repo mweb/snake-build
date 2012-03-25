@@ -505,6 +505,14 @@ class TestVersionedDir(unittest.TestCase):
                     os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1'),
                     rconf)
 
+    def test_branch(self):
+        ''' Test the branch function to create new branches. '''
+        self.assertTrue(False)
+
+    def test_tag(self):
+        ''' Test the tag function to tag state within the repos. '''
+        self.assertTrue(False)
+
 
 def _create_clone(origin, clonedir, bare=False):
     ''' Create a clone from an existing repository. Remove the existing

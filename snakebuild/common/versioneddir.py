@@ -214,17 +214,44 @@ class VersionedGitDir(object):
             raise VersionedDirException('File to add to the repository could '
                     'not be added: {0}'.format(name))
 
+    def branch(self, name):
+        ''' Create a new branch from the current posistion (tag, branch). This
+            command will make sure that the newly created branch will be
+            created on the remote repository and therefore it should be
+            accessible for all.
+
+            ATTENTION:
+            This commits all local changes to the server.
+
+            @param name: The name of the branch to create
+        '''
+        pass
+
+    def tag(self, name, author, comment):
+        ''' Add a tag to the current position (tag, branch). This creates the
+            tag but the push_remote must be called to get it on to the server.
+
+            @param name: The name of the tag
+            @param author: The author of the tag
+            @param comment: The text for tagging
+        '''
+        if name in self.get_tags():
+            raise VersionedDirException('Tag already exists {0}'.format(name))
+
+        _check_author_format(author)
+        if self._gitr('tag', '-a', name, '--author', author, '-m', comment):
+            raise VersionedDirException('Could not tag the repository.')
+        if self._gitr('push', '--tag'):
+            raise VersionedDirException('Could not push git repository: {0}'.
+                    format(self.path))
+
     def commit(self, author, comment):
         ''' Commit all open changes within the repository.
 
             @param author: The name of the author to commit under
             @param comment: The comment to provide with the commmit.
         '''
-        pattern_check = re.compile(".*<.*@.*\..*>$")
-        if re.match(pattern_check, author) == None:
-            raise VersionedDirException('The author name must have the '
-                    'following format: NAME <EMAIL> but got: {0}'.
-                    format(author))
+        _check_author_format(author)
         if self._gitr('commit', '--author', author, '-m', comment):
             raise VersionedDirException('Could not commit to the repository.')
 
@@ -257,7 +284,6 @@ class VersionedGitDir(object):
     def push_remote(self):
         ''' Push all the changes to the configured remote repository.
         '''
-        # TODO tags/branchs?
         if self._gitr('push'):
             raise VersionedDirException('Could not push git repository: {0}'.
                     format(self.path))
@@ -299,6 +325,19 @@ class VersionedGitDir(object):
         stdout, stderr = cmd.communicate()
         return cmd.returncode
 
+    def _check_author_format(author):
+        ''' Check if the given name email format is as expected.
+            Expected: NAME <EMAIL>
+
+            This method raises an error if it does not match otherwise it 
+            will return nothing.
+        '''
+        pattern_check = re.compile(".*<.*@.*\..*>$")
+        if re.match(pattern_check, author) == None:
+            raise VersionedDirException('The author name must have the '
+                    'following format: NAME <EMAIL> but got: {0}'.
+                    format(author))
+
     def _change_to_repo(self):
         ''' switch to the current repo directory to call the git commands. '''
         self.prevdir = os.getcwd()
@@ -309,6 +348,19 @@ class VersionedGitDir(object):
         if self.prevdir is not None:
             os.chdir(self.prevdir)
             self.prevdir = None
+
+
+def _check_author_format(author):
+    ''' Check if the given name email format is as expected.
+        Expected: NAME <EMAIL>
+
+        This method raises an error if it does not match otherwise it 
+        will return nothing.
+    '''
+    pattern_check = re.compile(".*<.*@.*\..*>$")
+    if re.match(pattern_check, author) == None:
+        raise VersionedDirException('The author name must have the '
+                'following format: NAME <EMAIL> but got: {0}'.format(author))
 
 
 def _create_git_repo(name, path):
