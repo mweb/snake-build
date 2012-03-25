@@ -368,16 +368,43 @@ class TestVersionedDir(unittest.TestCase):
     def test_clone_git_repos(self):
         ''' The the _clone_git_repo function '''
         barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
-        clonename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        clonename1 = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        clonename2 = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone2')
+
         if os.path.isdir(barename):
             shutil.rmtree(barename)
         if os.path.isdir('{0}.git'.format(barename)):
             shutil.rmtree('{0}.git'.format(barename))
-        if os.path.isdir(clonename):
-            shutil.rmtree(clonename)
+        if os.path.isdir(clonename1):
+            shutil.rmtree(clonename1)
+        if os.path.isdir(clonename2):
+            shutil.rmtree(clonename2)
+        if os.path.isdir('{0}.git'.format(clonename2)):
+            shutil.rmtree('{0}.git'.format(clonename2))
 
         vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
-        vd._clone_git_repo('snakebuild_git_test_bare', clonename, tmp_data_dir())
+        vd._clone_git_repo('snakebuild_git_test_bare', clonename1, tmp_data_dir())
+
+        # try to clone a git repos which does not exist.
+        with self.assertRaises(vd.VersionedDirException):
+            vd._clone_git_repo('snakebuild_git_test', 'test', tmp_data_dir())
+
+        # try to create a clone again, directory already exists
+        os.makedirs(clonename2)
+        with self.assertRaises(vd.VersionedDirException):
+            vd._clone_git_repo('snakebuild_git_test_bare', clonename1, tmp_data_dir())
+        with self.assertRaises(vd.VersionedDirException):
+            vd._clone_git_repo('snakebuild_git_test_bare', clonename2, tmp_data_dir())
+        shutil.rmtree(clonename2)
+
+        # try to clone an existing directory which isn't a git repos
+        if os.path.isdir(clonename1):
+            shutil.rmtree(clonename1)
+        os.makedirs('{0}.git'.format(clonename2))
+        with self.assertRaises(vd.VersionedDirException):
+            vd._clone_git_repo(clonename2, clonename1, tmp_data_dir())
+        shutil.rmtree('{0}.git'.format(clonename2))
+
 
     def test_create_new_repos(self):
         ''' Create several new repositories to test the creat_new_repo fuction.
