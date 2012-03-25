@@ -20,6 +20,7 @@
 
 import unittest
 import os
+import stat
 import time
 import shutil
 import subprocess
@@ -353,6 +354,16 @@ class TestVersionedDir(unittest.TestCase):
         # test with not existing git repos location
         with self.assertRaises(vd.VersionedDirException):
             vd._create_git_repo('snakebuild', barename)
+
+        os.makedirs(barename)
+        os.chmod(barename, stat.S_IRUSR)
+
+        # test with not writeable repository directory
+        with self.assertRaises(vd.VersionedDirException):
+            vd._create_git_repo('snakebuild', barename)
+
+        os.chmod(barename, stat.S_IRUSR | stat.S_IWUSR)
+        shutil.rmtree(barename)
 
     def test_clone_git_repos(self):
         ''' The the _clone_git_repo function '''
