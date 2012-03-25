@@ -193,6 +193,17 @@ class TestVersionedDir(unittest.TestCase):
         versioned.add('test.out')
         versioned.commit('Tester <test@test.com>', 'test commit')
 
+        # try to checking a file which is not readable
+        demofile = open(os.path.join(self.tempgitdir, 'readonly.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+        os.chmod(os.path.join(self.tempgitdir, 'readonly.out'), stat.S_IWUSR)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.add('readonly.out')
+        os.chmod(os.path.join(self.tempgitdir, 'readonly.out'),
+                stat.S_IWUSR|stat.S_IRUSR)
+
     def test_short_log_command(self):
         ''' Test the short log command to get a short log message. '''
         versioned = vd.get_versioned_directory(self.tempgitdir)

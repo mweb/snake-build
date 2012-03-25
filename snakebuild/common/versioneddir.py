@@ -211,7 +211,6 @@ class VersionedGitDir(object):
                     'branch first.')
 
         if self._gitr('add', name):
-            # TODO provoke error within tests
             raise VersionedDirException('File to add to the repository could '
                     'not be added: {0}'.format(name))
 
