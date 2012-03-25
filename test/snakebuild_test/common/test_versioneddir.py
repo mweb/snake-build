@@ -468,7 +468,29 @@ class TestVersionedDir(unittest.TestCase):
     def test_clone_repos(self):
         ''' Clone a repository to test the clone_repo fuction.
         '''
-        pass
+        barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
+        clonename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        if os.path.isdir(barename):
+            shutil.rmtree(barename)
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+        if os.path.isdir(clonename):
+            shutil.rmtree(clonename)
+
+        rconf = vd.ReposConfig(vd.ReposConfig.GIT, tmp_data_dir())
+        vd.create_new_repo('snakebuild_git_test_bare', rconf)
+
+        vd.clone_repo('snakebuild_git_test_bare',
+                'snakebuild_git_test_clone1', rconf)
+
+        # clean up
+        if os.path.isdir(clonename):
+            shutil.rmtree(clonename)
+        # change manually since we can't create such a type
+        rconf.repo_type = vd.ReposConfig.UNKNOWN
+        with self.assertRaises(vd.VersionedDirException):
+            vd.clone_repo('snakebuild_git_test_bare',
+                    'snakebuild_git_test_clone1', rconf)
 
 
 def _create_clone(origin, clonedir, bare=False):
