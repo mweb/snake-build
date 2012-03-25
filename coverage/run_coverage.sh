@@ -9,5 +9,5 @@ if [ -e "htmlcov" ]; then
 fi
 
 python-coverage run ../test/run_tests.py
-python-coverage html
+python-coverage html --omit="/usr/share/*,/*test*"
 firefox htmlcov/index.html
