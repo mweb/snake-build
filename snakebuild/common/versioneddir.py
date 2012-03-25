@@ -106,14 +106,12 @@ class ReposConfig(object):
         self.repo_type = repo_type
 
         if repo_type == self.GIT:
-            if os.path.isdir(path):
+            if not os.path.isdir(path):
                 raise VersionedDirException('The given path is not a valid '
                         'path for a local git repos has to be a local '
                         'accessible path: {0}'.format(path))
-            try:
-                tfl = open(os.path.join(path, 'test.txt'), 'w')
-                tfl.close()
-            except IOError, exc:
+
+            if not os.access(path, os.W_OK | os.R_OK):
                 raise VersionedDirException('The given path for the bar git '
                         'repos is not writeable: {0}'.format(str(exc)))
         self.path = path

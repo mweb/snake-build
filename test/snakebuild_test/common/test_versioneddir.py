@@ -322,6 +322,40 @@ class TestVersionedDir(unittest.TestCase):
         versioned = vd.VersionedGitDir(self.tempgitdir)
         self.assertTrue(versioned._gitr('branch') == 0)
 
+    def test_repos_config(self):
+        ''' Test the ReposConfig class if it works as expected. '''
+        tmpname = os.path.join(tmp_data_dir(), 'snakebuild_test')
+        if os.path.exists(tmpname):
+            shutil.rmtree(tmpname)
+
+        rconf = vd.ReposConfig(vd.ReposConfig.GIT, tmp_data_dir())
+        self.assertTrue(rconf.path == tmp_data_dir())
+        self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
+
+        rconf = vd.ReposConfig(vd.ReposConfig.GIT, os.path.abspath('.'))
+        self.assertTrue(rconf.path == os.path.abspath('.'))
+        self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
+
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig(vd.ReposConfig.GIT,
+                    os.path.join(tmp_data_dir(), 'not_existing'))
+
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig(vd.ReposConfig.UNKNOWN, tmp_data_dir())
+
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig(vd.ReposConfig.UNKNOWN + 1, tmp_data_dir())
+
+        os.makedirs(tmpname)
+        os.chmod(tmpname, stat.S_IRUSR)
+
+        # test with not writeable repository directory
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig(vd.ReposConfig.GIT, tmpname)
+
+        os.chmod(tmpname, stat.S_IRUSR | stat.S_IWUSR)
+        shutil.rmtree(tmpname)
+
     def test_create_git_repos(self):
         ''' Test the _create_git_repo function '''
         barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
