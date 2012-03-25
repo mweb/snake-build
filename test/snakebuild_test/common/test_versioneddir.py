@@ -481,7 +481,8 @@ class TestVersionedDir(unittest.TestCase):
         vd.create_new_repo('snakebuild_git_test_bare', rconf)
 
         vd.clone_repo('snakebuild_git_test_bare',
-                'snakebuild_git_test_clone1', rconf)
+                os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1'),
+                rconf)
 
         # clean up
         if os.path.isdir(clonename):
@@ -490,7 +491,8 @@ class TestVersionedDir(unittest.TestCase):
         rconf.repo_type = vd.ReposConfig.UNKNOWN
         with self.assertRaises(vd.VersionedDirException):
             vd.clone_repo('snakebuild_git_test_bare',
-                    'snakebuild_git_test_clone1', rconf)
+                    os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1'),
+                    rconf)
 
 
 def _create_clone(origin, clonedir, bare=False):
