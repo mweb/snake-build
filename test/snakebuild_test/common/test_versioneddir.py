@@ -417,7 +417,8 @@ class TestVersionedDir(unittest.TestCase):
             shutil.rmtree('{0}.git'.format(clonename2))
 
         vd._create_git_repo('snakebuild_git_test_bare', tmp_data_dir())
-        vd._clone_git_repo('snakebuild_git_test_bare', clonename1, tmp_data_dir())
+        vd._clone_git_repo('snakebuild_git_test_bare', clonename1,
+                tmp_data_dir())
 
         # try to clone a git repos which does not exist.
         with self.assertRaises(vd.VersionedDirException):
@@ -426,9 +427,11 @@ class TestVersionedDir(unittest.TestCase):
         # try to create a clone again, directory already exists
         os.makedirs(clonename2)
         with self.assertRaises(vd.VersionedDirException):
-            vd._clone_git_repo('snakebuild_git_test_bare', clonename1, tmp_data_dir())
+            vd._clone_git_repo('snakebuild_git_test_bare', clonename1,
+                    tmp_data_dir())
         with self.assertRaises(vd.VersionedDirException):
-            vd._clone_git_repo('snakebuild_git_test_bare', clonename2, tmp_data_dir())
+            vd._clone_git_repo('snakebuild_git_test_bare', clonename2,
+                    tmp_data_dir())
         shutil.rmtree(clonename2)
 
         # try to clone an existing directory which isn't a git repos
@@ -438,7 +441,6 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             vd._clone_git_repo(clonename2, clonename1, tmp_data_dir())
         shutil.rmtree('{0}.git'.format(clonename2))
-
 
     def test_create_new_repos(self):
         ''' Create several new repositories to test the creat_new_repo fuction.
