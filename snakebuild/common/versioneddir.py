@@ -113,7 +113,7 @@ class ReposConfig(object):
 
             if not os.access(path, os.W_OK | os.R_OK):
                 raise VersionedDirException('The given path for the bar git '
-                        'repos is not writeable: {0}'.format(str(exc)))
+                        'repos is not writeable: {0}'.format(path))
         self.path = path
 
 
