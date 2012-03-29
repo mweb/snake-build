@@ -517,7 +517,48 @@ class TestVersionedDir(unittest.TestCase):
 
     def test_tag(self):
         ''' Test the tag function to tag state within the repos. '''
-        self.assertTrue(False)
+        newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        _create_clone(self.tempgitdir, newgitdir)
+        versioned = vd.get_versioned_directory(newgitdir)
+        tags = versioned.get_tags()
+        self.assertFalse('test1_tag' in tags)
+        self.assertFalse('test2_tag' in tags)
+
+        versioned.tag('test1_tag', 'Tester', 'test@test.com', 'test tag')
+        tags = versioned.get_tags()
+
+        self.assertTrue('test1_tag' in tags)
+        self.assertFalse('test2_tag' in tags)
+
+        demofile = open(os.path.join(newgitdir, 'test.out'), 'w')
+        demofile.write('demo')
+        demofile.close()
+
+        versioned.add('test.out')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
+
+        versioned.tag('test2_tag', 'Tester', 'test@test.com', 'test tag2')
+        tags = versioned.get_tags()
+
+        self.assertTrue('test1_tag' in tags)
+        self.assertTrue('test2_tag' in tags)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.tag('test2_tag', 'Tester', 'test@test.com', 'test tag2')
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.tag('test3_tag', '', 'test@test.com', 'test tag2')
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.tag('test3_tag', 'Tester', 'test@test', 'test tag2')
+
+        # remove directory
+        shutil.rmtree(newgitdir)
+
+        # tagging of a repos which isn't cloned does not work
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.tag('illegal', 'Tester', 'test@test.com', 'test tag2')
 
 
 def _create_clone(origin, clonedir, bare=False):
