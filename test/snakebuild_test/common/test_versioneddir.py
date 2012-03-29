@@ -147,7 +147,7 @@ class TestVersionedDir(unittest.TestCase):
             versioned.add('test.out')
 
         with self.assertRaises(vd.VersionedDirException):
-            versioned.commit('Tester <test@test.com>', 'test commit')
+            versioned.commit('Tester', 'test@test.com', 'test commit')
 
         demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
         demofile.write('demo')
@@ -155,12 +155,16 @@ class TestVersionedDir(unittest.TestCase):
 
         versioned.add('test.out')
         with self.assertRaises(vd.VersionedDirException):
-            versioned.commit('Tester <test@test>', 'test commit')
+            versioned.commit('', 'test@test.com', 'test commit')
         with self.assertRaises(vd.VersionedDirException):
-            versioned.commit('Tester <test@test.com>asdf', 'test commit')
+            versioned.commit(None, 'test@test.com', 'test commit')
         with self.assertRaises(vd.VersionedDirException):
-            versioned.commit('Tester', 'test commit')
-        versioned.commit('Tester <test@test.com>', 'test commit')
+            versioned.commit('Tester', 'test@test', 'test commit')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester', None, 'test commit')
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.commit('Tester', '', 'test commit')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
 
         # check log messages
         cmd = versioned._git('log', "--pretty=format:%an", '-1')
@@ -182,7 +186,7 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.add('test.out')
         with self.assertRaises(vd.VersionedDirException):
-            versioned.commit('Tester <test@test.com>', 'test commit')
+            versioned.commit('Tester', 'test@test.com', 'test commit')
 
         # add file to branche (allowed)
         versioned.update('v1.x')
@@ -191,7 +195,7 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
 
         versioned.add('test.out')
-        versioned.commit('Tester <test@test.com>', 'test commit')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
 
         # try to checking a file which is not readable
         demofile = open(os.path.join(self.tempgitdir, 'readonly.out'), 'w')
@@ -222,7 +226,7 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
 
         versioned.add('test.out')
-        versioned.commit('Tester <test@test.com>', 'test commit')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
 
         logs = versioned.short_log(limit=1)
         self.assertTrue(len(logs) == 1)
@@ -251,7 +255,7 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
 
         versioned.add('test.out')
-        versioned.commit('Tester <test@test.com>', 'test commit')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
 
         logs = versioned.short_log("test.out")
         self.assertTrue(len(logs) == 1)
@@ -267,7 +271,7 @@ class TestVersionedDir(unittest.TestCase):
         demofile.close()
 
         versioned.add('test.out')
-        versioned.commit('Tester <test@test.com>', 'test commit')
+        versioned.commit('Tester', 'test@test.com', 'test commit')
         logs = versioned.short_log("test.out")
         self.assertTrue(len(logs) == 2)
         for log in logs:
@@ -302,14 +306,14 @@ class TestVersionedDir(unittest.TestCase):
         demofile.write('demo')
         demofile.close()
         clone1.add('clone1.out')
-        clone1.commit('Tester <test@test.com>', 'test clone1 commit')
+        clone1.commit('Tester', 'test@test.com', 'test clone1 commit')
         clone1.push_remote()
 
         demofile = open(os.path.join(clonedir2, 'clone2.out'), 'w')
         demofile.write('demo')
         demofile.close()
         clone2.add('clone2.out')
-        clone2.commit('Tester <test@test.com>', 'test clone1 commit')
+        clone2.commit('Tester', 'test@test.com', 'test clone1 commit')
         # Expecting an error on push remote since we are currently not in
         # sync with it. We use an older version
         with self.assertRaises(vd.VersionedDirException):

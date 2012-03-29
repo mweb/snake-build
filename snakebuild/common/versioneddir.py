@@ -245,14 +245,22 @@ class VersionedGitDir(object):
             raise VersionedDirException('Could not push git repository: {0}'.
                     format(self.path))
 
-    def commit(self, author, comment):
+    def commit(self, author_name, author_email, comment):
         ''' Commit all open changes within the repository.
 
-            @param author: The name of the author to commit under
+            @param author_name: The name of the author to use for the commit
+            @param author_email: The email address of the author to use for
+                    the commit
             @param comment: The comment to provide with the commmit.
         '''
-        _check_author_format(author)
-        if self._gitr('commit', '--author', author, '-m', comment):
+        if author_name is None or len(author_name) == 0:
+            raise VersionedDirException('The author name can not be empty '
+                    'for a commit.')
+        _check_email_format(author_email)
+        if self._gitr('commit', '-m', comment, '--author',
+                '{0} <{1}>'.format(author_name, author_email),
+                GIT_COMMITTER_NAME=author_name,
+                GIT_COMMITTER_EMAIL=author_email):
             raise VersionedDirException('Could not commit to the repository.')
 
     def short_log(self, name=None, limit=None):
@@ -304,39 +312,35 @@ class VersionedGitDir(object):
         '''
         return os.path.join(self.path, name)
 
-    def _git(self, *args):
+    def _git(self, *args, **flags):
         ''' call the git command and return the command it self to use the
             stdout, stdin as pipes.
 
             @*args: The arguments to give to the git command
+            @**flags: The env variables which should be set for this call
             @return: The Popen return value
         '''
         self._change_to_repo()
+        env = os.environ.copy()
+        if flags is not None and len(flags) > 0:
+            env.update(flags)
 
         cmd = subprocess.Popen(['git'] + list(args), stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=sys.stderr)
+                stdout=subprocess.PIPE, stderr=sys.stderr, env=env)
 
         self._change_back()
         return cmd
 
-    def _gitr(self, *args):
-        ''' call the git command and only read the return value. '''
-        cmd = self._git(*args)
+    def _gitr(self, *args, **flags):
+        ''' call the git command and only read the return value.
+
+            @*args: The arguments to give to the git command
+            @**flags: The env variables which should be set for this call
+            @return: The return value of the command
+        '''
+        cmd = self._git(*args, **flags)
         stdout, stderr = cmd.communicate()
         return cmd.returncode
-
-    def _check_author_format(author):
-        ''' Check if the given name email format is as expected.
-            Expected: NAME <EMAIL>
-
-            This method raises an error if it does not match otherwise it 
-            will return nothing.
-        '''
-        pattern_check = re.compile(".*<.*@.*\..*>$")
-        if re.match(pattern_check, author) == None:
-            raise VersionedDirException('The author name must have the '
-                    'following format: NAME <EMAIL> but got: {0}'.
-                    format(author))
 
     def _change_to_repo(self):
         ''' switch to the current repo directory to call the git commands. '''
@@ -350,17 +354,18 @@ class VersionedGitDir(object):
             self.prevdir = None
 
 
-def _check_author_format(author):
+def _check_email_format(email):
     ''' Check if the given name email format is as expected.
-        Expected: NAME <EMAIL>
+        Expected: NAME@DOMAIN
 
-        This method raises an error if it does not match otherwise it 
+        This method raises an error if it does not match otherwise it
         will return nothing.
     '''
-    pattern_check = re.compile(".*<.*@.*\..*>$")
-    if re.match(pattern_check, author) == None:
-        raise VersionedDirException('The author name must have the '
-                'following format: NAME <EMAIL> but got: {0}'.format(author))
+    pattern_check = re.compile(".*@.*\..*$")
+    if email is None or re.match(pattern_check, email) == None:
+        raise VersionedDirException('The email must have the '
+                'following format: NAME@DOMAIN (test@test.com) but got:'
+                ' {0}'.format(email))
 
 
 def _create_git_repo(name, path):
