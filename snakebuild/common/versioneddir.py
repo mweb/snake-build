@@ -215,7 +215,7 @@ class VersionedGitDir(object):
                     'not be added: {0}'.format(name))
 
     def branch(self, name):
-        ''' Create a new branch from the current posistion (tag, branch). This
+        ''' Create a new branch from the current position (tag, branch). This
             command will make sure that the newly created branch will be
             created on the remote repository and therefore it should be
             accessible for all.
@@ -225,9 +225,22 @@ class VersionedGitDir(object):
 
             @param name: The name of the branch to create
         '''
-        pass
+        if name in self.get_tags():
+            raise VersionedDirException('Tag already exists {0}'.format(name))
 
-    def tag(self, name, author, comment):
+        if self._gitr('branch', name):
+            raise VersionedDirException('Could not branch the repository.')
+        # TODO check if remote is available
+        if self._gitr('push', 'origin', name):
+            raise VersionedDirException('Could not push the branch to the '
+                    'central repository.')
+        if self._gitr('branch', '-d', name):
+            raise VersionedDirException('Could not remove local only branch '
+                    'the repository.')
+        if self._gitr('checkout', name):
+            raise VersionedDirException('Could not checkout the new branch.')
+
+    def tag(self, name, author_name, author_email, comment):
         ''' Add a tag to the current position (tag, branch). This creates the
             tag but the push_remote must be called to get it on to the server.
 
@@ -238,9 +251,16 @@ class VersionedGitDir(object):
         if name in self.get_tags():
             raise VersionedDirException('Tag already exists {0}'.format(name))
 
-        _check_author_format(author)
-        if self._gitr('tag', '-a', name, '--author', author, '-m', comment):
+        if len(author_name) == 0:
+            raise VersionedDirException('The author name can not be empty '
+                    'for a tag.')
+        _check_email_format(author_email)
+
+        if self._gitr('tag', '-a', name, '-m', comment,
+                GIT_COMMITTER_NAME=author_name,
+                GIT_COMMITTER_EMAIL=author_email):
             raise VersionedDirException('Could not tag the repository.')
+        # TODO check if remote is available
         if self._gitr('push', '--tag'):
             raise VersionedDirException('Could not push git repository: {0}'.
                     format(self.path))
