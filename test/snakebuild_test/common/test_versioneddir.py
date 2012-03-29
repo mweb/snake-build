@@ -513,7 +513,17 @@ class TestVersionedDir(unittest.TestCase):
 
     def test_branch(self):
         ''' Test the branch function to create new branches. '''
-        self.assertTrue(False)
+        newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        _create_clone(self.tempgitdir, newgitdir)
+        versioned = vd.get_versioned_directory(newgitdir)
+        branchs = versioned.get_branchs()
+        self.assertFalse('test1_branch' in branchs)
+        self.assertFalse('test2_branch' in branchs)
+
+        versioned.branch('test1_branch')
+        branchs = versioned.get_branchs()
+        self.assertTrue('test1_branch' in branchs)
+        self.assertFalse('test2_branch' in branchs)
 
     def test_tag(self):
         ''' Test the tag function to tag state within the repos. '''
