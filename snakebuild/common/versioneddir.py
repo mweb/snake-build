@@ -225,20 +225,23 @@ class VersionedGitDir(object):
 
             @param name: The name of the branch to create
         '''
-        if name in self.get_tags():
-            raise VersionedDirException('Tag already exists {0}'.format(name))
+        if name in self.get_branchs():
+            raise VersionedDirException('branch already exists '
+                    '{0}'.format(name))
 
         if self._gitr('branch', name):
             raise VersionedDirException('Could not branch the repository.')
-        # TODO check if remote is available
-        if self._gitr('push', 'origin', name):
-            raise VersionedDirException('Could not push the branch to the '
-                    'central repository.')
-        if self._gitr('branch', '-d', name):
-            raise VersionedDirException('Could not remove local only branch '
-                    'the repository.')
-        if self._gitr('checkout', name):
-            raise VersionedDirException('Could not checkout the new branch.')
+
+        if self.has_remote():
+            if self._gitr('push', 'origin', name):
+                raise VersionedDirException('Could not push the branch to the '
+                        'central repository.')
+            if self._gitr('branch', '-d', name):
+                raise VersionedDirException('Could not remove local only '
+                        'branch the repository.')
+            if self._gitr('checkout', name):
+                raise VersionedDirException('Could not checkout the new '
+                        'branch.')
 
     def tag(self, name, author_name, author_email, comment):
         ''' Add a tag to the current position (tag, branch). This creates the

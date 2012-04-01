@@ -514,6 +514,8 @@ class TestVersionedDir(unittest.TestCase):
     def test_branch(self):
         ''' Test the branch function to create new branches. '''
         newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        newgitdir_clone = os.path.join(tmp_data_dir(),
+                'snakebuild_git_test_clone2')
         _create_clone(self.tempgitdir, newgitdir)
         versioned = vd.get_versioned_directory(newgitdir)
         branchs = versioned.get_branchs()
@@ -524,6 +526,37 @@ class TestVersionedDir(unittest.TestCase):
         branchs = versioned.get_branchs()
         self.assertTrue('test1_branch' in branchs)
         self.assertFalse('test2_branch' in branchs)
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.branch('test1_branch')
+
+        versioned.tag('test1_tag', 'Tester', 'test@test.com',
+                'test branch tag')
+
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.branch('test1_tag')
+
+        _create_clone(newgitdir, newgitdir_clone)
+        versioned = vd.get_versioned_directory(newgitdir_clone)
+
+        versioned.branch('test5')
+        branchs = versioned.get_branchs()
+        self.assertTrue('test5' in branchs)
+
+        # remove directory
+        shutil.rmtree(newgitdir)
+
+        # now tagging should faile since we expect a remote repos which was
+        # removed
+        with self.assertRaises(vd.VersionedDirException):
+            versioned.branch('test6')
+
+        shutil.rmtree(newgitdir_clone)
+
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        self.assertFalse('local_only_branch' in versioned.get_branchs())
+        versioned.branch('local_only_branch')
+        self.assertTrue('local_only_branch' in versioned.get_branchs())
 
     def test_has_remote(self):
         ''' The the has_remote method. '''
