@@ -601,6 +601,41 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.tag('test6_tag', 'Tester', 'test@test.com', 'test tag2')
 
+    def test_multirepos(self):
+        ''' Test the usage of tags and branches with multiple clones '''
+        if os.path.isdir(os.path.join(tmp_data_dir(), 'sb_git')):
+            shutil.rmtree(os.path.join(tmp_data_dir(), 'sb_git'))
+        os.makedirs(os.path.join(tmp_data_dir(), 'sb_git'))
+        base_dir = os.path.join(tmp_data_dir(), 'sb_git')
+        clone1_dir = os.path.join(tmp_data_dir(), 'sb_git_clone1')
+        clone2_dir = os.path.join(tmp_data_dir(), 'sb_git_clone2')
+        if os.path.isdir(clone1_dir):
+            shutil.rmtree(clone1_dir)
+        if os.path.isdir(clone2_dir):
+            shutil.rmtree(clone2_dir)
+
+        # initialize a bare repository and create a file, tag and a branch
+        repos_config = vd.ReposConfig(vd.ReposConfig.GIT, base_dir)
+        vd.create_new_repo('test', repos_config)
+        vd.clone_repo('test', clone1_dir, repos_config)
+        clone1 = vd.get_versioned_directory(clone1_dir)
+
+        _create_file(clone1.get_local_path('file1'), 'demo')
+        clone1.add('file1')
+        clone1.commit('Tester', 'test@test.com', 'Added first file')
+        clone1.push_remote()
+        clone1.tag('v1.0', 'Tester', 'test@test.com', 'Added v1.0 tag')
+        clone1.branch('v1.x')
+        clone1.push_remote()
+
+        # create the second clone and check if file, tag and branch are
+        # available
+        vd.clone_repo('test', clone2_dir, repos_config)
+        clone2 = vd.get_versioned_directory(clone2_dir)
+        self.assertTrue(os.path.isfile(clone2.get_local_path('file1')))
+        self.assertTrue('v1.0' in clone2.get_tags())
+        #self.assertTrue('v1.x' in clone2.get_branchs())
+
 
 def _create_clone(origin, clonedir, bare=False):
     ''' Create a clone from an existing repository. Remove the existing
