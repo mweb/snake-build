@@ -332,6 +332,16 @@ class VersionedGitDir(object):
         '''
         return os.path.join(self.path, name)
 
+    def has_remote(self):
+        ''' Check if the given git repos has a remot repos configured.
+        '''
+        cmd = self._git('remote')
+        stdout, stderr = cmd.communicate()
+        if len(stdout.split('\n')) == 1:
+            if len(stdout) == 0:
+                return False
+        return True
+
     def _git(self, *args, **flags):
         ''' call the git command and return the command it self to use the
             stdout, stdin as pipes.

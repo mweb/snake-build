@@ -525,6 +525,16 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue('test1_branch' in branchs)
         self.assertFalse('test2_branch' in branchs)
 
+    def test_has_remote(self):
+        ''' The the has_remote method. '''
+        newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        _create_clone(self.tempgitdir, newgitdir)
+        versioned = vd.get_versioned_directory(newgitdir)
+        self.assertTrue(versioned.has_remote())
+
+        versioned = vd.get_versioned_directory(self.tempgitdir)
+        self.assertFalse(versioned.has_remote())
+
     def test_tag(self):
         ''' Test the tag function to tag state within the repos. '''
         newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
