@@ -260,10 +260,10 @@ class VersionedGitDir(object):
                 GIT_COMMITTER_NAME=author_name,
                 GIT_COMMITTER_EMAIL=author_email):
             raise VersionedDirException('Could not tag the repository.')
-        # TODO check if remote is available
-        if self._gitr('push', '--tag'):
-            raise VersionedDirException('Could not push git repository: {0}'.
-                    format(self.path))
+        if self.has_remote():
+            if self._gitr('push', '--tag'):
+                raise VersionedDirException('Could not push git repository: {0}'.
+                        format(self.path))
 
     def commit(self, author_name, author_email, comment):
         ''' Commit all open changes within the repository.

@@ -538,6 +538,8 @@ class TestVersionedDir(unittest.TestCase):
     def test_tag(self):
         ''' Test the tag function to tag state within the repos. '''
         newgitdir = os.path.join(tmp_data_dir(), 'snakebuild_git_test_clone1')
+        newgitdir_clone = os.path.join(tmp_data_dir(),
+                'snakebuild_git_test_clone2')
         _create_clone(self.tempgitdir, newgitdir)
         versioned = vd.get_versioned_directory(newgitdir)
         tags = versioned.get_tags()
@@ -572,13 +574,20 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.tag('test3_tag', 'Tester', 'test@test', 'test tag2')
 
+        _create_clone(newgitdir, newgitdir_clone)
+        versioned = vd.get_versioned_directory(newgitdir_clone)
+
+        versioned.tag('test5_tag', 'Tester', 'test@test.com', 'test tag2')
+        tags = versioned.get_tags()
+        self.assertTrue('test5_tag' in tags)
+
         # remove directory
         shutil.rmtree(newgitdir)
 
-        # tagging of a repos which isn't cloned does not work
-        versioned = vd.get_versioned_directory(self.tempgitdir)
+        # now tagging should faile since we expect a remote repos which was
+        # removed
         with self.assertRaises(vd.VersionedDirException):
-            versioned.tag('illegal', 'Tester', 'test@test.com', 'test tag2')
+            versioned.tag('test6_tag', 'Tester', 'test@test.com', 'test tag2')
 
 
 def _create_clone(origin, clonedir, bare=False):
