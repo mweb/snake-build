@@ -463,17 +463,6 @@ def _create_git_repo(name, path):
         raise VersionedDirException('Could not initialize git repos: {0}'.
                 format(os.path.join(path, name)))
 
-#    cmd = subprocess.Popen(['git', '--bare', 'clone', os.path.join(path, name),
-#            os.path.join(path, '{0}.git'.format(name))], stdin=subprocess.PIPE,
-#            stdout=subprocess.PIPE, stderr=sys.stderr)
-#    stdout, stderr = cmd.communicate()
-#
-#    if cmd.returncode != 0:
-#        raise VersionedDirException('Could not initialize bare git repos: {0}'.
-#                format(os.path.join(path, name)))
-#
-#    shutil.rmtree(os.path.join(path, name))
-#
 
 def _clone_git_repo(name, directory, path):
     ''' Create a clone from a given central git repository.
