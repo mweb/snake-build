@@ -136,6 +136,22 @@ class VersionedGitDir(object):
         if len(self.get_branchs()) == 0:
             self.new_repo = True
 
+    def get_local_path(self, name):
+        ''' Get a file or directory name as the full path to access the file.
+            if a nested directory or file needs to be accessed specified a
+            list with the path to it.
+            To access:
+                REPOS/DIR1/FILE1
+            Use:
+                [DIR1, FILE1]
+
+            @param name: The filename or directory to access
+            @return the full path to access the file locally
+        '''
+        if type(name) is list:
+            return os.path.join(self.path, *name)
+        return os.path.join(self.path, name)
+
     def get_tags(self):
         ''' Get all tag names of the repository. '''
         cmd = self._git('tag')
