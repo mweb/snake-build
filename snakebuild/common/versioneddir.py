@@ -58,7 +58,7 @@ def get_versioned_directory(directory):
 
 def create_new_repo(name, local_repos_config):
     ''' Create a new respository on the share/server. This creates a new repos
-        to be access afterwards from a local repos. For GIT this is a bare
+        to be accessed afterwards from a local repos. For GIT this is a bare
         repos.
 
         The given name must be unique other wise this function will throw an
@@ -132,6 +132,9 @@ class VersionedGitDir(object):
                     'repository: {0}'.format(directory))
         self.path = directory
         self.prevdir = None
+        self.new_repo = False
+        if len(self.get_branchs()) == 0:
+            self.new_repo = True
 
     def get_tags(self):
         ''' Get all tag names of the repository. '''
@@ -205,7 +208,7 @@ class VersionedGitDir(object):
             raise VersionedDirException('File to add to the repository does '
                     'not exist: {0}'.format(name))
 
-        if self.get_current_branch() == None:
+        if self.get_current_branch() == None and not self.new_repo:
             raise VersionedDirException('The current repository is not within '
                     'a valid branch, therefore no add allowed. create a '
                     'branch first.')
@@ -315,7 +318,13 @@ class VersionedGitDir(object):
     def push_remote(self):
         ''' Push all the changes to the configured remote repository.
         '''
-        if self._gitr('push'):
+        cmds = ['push']
+        if self.new_repo:
+            cmds.append('origin')
+            cmds.append('master')
+            self.new_repo = False
+
+        if self._gitr(*cmds):
             raise VersionedDirException('Could not push git repository: {0}'.
                     format(self.path))
 
