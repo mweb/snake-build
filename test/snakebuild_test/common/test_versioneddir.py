@@ -131,9 +131,7 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.update('1234')
 
-        demofile = open(os.path.join(self.tempgitdir, 'kk'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'kk'), 'demo')
 
         self.assertTrue(os.path.isfile(os.path.join(self.tempgitdir, 'kk')))
         versioned.update('master')
@@ -149,9 +147,7 @@ class TestVersionedDir(unittest.TestCase):
         with self.assertRaises(vd.VersionedDirException):
             versioned.commit('Tester', 'test@test.com', 'test commit')
 
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo')
 
         versioned.add('test.out')
         with self.assertRaises(vd.VersionedDirException):
@@ -179,9 +175,7 @@ class TestVersionedDir(unittest.TestCase):
 
         # add file to tag (not allowed)
         versioned.update('v1.0')
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo')
 
         with self.assertRaises(vd.VersionedDirException):
             versioned.add('test.out')
@@ -190,17 +184,13 @@ class TestVersionedDir(unittest.TestCase):
 
         # add file to branche (allowed)
         versioned.update('v1.x')
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo')
 
         versioned.add('test.out')
         versioned.commit('Tester', 'test@test.com', 'test commit')
 
         # try to checking a file which is not readable
-        demofile = open(os.path.join(self.tempgitdir, 'readonly.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'readonly.out'), 'demo')
         os.chmod(os.path.join(self.tempgitdir, 'readonly.out'), stat.S_IWUSR)
 
         with self.assertRaises(vd.VersionedDirException):
@@ -221,9 +211,7 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(len(logs) == 3)
 
         # add file with given author to check history
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo')
 
         versioned.add('test.out')
         versioned.commit('Tester', 'test@test.com', 'test commit')
@@ -250,9 +238,7 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(len(logs[0]) == 5)
 
         # add file with given author to check history
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo')
 
         versioned.add('test.out')
         versioned.commit('Tester', 'test@test.com', 'test commit')
@@ -266,9 +252,7 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(logs[0][4] == "(HEAD, master)")
 
         # change file with given author to check history
-        demofile = open(os.path.join(self.tempgitdir, 'test.out'), 'w')
-        demofile.write('demo2go')
-        demofile.close()
+        _create_file(os.path.join(self.tempgitdir, 'test.out'), 'demo2go')
 
         versioned.add('test.out')
         versioned.commit('Tester', 'test@test.com', 'test commit')
@@ -302,16 +286,12 @@ class TestVersionedDir(unittest.TestCase):
         clone1 = vd.get_versioned_directory(clonedir1)
         clone2 = vd.get_versioned_directory(clonedir2)
 
-        demofile = open(os.path.join(clonedir1, 'clone1.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(clonedir1, 'clone1.out'), 'demo')
         clone1.add('clone1.out')
         clone1.commit('Tester', 'test@test.com', 'test clone1 commit')
         clone1.push_remote()
 
-        demofile = open(os.path.join(clonedir2, 'clone2.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(clonedir2, 'clone2.out'), 'demo')
         clone2.add('clone2.out')
         clone2.commit('Tester', 'test@test.com', 'test clone1 commit')
         # Expecting an error on push remote since we are currently not in
@@ -460,7 +440,8 @@ class TestVersionedDir(unittest.TestCase):
         shutil.rmtree('{0}.git'.format(clonename2))
 
     def test_create_new_repos(self):
-        ''' Create several new repositories to test the creat_new_repo fuction.
+        ''' Create several new repositories to test the create_new_repo
+            fuction.
         '''
         barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
         if os.path.isdir(barename):
@@ -585,9 +566,7 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue('test1_tag' in tags)
         self.assertFalse('test2_tag' in tags)
 
-        demofile = open(os.path.join(newgitdir, 'test.out'), 'w')
-        demofile.write('demo')
-        demofile.close()
+        _create_file(os.path.join(newgitdir, 'test.out'), 'demo')
 
         versioned.add('test.out')
         versioned.commit('Tester', 'test@test.com', 'test commit')
@@ -692,10 +671,18 @@ def _add_git_file(filename, content):
         @param filename: The name of the file to add
         @param content: The content of the file
     '''
-    newfile = open(filename, 'w')
-    newfile.write(content)
-    newfile.close()
+    _create_file(filename, content)
 
     subprocess.check_call(['git', 'add', filename])
     subprocess.check_call(['git', 'commit',
         '-m added file {0}'.format(filename)])
+
+
+def _create_file(filename, content):
+    ''' Create a file and write the given content into the file.
+        @param filename: The name of the file to add
+        @param content: The content of the file
+    '''
+    newfile = open(filename, 'w')
+    newfile.write(content)
+    newfile.close()
