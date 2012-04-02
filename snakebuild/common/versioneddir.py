@@ -25,7 +25,6 @@
 import os.path
 import sys
 import re
-import shutil
 import subprocess
 
 
@@ -289,8 +288,8 @@ class VersionedGitDir(object):
             raise VersionedDirException('Could not tag the repository.')
         if self.has_remote():
             if self._gitr('push', '--tag'):
-                raise VersionedDirException('Could not push git repository: {0}'.
-                        format(self.path))
+                raise VersionedDirException('Could not push git repository: '
+                        '{0}'.format(self.path))
 
     def commit(self, author_name, author_email, comment):
         ''' Commit all open changes within the repository.
