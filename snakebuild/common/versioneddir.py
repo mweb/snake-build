@@ -161,14 +161,19 @@ class VersionedGitDir(object):
 
     def get_branchs(self):
         ''' Get all tag names of the repository. '''
-        cmd = self._git('branch')
+        cmd = self._git('branch', '-a')
         stdout, stderr = cmd.communicate()
         branchs = []
         for value in stdout.split('\n'):
             if value.startswith('*'):
                 branchs.append(value[2:].strip())
             elif len(value) > 0:
-                branchs.append(value.strip())
+                new_value = value.strip()
+                if new_value.startswith('remotes'):
+                    new_value = new_value.split('/')[-1].strip()
+
+                if not new_value in branchs:
+                    branchs.append(new_value)
         return branchs
 
     def get_current_branch(self):

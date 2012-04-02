@@ -634,7 +634,7 @@ class TestVersionedDir(unittest.TestCase):
         clone2 = vd.get_versioned_directory(clone2_dir)
         self.assertTrue(os.path.isfile(clone2.get_local_path('file1')))
         self.assertTrue('v1.0' in clone2.get_tags())
-        #self.assertTrue('v1.x' in clone2.get_branchs())
+        self.assertTrue('v1.x' in clone2.get_branchs())
 
 
 def _create_clone(origin, clonedir, bare=False):
