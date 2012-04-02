@@ -216,6 +216,8 @@ class VersionedGitDir(object):
         if self._gitr('checkout', name):
             raise VersionedDirException('Could not checkout branch/tag from '
                     'git repository: {0}/{1}'.format(self.path, name))
+        if self.has_remote() and self.get_current_branch() is not None:
+            self.pull_remote()
 
     def add(self, name):
         ''' Add a new file to the repository to be managed by this repo. This
@@ -224,15 +226,16 @@ class VersionedGitDir(object):
             @param name: The name of the file to add (path within the
                 repository
         '''
-        if not os.path.isfile(os.path.join(self.path, name)):
+        if not os.path.isfile(self.get_local_path(name)):
             raise VersionedDirException('File to add to the repository does '
-                    'not exist: {0}'.format(name))
+                    'not exist: {0}'.format(str(name)))
 
         if self.get_current_branch() == None and not self.new_repo:
             raise VersionedDirException('The current repository is not within '
                     'a valid branch, therefore no add allowed. create a '
                     'branch first.')
-
+        if type(name) == list:
+            name = os.path.join(*name)
         if self._gitr('add', name):
             raise VersionedDirException('File to add to the repository could '
                     'not be added: {0}'.format(name))

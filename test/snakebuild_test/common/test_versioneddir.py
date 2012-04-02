@@ -635,6 +635,44 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(os.path.isfile(clone2.get_local_path('file1')))
         self.assertTrue('v1.0' in clone2.get_tags())
         self.assertTrue('v1.x' in clone2.get_branchs())
+        clone2.update('v1.x')
+        _create_file(clone2.get_local_path('file2'), 'demo2')
+        clone2.add('file2')
+        clone2.commit('Tester2', 'test2@test.com', 'Added second file')
+        clone2.push_remote()
+
+        # go back to the clone1 and see if we get the new file within the
+        # branch
+        clone1.update('master')
+        clone1.pull_remote()
+        self.assertFalse(os.path.isfile(clone1.get_local_path('file2')))
+        clone1.update('v1.x')
+        self.assertTrue(os.path.isfile(clone1.get_local_path('file2')))
+        # now get the tag
+        clone1.update('v1.0')
+        self.assertFalse(os.path.isfile(clone1.get_local_path('file2')))
+        # try to add a file (should not work)
+        os.makedirs(clone1.get_local_path('test'))
+        _create_file(clone1.get_local_path(['test', 'file3']), 'demo')
+        with self.assertRaises(vd.VersionedDirException):
+            clone1.add(['test', 'file3'])
+        clone1.branch('test_branch')
+        clone1.add(['test', 'file3'])
+        clone1.commit('Tester', 'test@test.com', 'Added third file')
+        clone1.push_remote()
+
+        # see if the file is available within the clone2
+        self.assertFalse(os.path.isfile(clone2.get_local_path(['test',
+                'file3'])))
+        self.assertFalse('test_branch' in clone2.get_branchs())
+
+        clone2.pull_remote()
+        self.assertFalse(os.path.isfile(clone2.get_local_path(['test',
+                'file3'])))
+        self.assertTrue('test_branch' in clone2.get_branchs())
+        clone2.update('test_branch')
+        self.assertTrue(os.path.isfile(clone2.get_local_path(['test',
+                'file3'])))
 
 
 def _create_clone(origin, clonedir, bare=False):
