@@ -31,15 +31,15 @@ v0.1;;
 
 v0.2;;
   This version should provide the possibility to build software with simple
-  build scripts.
+  build scripts. All the build scripts should be stroed within a VCS.
 
 v0.3;;
-  This version should provide support for getting all the build scripts and the
-  config files from a VCS.
+  Better build scripts and support for build libraries. Integration of test
+  resources.
 
 v0.x;;
-  Get the control an reporting server. This includes a web frontend. A more
-  detailed plan will be made after further progress.
+  Get the control an reporting server. A more detailed plan will be made
+  after further progress.
 
 v1.0;;
   Everything is working....
