@@ -42,7 +42,7 @@ clean:
 	-rm -rf dist
 	-rm -rf doc/*.html
 	-rm -rf locale
-	-rm -rf  snakebuild/locale
+	-rm -rf snakebuild/locale
 
 check: tests
 
