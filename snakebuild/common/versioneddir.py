@@ -99,6 +99,12 @@ class ReposConfig(object):
                     defined
             @param path: The path where to find the repository.
         '''
+        if type(repo_type) == str or type(repo_type) == unicode:
+            if repo_type.lower() == 'git':
+                repo_type = self.GIT
+            else:
+                repo_type = self.UNKNOWN
+
         if repo_type >= self.UNKNOWN:
             raise VersionedDirException('The given repository type is '
                     'unknown: {0}'.format(repo_type))

@@ -329,6 +329,17 @@ class TestVersionedDir(unittest.TestCase):
         self.assertTrue(rconf.path == tmp_data_dir())
         self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
 
+        # test with a string as the type
+        rconf = vd.ReposConfig("GIT", tmp_data_dir())
+        self.assertTrue(rconf.path == tmp_data_dir())
+        self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
+        rconf = vd.ReposConfig("Git", tmp_data_dir())
+        self.assertTrue(rconf.path == tmp_data_dir())
+        self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
+        rconf = vd.ReposConfig("git", tmp_data_dir())
+        self.assertTrue(rconf.path == tmp_data_dir())
+        self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
+
         rconf = vd.ReposConfig(vd.ReposConfig.GIT, os.path.abspath('.'))
         self.assertTrue(rconf.path == os.path.abspath('.'))
         self.assertTrue(rconf.repo_type == vd.ReposConfig.GIT)
@@ -342,6 +353,14 @@ class TestVersionedDir(unittest.TestCase):
 
         with self.assertRaises(vd.VersionedDirException):
             rconf = vd.ReposConfig(vd.ReposConfig.UNKNOWN + 1, tmp_data_dir())
+
+        # with a string as the type
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig("gitter", tmp_data_dir())
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig("svn", tmp_data_dir())
+        with self.assertRaises(vd.VersionedDirException):
+            rconf = vd.ReposConfig("unknown", tmp_data_dir())
 
         os.makedirs(tmpname)
         os.chmod(tmpname, stat.S_IRUSR)
