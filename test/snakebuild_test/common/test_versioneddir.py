@@ -458,6 +458,19 @@ class TestVersionedDir(unittest.TestCase):
             vd._clone_git_repo(clonename2, clonename1, tmp_data_dir())
         shutil.rmtree('{0}.git'.format(clonename2))
 
+    def test_remote_repo_existing(self):
+        ''' Test the remote repo existing function. '''
+        barename = os.path.join(tmp_data_dir(), 'snakebuild_git_test_bare')
+
+        if os.path.isdir('{0}.git'.format(barename)):
+            shutil.rmtree('{0}.git'.format(barename))
+
+        rconf = vd.ReposConfig(vd.ReposConfig.GIT, tmp_data_dir())
+        self.assertFalse(vd.remote_repo_existing(barename, rconf))
+
+        vd.create_new_repo('snakebuild_git_test_bare', rconf)
+        self.assertTrue(vd.remote_repo_existing(barename, rconf))
+
     def test_create_new_repos(self):
         ''' Create several new repositories to test the create_new_repo
             fuction.

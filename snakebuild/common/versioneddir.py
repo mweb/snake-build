@@ -87,6 +87,17 @@ def clone_repo(name, directory, local_repos_config):
         raise VersionedDirException('The given VCS type is not supported.')
 
 
+def remote_repo_existing(name, local_repos_config):
+    ''' Check if a repository exists for cloning to the local path.
+
+        @return True if it exists and False if not
+    '''
+    if not os.path.isdir(os.path.join(local_repos_config.path,
+                '{0}.git'.format(name))):
+        return False
+    return True
+
+
 class ReposConfig(object):
     ''' The repository config to use for creating or clonig repositories. '''
 
