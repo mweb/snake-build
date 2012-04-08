@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+# Copyright (C) 2006-2012 Mathias Weber <mathew.weber@gmail.com>
 #
 # This file is part of Snake-Build.
 #
@@ -19,11 +19,10 @@
 ''' The unit test for the resource object '''
 
 import unittest
-import os
-import shutil
 import json
 
 from snakebuild.resourceserver.resource import ResourceManager
+from test_helpers.versioneddir_helper import create_versioned_dir
 
 
 class TestResourceManager(unittest.TestCase):
@@ -34,32 +33,33 @@ class TestResourceManager(unittest.TestCase):
         ''' Setup the test case. Create a directory for the test resources. If
             it allready exists remove it.
         '''
-        self.config_dir = os.path.join(os.path.dirname(__file__), '..', '..',
-                'data')
-        if os.path.isdir(os.path.join(self.config_dir, 'resources')):
-            shutil.rmtree(os.path.join(self.config_dir, 'resources'))
-        os.makedirs(os.path.join(self.config_dir, 'resources'))
+        self.repo = create_versioned_dir('resources')
+
         data = {"name": "Test1",
                 "parallel_count": 2,
                 "keywords": ["myTest", "build"],
                 "parameters": {"value1": "arther"}}
-        tfile = open(os.path.join(self.config_dir, 'resources',
-                'test1.resource'), 'w')
+        tfile = open(self.repo.get_local_path('test1.resource'), 'w')
         tfile.write(json.dumps(data))
         tfile.close()
+        self.repo.add('test1.resource')
 
         data = {"name": "Test2",
                 "parallel_count": 4,
                 "keywords": ["myTest", "build", "run"],
                 "parameters": {"value1": "trillian"}}
-        tfile = open(os.path.join(self.config_dir, 'resources',
-                'test2.resource'), 'w')
+        tfile = open(self.repo.get_local_path('test2.resource'), 'w')
         tfile.write(json.dumps(data))
+        tfile.close()
+        self.repo.add('test2.resource')
+        self.repo.commit('Tester', 'test@snakebuild.org', 'added '
+                'resourcemanager tests')
+        self.repo.push_remote()
 
     def test_resourcemanager_creation(self):
         ''' Test the resourcemanager creation
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
         self.assertTrue(len(mgr.resources) == 2)
         # test resources names
         self.assertTrue('Test2' in mgr.resources)
@@ -96,14 +96,14 @@ class TestResourceManager(unittest.TestCase):
     def test_acquire_command(self):
         ''' Test the acquire method if it sets the counters correctly.
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
         self.assertTrue(len(mgr.resources) == 2)
         self.assertTrue(mgr.acquire('Arther', 'test1', False) == 'Test1')
 
     def test_release_command(self):
         ''' Test the release method if it uses the right resource.
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
         name = mgr.acquire('Arther', 'test1', False)
         self.assertTrue(mgr.release(name, 'Arther', False))
 

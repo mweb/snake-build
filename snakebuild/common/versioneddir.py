@@ -133,7 +133,134 @@ class ReposConfig(object):
         self.path = path
 
 
-class VersionedGitDir(object):
+class VersionedDirBase(object):
+    ''' The base call that must be used by all Versioned directories. '''
+
+    def get_local_path(self, name):
+        ''' Get a file or directory name as the full path to access the file.
+            if a nested directory or file needs to be accessed specified a
+            list with the path to it.
+            To access:
+                REPOS/DIR1/FILE1
+            Use:
+                [DIR1, FILE1]
+
+            @param name: The filename or directory to access
+            @return the full path to access the file locally
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def get_tags(self):
+        ''' Get all tag names of the repository. '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def get_branchs(self):
+        ''' Get all tag names of the repository. '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def get_current_branch(self):
+        ''' Get the current branch. If currently no branch is selected (not
+            ready to commit) None is returned
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def get_current_tag(self):
+        ''' Get the current tag name if the current repos is on a tag.
+            Otherwise None
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def update(self, name):
+        ''' Make sure that the given file is a the given tag/branch and that
+            it is up to date. If there are uncommited changed overwrite them
+            with the values from the repository.
+
+            WARNING: Use with caution since this might overwrite manual
+                changes.
+
+            @param name: The name of the branch or tag to use for the update.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def add(self, name):
+        ''' Add a new file to the repository to be managed by this repo. This
+            does not commit the change, only prepares it.
+
+            @param name: The name of the file to add (path within the
+                repository
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def branch(self, name):
+        ''' Create a new branch from the current position (tag, branch). This
+            command will make sure that the newly created branch will be
+            created on the remote repository and therefore it should be
+            accessible for all.
+
+            ATTENTION:
+            This commits all local changes to the server.
+
+            @param name: The name of the branch to create
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def tag(self, name, author_name, author_email, comment):
+        ''' Add a tag to the current position (tag, branch). This creates the
+            tag but the push_remote must be called to get it on to the server.
+
+            @param name: The name of the tag
+            @param author: The author of the tag
+            @param comment: The text for tagging
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def commit(self, author_name, author_email, comment):
+        ''' Commit all open changes within the repository.
+
+            @param author_name: The name of the author to use for the commit
+            @param author_email: The email address of the author to use for
+                    the commit
+            @param comment: The comment to provide with the commmit.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def short_log(self, name=None, limit=None):
+        ''' Get the short log messages this will be tuples with all the
+            messages.
+            (Author, Email, Message, Date)
+
+            @param limit: If none then all the history is shown otherwise
+                    limit it by the number given: For example use 1 to get
+                    only the last commit or 3 for the last 3 commits.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def push_remote(self):
+        ''' Push all the changes to the configured remote repository.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def pull_remote(self):
+        ''' Push all the changes to the configured remote repository.
+
+            @param name: The name of the given remote repository.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def get_full_path(self, name):
+        ''' Get the full path to the file stored within the file.
+
+            @param name: The path within the repository to access.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+    def has_remote(self):
+        ''' Check if the given git repos has a remot repos configured.
+        '''
+        raise VersionedDirException('get_local_path is not implemented.')
+
+
+class VersionedGitDir(VersionedDirBase):
     ''' This class gives access to the files and helps to select a certain
         version and updating the files.
     '''

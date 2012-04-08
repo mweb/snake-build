@@ -28,6 +28,7 @@ import json
 from snakebuild.resourceclient.clientcmds import *
 from snakebuild.commands.handler import SHELL_COMMANDS
 from snakebuild.common import Config
+from test_helpers.versioneddir_helper import create_versioned_dir_all
 
 
 class TestCommands(unittest.TestCase):
@@ -49,9 +50,9 @@ class TestCommands(unittest.TestCase):
                 os.path.join(os.path.dirname(__file__), '..', '..',
                 '..', 'bin', 'sb-resourceserver'))
 
-        resource_config_dir = _create_server_config(self.config_dir)
+        resource_config = _create_resource_configs()
+        _create_server_config(self.config_dir, resource_config)
         config_file = _create_client_config(self.config_dir)
-        _create_resource_configs(resource_config_dir)
 
         self.config = Config()
         self.config.init_default_config(config_data_file)
@@ -156,17 +157,18 @@ class TestCommands(unittest.TestCase):
 _NETWORK_PORT = 9999
 
 
-def _create_server_config(config_dir):
+def _create_server_config(config_dir, resource_options):
     ''' Create the config file for the resource server.
 
         @param config_dir: The path where to store the config file
-
-        @return: The path where the resources should be stored
+        @param resource_options: The informatin for the resource config
     '''
     sfl = open(os.path.join(config_dir, 'server.conf'), 'w')
     sfl.write('[resourceserver]\n')
-    sfl.write('resources_directory={0:s}\n'.format(
-            os.path.join(config_dir, 'resources')))
+    sfl.write('repository_type=GIT\n')
+    sfl.write('resource_repos_name=commands\n')
+    sfl.write('repository_local={0}\n'.format(resource_options[0]))
+    sfl.write('repository_data={0}\n'.format(resource_options[1]))
     sfl.write('port = {0}\n'.format(_NETWORK_PORT))
 
     return os.path.join(config_dir, 'resources')
@@ -186,29 +188,33 @@ def _create_client_config(config_dir):
     return os.path.join(config_dir, 'client.conf')
 
 
-def _create_resource_configs(path):
+def _create_resource_configs():
     ''' Create the resources files for the resources used for this tests.
 
-        @param path: The path where to create the new files.
+        @return: return the repository path and the repos config as a tuple
     '''
-    if os.path.isdir(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
-
+    repo, bare_dir = create_versioned_dir_all('commands')
     data = {"name": "Test1",
             "parallel_count": 2,
             "keywords": ["myTest", "build"],
             "parameters": {"value1": "arther"}}
-    tfile = open(os.path.join(path, 'test1.resource'), 'w')
+    tfile = open(repo.get_local_path('test1.resource'), 'w')
     tfile.write(json.dumps(data))
     tfile.close()
+    repo.add('test1.resource')
 
     data = {"name": "Test2",
             "parallel_count": 4,
             "keywords": ["myTest", "build", "run"],
             "parameters": {"value1": "trillian"}}
-    tfile = open(os.path.join(path, 'test2.resource'), 'w')
+    tfile = open(repo.get_local_path('test2.resource'), 'w')
     tfile.write(json.dumps(data))
+    tfile.close()
+    repo.add('test2.resource')
+    repo.commit('Tester', 'test@snakebuild.org', 'added resourcemanager '
+            'tests')
+    repo.push_remote()
+    return repo.path, bare_dir
 
 
 class _Options(object):

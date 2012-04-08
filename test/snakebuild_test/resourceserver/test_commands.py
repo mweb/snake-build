@@ -19,14 +19,13 @@
 ''' The unit test for the resource server commands. '''
 
 import unittest
-import os
-import shutil
 import json
 
 from snakebuild.resourceserver.servercommands import COMMANDS
 from snakebuild.resourceserver.servercmds import *
 from snakebuild.communication.commandstructure import FUNCTION, SUCCESS, ERROR
 from snakebuild.resourceserver.resource import ResourceManager
+from test_helpers.versioneddir_helper import create_versioned_dir
 
 
 class TestCommands(unittest.TestCase):
@@ -36,32 +35,33 @@ class TestCommands(unittest.TestCase):
         ''' Setup the test case. Create a directory for the test resources. If
             it allready exists remove it.
         '''
-        self.config_dir = os.path.join(os.path.dirname(__file__), '..', '..',
-                'data')
-        if os.path.isdir(os.path.join(self.config_dir, 'resources')):
-            shutil.rmtree(os.path.join(self.config_dir, 'resources'))
-        os.makedirs(os.path.join(self.config_dir, 'resources'))
+        self.repo = create_versioned_dir('resources')
+
         data = {"name": "Test1",
                 "parallel_count": 2,
                 "keywords": ["myTest", "build"],
                 "parameters": {"value1": "arther"}}
-        tfile = open(os.path.join(self.config_dir, 'resources',
-                'test1.resource'), 'w')
+        tfile = open(self.repo.get_local_path('test1.resource'), 'w')
         tfile.write(json.dumps(data))
         tfile.close()
+        self.repo.add('test1.resource')
 
         data = {"name": "Test2",
                 "parallel_count": 4,
                 "keywords": ["myTest", "build", "run"],
                 "parameters": {"value1": "trillian"}}
-        tfile = open(os.path.join(self.config_dir, 'resources',
-                'test2.resource'), 'w')
+        tfile = open(self.repo.get_local_path('test2.resource'), 'w')
         tfile.write(json.dumps(data))
+        tfile.close()
+        self.repo.add('test2.resource')
+        self.repo.commit('Tester', 'test@snakebuild.org', 'added '
+                'resourcemanager tests')
+        self.repo.push_remote()
 
     def test_status_list_cmd(self):
         ''' Test the status_list command.
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
 
         # test before any action
         result = COMMANDS['status_list'][FUNCTION](mgr)
@@ -105,7 +105,7 @@ class TestCommands(unittest.TestCase):
     def test_resource_details_cmd(self):
         ''' Test the resource_details command
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
 
         # test before any action
         result = COMMANDS['resource_details'][FUNCTION](mgr, 'Test1')
@@ -142,11 +142,10 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
-
     def test_acquire_release_cmds(self):
         ''' Test the acquire and the release functions of the resource server.
         '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
 
         result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test1')
         self.assertTrue(len(result) == 2)
@@ -195,7 +194,7 @@ class TestCommands(unittest.TestCase):
 
     def test_shutdown_cmd(self):
         ''' Test the private shutdown function. '''
-        mgr = ResourceManager(os.path.join(self.config_dir, 'resources'))
+        mgr = ResourceManager(self.repo)
 
         # test before any action
         result = COMMANDS['shutdown'][FUNCTION](mgr)

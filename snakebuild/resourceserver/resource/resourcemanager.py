@@ -27,6 +27,7 @@ import logging
 import json
 
 from snakebuild.i18n import _
+from snakebuild.common.versioneddir import VersionedDirBase
 from snakebuild.resourceserver.resource import init_resource_from_obj
 from snakebuild.resourceserver.resource import ResourceException
 
@@ -40,7 +41,7 @@ class ResourceManager(object):
         it provides an interface to get informations about the resources.
     '''
 
-    def __init__(self, dirname):
+    def __init__(self, resource_repo):
         ''' Constructor. Create the ResourceManager object and load the
             resources from the configured resource directory.
 
@@ -49,8 +50,7 @@ class ResourceManager(object):
             starting with a dot (hidden files) or files ending with .bkp are
             read and interpreted as a resource.
 
-            @param: The name of the directory to get the config files from for
-                    the resources
+            @param resource_repo: The resource repository to load and change.
         '''
         LOG.debug(_('Initialize ResourceManager'))
         self.resources = {}
@@ -58,8 +58,11 @@ class ResourceManager(object):
         self.keywords = {}
         self.run = True
 
-        if os.path.isdir(dirname):
-            self._load_resources(dirname)
+        if not isinstance(resource_repo, VersionedDirBase):
+            raise ResourceException('The resource location is not a versioned '
+                    'directory. ResourceManager could not be created.')
+        self.resources_respository = resource_repo
+        self._load_resources()
 
         for name, resource in self.resources.iteritems():
             for keyword in resource.keywords:
@@ -133,25 +136,28 @@ class ResourceManager(object):
             LOG.error(_('Release command called for a not existing resource '
                     '{0} User: {1}').format(resourcename, uname))
             raise ResourceException(_('Release command called for a not '
-                    'existing resource {0} User: {1}').format(resourcename, 
+                    'existing resource {0} User: {1}').format(resourcename,
                     uname))
 
         self.resources[resourcename].release(uname, exclusive)
         self.release_listener.set()
         return True
 
-    def _load_resources(self, dirname):
+    def _load_resources(self):
         ''' Load all the resources from the given directory.
 
             @param dirname: The full path to the resource to load
         '''
-        LOG.info(_('Loading resources from: {0}').format(dirname))
-        for element in os.listdir(dirname):
+        LOG.info(_('Loading resources from: {0}').format(
+                self.resources_respository.path))
+        for element in os.listdir(self.resources_respository.path):
             if element.startswith('.') or element.endswith('bkp'):
                 # ignore hidden files
                 continue
-            if os.path.isfile(os.path.join(dirname, element)):
-                self._load_resource(os.path.join(dirname, element))
+            if os.path.isfile(self.resources_respository.get_full_path(
+                    element)):
+                self._load_resource(self.resources_respository.get_full_path(
+                        element))
 
     def _load_resource(self, filename):
         ''' Load the given resource from the given file.
@@ -164,7 +170,7 @@ class ResourceManager(object):
         if resource is not None:
             if resource.name in self.resources:
                 LOG.warning(_('A resource with name "{0}" already exists. '
-                        'Ignore it. Filename: {1}').format(resource.name, 
+                        'Ignore it. Filename: {1}').format(resource.name,
                         filename))
                 return
             self.resources[resource.name] = resource

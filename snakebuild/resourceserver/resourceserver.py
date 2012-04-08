@@ -19,12 +19,21 @@
 ''' This file provides a start_server method to start the ResourceServer.
 '''
 
+import logging
+import os.path
+
 from snakebuild.i18n import _
 from snakebuild.common import Daemon
+from snakebuild.common.versioneddir import VersionedDirException, ReposConfig,\
+        remote_repo_existing, create_new_repo, clone_repo, \
+        get_versioned_directory
 from snakebuild.communication import Server
 from snakebuild.resourceserver.servercommands import COMMANDS
 from snakebuild.resourceserver.servercmds import *
 from snakebuild.resourceserver.resource import ResourceManager
+
+
+LOG = logging.getLogger('snakebuild.resourceserver.resourceserver')
 
 
 def start_server(options, arguments, config):
@@ -60,8 +69,29 @@ def start_server(options, arguments, config):
     if stop:
         Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
     else:
-        resourcemanager = ResourceManager(config.get_s('resourceserver',
-               'resources_directory'))
+        repos_name = config.get_s('resourceserver', 'resource_repos_name')
+        repos_type = config.get_s('resourceserver', 'repository_type')
+        repos_data = config.get_s('resourceserver', 'repository_data')
+        repos_local = config.get_s('resourceserver', 'repository_local')
+
+        try:
+            repos_config = ReposConfig(repos_type, repos_data)
+        except VersionedDirException, exc:
+            LOG.error('The given repository type and repository data are '
+                    'invalid. Fix the configuration: {0}'.format(str(exc)))
+
+        if os.path.isdir(os.path.join(repos_local, repos_name)):
+            versioned_dir = get_versioned_directory(os.path.join(repos_local,
+                    repos_name))
+        else:
+            if not remote_repo_existing(repos_name, repos_config):
+                create_new_repo(repos_name, repos_config)
+            path = os.path.join(repos_local, repos_name)
+            clone_repo(repos_name, path, repos_config)
+            versioned_dir = get_versioned_directory(path)
+
+        # TODO use versioned dir (and tag to use)
+        resourcemanager = ResourceManager(versioned_dir)
         if options.background:
             Daemon(Server(host, port, COMMANDS, name, resourcemanager),
                     Daemon.START)
