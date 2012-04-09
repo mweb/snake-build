@@ -35,6 +35,13 @@ def run_client(options, arguments, config):
         @param config: The loaded config object
         @return true or false depends on success or failure
     '''
+    if options.username is not None:
+        config.set('ResourceClient', 'clientname', options.username)
+    if options.server is not None:
+        config.set('ResourceClient', 'hostname', options.server)
+    if options.port is not None:
+        config.set('ResourceClient', 'port', options.port)
+
     try:
         return handle_cmd(arguments, options, config)
     except KeyboardInterrupt:

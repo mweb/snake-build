@@ -44,8 +44,6 @@ def acquire(options, config, tag, exclusive=False):
     srvr = get_resource_server(config)
 
     name = config.get_s('ResourceClient', 'clientname')
-    if options.username is not None:
-        name = options.username
 
     if type(exclusive) is not bool:
         if type(exclusive) is str or type(exclusive) is unicode:
