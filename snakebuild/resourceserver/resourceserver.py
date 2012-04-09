@@ -90,7 +90,12 @@ def start_server(options, arguments, config):
             clone_repo(repos_name, path, repos_config)
             versioned_dir = get_versioned_directory(path)
 
-        # TODO use versioned dir (and tag to use)
+        if options.tag is not None:
+            versioned_dir.update(options.tag)
+        else:
+            # if nothing is specified always go for the master
+            versioned_dir.update("master")
+
         resourcemanager = ResourceManager(versioned_dir)
         if options.background:
             Daemon(Server(host, port, COMMANDS, name, resourcemanager),

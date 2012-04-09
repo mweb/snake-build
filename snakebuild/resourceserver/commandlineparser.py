@@ -39,6 +39,8 @@ def parse_command_line():
             default=False)
     parser.add_option('-v', '--version', dest='version', action='store_true',
             help=_('Ask for the version.'), default=False)
+    parser.add_option('--tag', dest='tag', help='Use the config file from the '
+            'given tag or branch instead of master', default=None)
 
     (options, args) = parser.parse_args()
 
