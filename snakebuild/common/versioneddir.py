@@ -535,7 +535,7 @@ class VersionedGitDir(VersionedDirBase):
             env.update(flags)
 
         cmd = subprocess.Popen(['git'] + list(args), stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=sys.stderr, env=env)
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
 
         self._change_back()
         return cmd
