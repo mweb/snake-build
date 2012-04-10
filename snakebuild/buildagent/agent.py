@@ -16,7 +16,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The snakebuild build agent package. '''
+''' The snakebuild build agent run function to start a build agent. '''
 
-from agent import run_agent
-from commandlineparser import parse_command_line
+import logging
+
+
+LOG = logging.getLogger('snakebuild.buildagent.agent')
+
+
+def run_agent(options, arguments, config):
+    ''' Start the build agent.
+
+        @param options: The parsed commandline options.
+        @param config: The config object loaded during start.
+        @param arguments: the arguments for the command.
+
+        @return true or false depends on success or failure
+    '''
+    return True
