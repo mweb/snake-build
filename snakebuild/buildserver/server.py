@@ -16,8 +16,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The snakebuild buildserver package. The build server handles the
-    scheduling and running of builds. '''
+''' The snakebuild build server run function to start a build server. '''
 
-from server import run_server
-from commandlineparser import parse_command_line
+import logging
+
+
+LOG = logging.getLogger('snakebuild.buildserver.server')
+
+
+def run_server(options, arguments, config):
+    ''' Start the build server.
+
+        @param options: The parsed commandline options.
+        @param config: The config object loaded during start.
+        @param arguments: the arguments for the command.
+
+        @return true or false depends on success or failure
+    '''
+    return True
