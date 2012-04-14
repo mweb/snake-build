@@ -20,6 +20,10 @@
 
 import logging
 
+from snakebuild.common import output
+from snakebuild.i18n import _
+from snakebuild.commands import command, handle_cmd
+
 
 LOG = logging.getLogger('snakebuild.buildagent.agent')
 
@@ -33,4 +37,38 @@ def run_agent(options, arguments, config):
 
         @return true or false depends on success or failure
     '''
+    try:
+        return handle_cmd(arguments, options, config)
+    except KeyboardInterrupt:
+        output.error(_('Abort by keyboard interrupt.'))
+        return False
+
+
+@command('stop')
+def stop_agent(options, config, name="SnakeBuild"):
+    ''' Stop the agent that is running in the background.
+
+        @param options: The options provided to this command call
+        @param config: The config object to use
+        @param name: The name of the agent to stop.
+        @return True on success, False on error and nothing on wrong usage.
+    '''
+    print "STOP"
+    return True
+
+
+@command('start')
+def start_agent(options, config, name="SnakeBuild"):
+    ''' Start the build agent.
+
+        By specifing the name it is possible to run multiple build agent
+        instances on one server.
+
+        @param options: The options provided to this command call
+        @param config: The config object to use
+        @param name: The name to use for the build agent. This name has to be
+                unique on one server.
+        @return True on success, False on error and nothing on wrong usage.
+    '''
+    print "START"
     return True
