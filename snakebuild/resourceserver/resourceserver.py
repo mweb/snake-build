@@ -27,6 +27,7 @@ from snakebuild.common import Daemon
 from snakebuild.common.versioneddir import VersionedDirException, ReposConfig,\
         remote_repo_existing, create_new_repo, clone_repo, \
         get_versioned_directory
+from snakebuild.commands import command, handle_cmd
 from snakebuild.communication import Server
 from snakebuild.resourceserver.servercommands import COMMANDS
 from snakebuild.resourceserver.servercmds import *
@@ -45,63 +46,74 @@ def start_server(options, arguments, config):
                 within this list is always the command it self.
         @return true or false depends on success or failure
     '''
-    stop = False
-    if not (len(arguments) == 0 or len(arguments) == 1):
-        print(_("Could not start the resource server illegal arguments. "
-                "Expected None or one argument but got: {0:d}").format(
-                len(arguments)))
+    try:
+        return handle_cmd(arguments, options, config)
+    except KeyboardInterrupt:
+        output.error(_('Abort by keyboard interrupt.'))
         return False
 
-    if len(arguments) == 1:
-        cmd = arguments[0].lower()
-        if cmd == 'stop':
-            stop = True
-        elif cmd == 'start':
-            stop = False
-        else:
-            print _("Command not supported for starting: {0}").format(
-                    arguments[0])
 
+@command('stop')
+def stop_server(options, config):
+    ''' Stop the resource server running on this machine.
+
+        @param config: The config object to use
+        @param name: The name of the agent to stop.
+    '''
     host = config.get_s('resourceserver', 'hostname')
     port = config.get_s('resourceserver', 'port')
     name = 'resourceserver'
 
-    if stop:
-        Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
+    Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
+    return True
+
+
+@command('start')
+def start_server_now(options, config):
+    ''' Start the resource server.
+
+        @param config: The config object to use
+        @param name: The name of the agent to stop.
+
+        @return true or false depends on success or failure
+    '''
+    host = config.get_s('resourceserver', 'hostname')
+    port = config.get_s('resourceserver', 'port')
+    name = 'resourceserver'
+
+    repos_name = config.get_s('resourceserver', 'resource_repos_name')
+    repos_type = config.get_s('resourceserver', 'repository_type')
+    repos_data = config.get_s('resourceserver', 'repository_data')
+    repos_local = config.get_s('resourceserver', 'repository_local')
+
+    try:
+        repos_config = ReposConfig(repos_type, repos_data)
+    except VersionedDirException, exc:
+        LOG.error('The given repository type and repository data are '
+                'invalid. Fix the configuration: {0}'.format(str(exc)))
+
+    if os.path.isdir(os.path.join(repos_local, repos_name)):
+        versioned_dir = get_versioned_directory(os.path.join(repos_local,
+                repos_name))
     else:
-        repos_name = config.get_s('resourceserver', 'resource_repos_name')
-        repos_type = config.get_s('resourceserver', 'repository_type')
-        repos_data = config.get_s('resourceserver', 'repository_data')
-        repos_local = config.get_s('resourceserver', 'repository_local')
+        if not remote_repo_existing(repos_name, repos_config):
+            create_new_repo(repos_name, repos_config)
+        path = os.path.join(repos_local, repos_name)
+        clone_repo(repos_name, path, repos_config)
+        versioned_dir = get_versioned_directory(path)
 
-        try:
-            repos_config = ReposConfig(repos_type, repos_data)
-        except VersionedDirException, exc:
-            LOG.error('The given repository type and repository data are '
-                    'invalid. Fix the configuration: {0}'.format(str(exc)))
+    if options.tag is not None:
+        versioned_dir.update(options.tag)
+    else:
+        # if nothing is specified always go for the master
+        versioned_dir.update("master")
 
-        if os.path.isdir(os.path.join(repos_local, repos_name)):
-            versioned_dir = get_versioned_directory(os.path.join(repos_local,
-                    repos_name))
-        else:
-            if not remote_repo_existing(repos_name, repos_config):
-                create_new_repo(repos_name, repos_config)
-            path = os.path.join(repos_local, repos_name)
-            clone_repo(repos_name, path, repos_config)
-            versioned_dir = get_versioned_directory(path)
-
-        if options.tag is not None:
-            versioned_dir.update(options.tag)
-        else:
-            # if nothing is specified always go for the master
-            versioned_dir.update("master")
-
-        resourcemanager = ResourceManager(versioned_dir)
-        if options.background:
-            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
-                    Daemon.START)
-        else:
-            Daemon(Server(host, port, COMMANDS, name, resourcemanager),
-                    Daemon.FOREGROUND)
+    resourcemanager = ResourceManager(versioned_dir)
+    if options.background:
+        Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+                Daemon.START)
+    else:
+        Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+                Daemon.FOREGROUND)
 
     return True
