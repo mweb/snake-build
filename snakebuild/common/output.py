@@ -90,6 +90,32 @@ def format_message(value, indent="", line_length=None, first_indent=None):
     return "\n".join(result)
 
 
+def shorten_message(msg):
+    ''' Only get the first sentence of a message. Search for .?! and drop the
+        rest.
+        @param msg: The message to shorten.
+        @return: The shortened message
+    '''
+    # there is probalby a better way for doing this.
+    dot_pos = msg.find('.')
+    question_pos = msg.find('?')
+    exclamation_pos = msg.find('!')
+
+    if question_pos < 0:
+        question_pos = len(msg)
+    if exclamation_pos < 0:
+        exclamation_pos = len(msg)
+
+    if dot_pos > 0 and dot_pos < question_pos and dot_pos < exclamation_pos:
+        return msg[:dot_pos + 1]
+    if question_pos > 0 and question_pos < exclamation_pos:
+        return msg[:question_pos + 1]
+    if exclamation_pos > 0:
+        return msg[:question_pos + 1]
+
+    return msg
+
+
 def get_line_length(line_length):
     ''' Get the line length of a terminal or the given line lenght if not None
 

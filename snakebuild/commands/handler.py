@@ -231,8 +231,8 @@ def _print_short_help(cmd, info):
     else:
         space = 4 - (i % 4)
     output.message("{0}{1}{2}".format(cmd, " " * space,
-            translate(info[CMD_DESCRIPTION].strip())), indent=' ' * 8,
-            first_indent=" " * 2)
+            output.shorten_message(translate(info[CMD_DESCRIPTION].strip()))),
+            indent=' ' * 8, first_indent=" " * 2)
 
 
 def _print_cmd_help(cmd, config):
