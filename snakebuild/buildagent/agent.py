@@ -21,9 +21,13 @@
 import logging
 
 from snakebuild.common import output
+from snakebuild.common import Daemon
 from snakebuild.i18n import _
 from snakebuild.commands import command, handle_cmd
-
+from snakebuild.communication import Server
+# this needs to be imported to fill the REMOTE_COMMANDS
+import snakebuild.buildagent.agentcmds
+#from snakebuild.buildagent.buildagent import BuildAgent
 
 LOG = logging.getLogger('snakebuild.buildagent.agent')
 
@@ -45,7 +49,7 @@ def run_agent(options, arguments, config):
 
 
 @command('stop')
-def stop_agent(options, config, name="SnakeBuild"):
+def stop_agent(options, config, name="snakebuild"):
     ''' Stop the agent that is running in the background.
 
         @param options: The options provided to this command call
@@ -53,7 +57,11 @@ def stop_agent(options, config, name="SnakeBuild"):
         @param name: The name of the agent to stop.
         @return True on success, False on error and nothing on wrong usage.
     '''
-    print "STOP"
+    host = config.get_s('buildagent', 'hostname')
+    port = config.get_s('buildagent', 'port')
+    name = "ba_{0}".format(name.lower())
+
+    Daemon(Server(host, port, name), Daemon.STOP)
     return True
 
 
@@ -70,5 +78,11 @@ def start_agent(options, config, name="SnakeBuild"):
                 unique on one server.
         @return True on success, False on error and nothing on wrong usage.
     '''
-    print "START"
+    host = config.get_s('buildagent', 'hostname')
+    port = config.get_s('buildagent', 'port')
+    name = "ba_{0}".format(name.lower())
+
+#    agent = BuildAgent()
+    agent = None
+    Daemon(Server(host, port, name, agent), Daemon.START)
     return True

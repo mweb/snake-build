@@ -16,26 +16,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' Create the snakebuild_test suite '''
+''' The unit test for the build agent instance commands. '''
 
 import unittest
 
-import communication
-import common
-import commands
-import resourceserver
-import resourceclient
-import buildagent
 
+class TestBuildAgent(unittest.TestCase):
+    ''' The unit test for the snake build build agent instance.
+    '''
+    def setUp(self):
+        ''' Setup the test case. Create a directory for the test resources. If
+            it allready exists remove it.
+        '''
+        pass
 
-def suite():
-    ''' Get the test suite for the common snakebuild classes. '''
-    communication_test = communication.suite()
-    common_test = common.suite()
-    commands_test = commands.suite()
-    resourceserver_test = resourceserver.suite()
-    resourceclient_test = resourceclient.suite()
-    buildagent_test = buildagent.suite()
-
-    return unittest.TestSuite([communication_test, common_test, commands_test,
-            resourceserver_test, resourceclient_test, buildagent_test])
+    def test_agent(self):
+        ''' Test the agent
+        '''
+        pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006-2011 Mathias Weber <mathew.weber@gmail.com>
+# Copyright (C) 2006-2012 Mathias Weber <mathew.weber@gmail.com>
 #
 # This file is part of Snake-Build.
 #
@@ -16,26 +16,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' Create the snakebuild_test suite '''
+''' Create the test suite for the buildagent classes. '''
 
 import unittest
 
-import communication
-import common
-import commands
-import resourceserver
-import resourceclient
-import buildagent
+from test_buildagent import TestBuildAgent
+from test_commands import TestCommands
 
 
 def suite():
-    ''' Get the test suite for the common snakebuild classes. '''
-    communication_test = communication.suite()
-    common_test = common.suite()
-    commands_test = commands.suite()
-    resourceserver_test = resourceserver.suite()
-    resourceclient_test = resourceclient.suite()
-    buildagent_test = buildagent.suite()
+    ''' Get the test suite for the resourceserver snakebuild classes. '''
+    agent = unittest.TestLoader().loadTestsFromTestCase(TestBuildAgent)
+    commands = unittest.TestLoader().loadTestsFromTestCase(TestCommands)
 
-    return unittest.TestSuite([communication_test, common_test, commands_test,
-            resourceserver_test, resourceclient_test, buildagent_test])
+    return unittest.TestSuite([agent, commands])
