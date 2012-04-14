@@ -24,13 +24,13 @@ import logging
 
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
-from snakebuild.resourceserver.servercommands import command
+from snakebuild.communication.server import remote_command
 from snakebuild.resourceserver.resource import ResourceException
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-@command('release', False)
+@remote_command('release', False)
 def release(res_mgr, name, resource_name, exclusive=False):
     ''' This command releases a resource which where acquired before.
 

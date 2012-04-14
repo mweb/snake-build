@@ -23,12 +23,12 @@
 import logging
 
 from snakebuild.communication.commandstructure import prepare_answer
-from snakebuild.resourceserver.servercommands import command
+from snakebuild.communication.server import remote_command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-@command('status_list', False)
+@remote_command('status_list', False)
 def status_list(res_mgr):
     ''' This command returns a list with all the configured resources. In
         addtion to the name we return the current status and the keywords

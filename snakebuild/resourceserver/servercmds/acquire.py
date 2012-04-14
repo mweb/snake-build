@@ -25,12 +25,12 @@ import logging
 from snakebuild.i18n import _
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
-from snakebuild.resourceserver.servercommands import command
+from snakebuild.communication.server import remote_command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-@command('acquire', False)
+@remote_command('acquire', False)
 def acquire(res_mgr, name, tag, exclusive=False):
     ''' This command acquires a resource of the given tag. If the tag or
         resource doesn't exist it will return an error. This command might

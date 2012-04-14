@@ -30,8 +30,14 @@ import SocketServer
 
 from snakebuild.i18n import _
 from snakebuild.communication.messagehandler import MessageHandler
+from snakebuild.communication.commandstructure import command_register
+
 
 LOG = logging.getLogger('snakebuild.communication.messagehandler')
+
+
+REMOTE_COMMANDS = {}
+remote_command = command_register(REMOTE_COMMANDS)
 
 
 class ServerCommunicationException(BaseException):
@@ -62,25 +68,19 @@ class Server(object):
     # this defines the known message types
     SJSON, UNKNWON = range(2)
 
-    def __init__(self, host, port, commands, name, data=None):
+    def __init__(self, host, port, name, data=None):
         ''' Create a server object with the given host and port. The server
             does not start listening until the run method is called.
 
-            The commands dictionary has the commands that are supported as keys
-            and as the value a tuple with the first element a callable which
-            takes two parameters. 1. command 2. parameters
-
             @param host: The host address (as a string)
             @param port: The network port to use for the connection (as int)
-            @param commands: A dictionary with all the supported commands and
-                    the methods to call if such a command get received.
             @param name: This name is used for the identifier for the pid,
                     stdin, stdout and stederr files.
             @param data: The data object which has is required by the commands
         '''
         self.host = host
         self.port = port
-        self.commands = commands
+        self.commands = REMOTE_COMMANDS
         self.data = data
         self.server = None
         self.server_running = True

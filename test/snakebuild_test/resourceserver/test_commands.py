@@ -21,7 +21,7 @@
 import unittest
 import json
 
-from snakebuild.resourceserver.servercommands import COMMANDS
+from snakebuild.communication.server import REMOTE_COMMANDS
 from snakebuild.resourceserver.servercmds import *
 from snakebuild.communication.commandstructure import FUNCTION, SUCCESS, ERROR
 from snakebuild.resourceserver.resource import ResourceManager
@@ -64,7 +64,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(self.repo)
 
         # test before any action
-        result = COMMANDS['status_list'][FUNCTION](mgr)
+        result = REMOTE_COMMANDS['status_list'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -86,7 +86,7 @@ class TestCommands(unittest.TestCase):
         mgr.acquire('Zaphod', 'test2', False)
         mgr.acquire('Ford', 'test1', True)
 
-        result = COMMANDS['status_list'][FUNCTION](mgr)
+        result = REMOTE_COMMANDS['status_list'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -108,7 +108,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(self.repo)
 
         # test before any action
-        result = COMMANDS['resource_details'][FUNCTION](mgr, 'Test1')
+        result = REMOTE_COMMANDS['resource_details'][FUNCTION](mgr, 'Test1')
 
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
@@ -125,7 +125,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(resource['parameters']['value1'] == 'arther')
 
         # test with not existing resource
-        result = COMMANDS['resource_details'][FUNCTION](mgr, 'Test11')
+        result = REMOTE_COMMANDS['resource_details'][FUNCTION](mgr, 'Test11')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -134,7 +134,7 @@ class TestCommands(unittest.TestCase):
         self.assertTrue(len(result['message']) > 0)
 
         # test with illegal parameter
-        result = COMMANDS['resource_details'][FUNCTION](mgr, ['Test11'])
+        result = REMOTE_COMMANDS['resource_details'][FUNCTION](mgr, ['Test11'])
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue('status' in result)
@@ -147,7 +147,7 @@ class TestCommands(unittest.TestCase):
         '''
         mgr = ResourceManager(self.repo)
 
-        result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test1')
+        result = REMOTE_COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test1')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == SUCCESS)
@@ -155,7 +155,7 @@ class TestCommands(unittest.TestCase):
         resource = result['resource']
         self.assertTrue(type(resource) == str or type(resource) == unicode)
 
-        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
+        result = REMOTE_COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == SUCCESS)
@@ -165,28 +165,28 @@ class TestCommands(unittest.TestCase):
         # TODO add more tests here and check the status of the resources
 
         # not existing resource
-        result = COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test11')
+        result = REMOTE_COMMANDS['acquire'][FUNCTION](mgr, 'Pingg', 'Test11')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
         # not existing resource
-        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test11')
+        result = REMOTE_COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test11')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
         # not existing user
-        result = COMMANDS['release'][FUNCTION](mgr, 'Pingu', 'Test1')
+        result = REMOTE_COMMANDS['release'][FUNCTION](mgr, 'Pingu', 'Test1')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == ERROR)
         self.assertTrue(len(result['message']) > 0)
 
         # not acquired
-        result = COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
+        result = REMOTE_COMMANDS['release'][FUNCTION](mgr, 'Pingg', 'Test1')
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result) == dict)
         self.assertTrue(result['status'] == ERROR)
@@ -197,7 +197,7 @@ class TestCommands(unittest.TestCase):
         mgr = ResourceManager(self.repo)
 
         # test before any action
-        result = COMMANDS['shutdown'][FUNCTION](mgr)
+        result = REMOTE_COMMANDS['shutdown'][FUNCTION](mgr)
 
         self.assertTrue(len(result) == 1)
         self.assertTrue(type(result) == dict)

@@ -25,12 +25,12 @@ import logging
 from snakebuild.i18n import _
 from snakebuild.communication.commandstructure import prepare_answer, \
         prepare_error
-from snakebuild.resourceserver.servercommands import command
+from snakebuild.communication.server import remote_command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.commands')
 
 
-@command('resource_details', False)
+@remote_command('resource_details', False)
 def resource_details(res_mgr, name):
     ''' This command returns all the configured information about a resouce.
         The data sent is similar to the data available within the config file.

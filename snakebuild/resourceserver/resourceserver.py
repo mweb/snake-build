@@ -23,13 +23,12 @@ import logging
 import os.path
 
 from snakebuild.i18n import _
-from snakebuild.common import Daemon
-from snakebuild.common.versioneddir import VersionedDirException, ReposConfig,\
-        remote_repo_existing, create_new_repo, clone_repo, \
+from snakebuild.common import Daemon, output
+from snakebuild.common.versioneddir import VersionedDirException, \
+        ReposConfig, remote_repo_existing, create_new_repo, clone_repo, \
         get_versioned_directory
 from snakebuild.commands import command, handle_cmd
 from snakebuild.communication import Server
-from snakebuild.resourceserver.servercommands import COMMANDS
 from snakebuild.resourceserver.servercmds import *
 from snakebuild.resourceserver.resource import ResourceManager
 
@@ -64,7 +63,7 @@ def stop_server(options, config):
     port = config.get_s('resourceserver', 'port')
     name = 'resourceserver'
 
-    Daemon(Server(host, port, COMMANDS, name), Daemon.STOP)
+    Daemon(Server(host, port, name), Daemon.STOP)
     return True
 
 
@@ -110,10 +109,10 @@ def start_server_now(options, config):
 
     resourcemanager = ResourceManager(versioned_dir)
     if options.background:
-        Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+        Daemon(Server(host, port, name, resourcemanager),
                 Daemon.START)
     else:
-        Daemon(Server(host, port, COMMANDS, name, resourcemanager),
+        Daemon(Server(host, port, name, resourcemanager),
                 Daemon.FOREGROUND)
 
     return True

@@ -23,12 +23,12 @@
 import logging
 
 from snakebuild.communication.commandstructure import prepare_answer
-from snakebuild.resourceserver.servercommands import command
+from snakebuild.communication.server import remote_command
 
 LOG = logging.getLogger('snakebuild.resourcesserver.servercmds.shutdown')
 
 
-@command('shutdown', True)
+@remote_command('shutdown', True)
 def shutdown(res_mgr):
     ''' This method is called on a shutdown request.
 
