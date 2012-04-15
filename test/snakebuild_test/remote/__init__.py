@@ -16,17 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' Create the test suite for the resourceclient classes. '''
+''' The remote api test suites '''
 
-import unittest
-
-from test_commands import TestCommands
-from test_client import TestClient
-
-
-def suite():
-    ''' Get the test suite for the resourceserver snakebuild classes. '''
-    commands = unittest.TestLoader().loadTestsFromTestCase(TestCommands)
-    client = unittest.TestLoader().loadTestsFromTestCase(TestClient)
-
-    return unittest.TestSuite([client, commands])
+from create import suite

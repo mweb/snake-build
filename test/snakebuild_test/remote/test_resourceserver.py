@@ -31,8 +31,8 @@ from snakebuild.communication.client import ClientCommunicationException
 from test_helpers.versioneddir_helper import create_versioned_dir_all
 
 
-class TestServerCmds(unittest.TestCase):
-    ''' The unit test for the snake build resource client remote commands.
+class TestResourceServer(unittest.TestCase):
+    ''' The unit test for the snake build resource server remote commands.
     '''
     def setUp(self):
         ''' Setup the test case. Nothing yet.
