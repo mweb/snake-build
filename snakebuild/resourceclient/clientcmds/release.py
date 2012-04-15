@@ -25,7 +25,7 @@ from snakebuild.common import output
 from snakebuild.communication import ClientCommunicationException
 from snakebuild.commands import command
 from snakebuild.resourceclient.clientcmds.common import get_resource_server
-from snakebuild.resourceclient.servercmds import ResourceServerRemoteError
+from snakebuild.remote.resourceserver import ResourceServerRemoteError
 
 
 @command('release')

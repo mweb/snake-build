@@ -25,7 +25,7 @@ import subprocess
 import time
 import json
 
-from snakebuild.resourceclient.servercmds import ResourceServer, \
+from snakebuild.remote.resourceserver import ResourceServer, \
         ResourceServerRemoteError, ResourceServerIllegalParameterError
 from snakebuild.communication.client import ClientCommunicationException
 from test_helpers.versioneddir_helper import create_versioned_dir_all

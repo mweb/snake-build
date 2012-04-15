@@ -16,10 +16,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
-''' The snakebuild.resourceclient.servercmds package. This package provides
-    an interface to communicate with the server.
+''' The snakebuild.remote package. This package provides all the interfaces
+    to all the servers.
+    Currently the following services are supported by this apis:
+    - ResourceServer
 '''
-
-from snakebuild.resourceclient.servercmds.resourceserver import \
-        ResourceServer, ResourceServerRemoteError, \
-        ResourceServerIllegalParameterError

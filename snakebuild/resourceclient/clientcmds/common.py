@@ -19,7 +19,7 @@
 ''' The file provides some common functions for all client command handlers.
 '''
 
-from snakebuild.resourceclient.servercmds import ResourceServer
+from snakebuild.remote.resourceserver import ResourceServer
 
 
 def get_resource_server(config):
