@@ -20,4 +20,5 @@
     to all the servers.
     Currently the following services are supported by this apis:
     - ResourceServer
+    - BuildAgent
 '''

@@ -26,7 +26,7 @@ import commands
 import resourceserver
 import resourceclient
 import buildagent
-
+import remote
 
 def suite():
     ''' Get the test suite for the common snakebuild classes. '''
@@ -36,6 +36,8 @@ def suite():
     resourceserver_test = resourceserver.suite()
     resourceclient_test = resourceclient.suite()
     buildagent_test = buildagent.suite()
+    remote_test = remote.suite()
 
     return unittest.TestSuite([communication_test, common_test, commands_test,
-            resourceserver_test, resourceclient_test, buildagent_test])
+            resourceserver_test, resourceclient_test, buildagent_test,
+            remote_test])

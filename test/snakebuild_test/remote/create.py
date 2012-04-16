@@ -21,11 +21,14 @@
 import unittest
 
 from test_resourceserver import TestResourceServer
+from test_buildagent import TestBuildAgent
 
 
 def suite():
     ''' Get the test suite for the snakebuild remote api classes. '''
     resourceserver = unittest.TestLoader().loadTestsFromTestCase(
             TestResourceServer)
+    buildagent = unittest.TestLoader().loadTestsFromTestCase(
+            TestBuildAgent)
 
-    return unittest.TestSuite([resourceserver])
+    return unittest.TestSuite([resourceserver, buildagent])
