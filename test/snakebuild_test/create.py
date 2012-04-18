@@ -28,6 +28,7 @@ import resourceclient
 import buildagent
 import remote
 
+
 def suite():
     ''' Get the test suite for the common snakebuild classes. '''
     communication_test = communication.suite()
