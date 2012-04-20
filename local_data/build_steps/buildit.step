@@ -1,0 +1,35 @@
+{
+    "name": "Build It",
+    "description": "",
+    "type": "shell",
+    "script": "buildit.sh",
+    "input": {
+        "build_type": {
+            "type": "str",
+            "default": "Ci",
+            "description": "Set the build type to build valid values are: Ci, Nightly"
+        },
+        "major_version": {
+            "type": "int",
+            "description": "Set the major version numer to use"
+        }
+    },
+    "output": {
+        "minor_version": {
+            "type": "int",
+            "description": "The minor version set"
+        },
+        "build_name": {
+            "type": "str",
+            "description": "The name that was builded"
+        }
+    }
+    "checks": {
+        "pre_condition": {
+        },
+        "post_condition": {
+        },
+        "log_check": "none",
+        "on_error": "abort"
+    }
+}
