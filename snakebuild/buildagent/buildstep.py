@@ -78,6 +78,39 @@ class ShellBuildStep(object):
 class PythonBuildStep(object):
     ''' The build step calling python functions. '''
     pass
+def _is_valid_variable(data):
+    ''' Check if the given variable type is a valid which means it has at
+        least a type and a description key and optional a default value.
+
+        The type supports the following types:
+            - str
+            - int
+            - float
+    '''
+    if not 'type' in data:
+        return _("The variable 'type' is not specified.")
+    if not 'description' in data:
+        return  _("The variable 'description' is not specified.")
+
+    if not isinstance(data['type'], (str, unicode)):
+        return _("The variable 'type' is not a string.")
+    if not isinstance(data['description'], (str, unicode)):
+        return _("The variable 'description' is not a string.")
+
+    if 'default' in data:
+        if not data['type'] in ('str', 'int', 'float'):
+            return _('The given variable type is not supported: {0}').\
+                    format(data['type'])
+
+        if (data['type'] == 'str' and
+                not isinstance(data['default'], (str, unicode))):
+            return _("The variable 'default' is not a string as specified.")
+        elif data['type'] == 'int' and not isinstance(data['default'], int):
+            return _("The variable 'default' is not a integer as specified.")
+        elif (data['type'] == 'float' and
+                not isinstance(data['default'], float)):
+            return _("The variable 'default' is not a integer as specified.")
+    return None
 
 
 def _is_valid(data):
@@ -120,6 +153,12 @@ def _is_valid(data):
         LOG.error(_('The input entry within the build step is not a '
                 'dictionary.'))
         return False
+    for name, description in data["input"].iteritems():
+        answer = _is_valid_variable(description)
+        if answer is not None:
+            LOG.error(_('The variable: {0} is not correctly specified: {1}').
+                    format(name, answer))
+            return False
 
     if not "output" in data:
         LOG.error(_('The build step object does not have a output entry.'))
@@ -128,6 +167,12 @@ def _is_valid(data):
         LOG.error(_('The output entry within the build step is not a '
                 'dictionary.'))
         return False
+    for name, description in data["output"].iteritems():
+        answer = _is_valid_variable(description)
+        if answer is not None:
+            LOG.error(_('The variable: {0} is not correctly specified: {1}').
+                    format(name, answer))
+            return False
 
     if not "checks" in data:
         LOG.error(_('The build step object does not have a checks entry.'))
@@ -135,6 +180,36 @@ def _is_valid(data):
     if not isinstance(data["checks"], dict):
         LOG.error(_('The checks entry within the build step is not a '
                 'dictionary.'))
+        return False
+    if not "pre_condition" in data["checks"]:
+        LOG.error(_('The checks entry expects an object with the name '
+                'pre_condition'))
+        return False
+    if not isinstance(data["checks"]["pre_condition"], dict):
+        LOG.error(_('The pre_condition entry within checks is not a '
+                'dictionary.'))
+        return False
+    if not "post_condition" in data["checks"]:
+        LOG.error(_('The checks entry expects an object with the name '
+                'post_condition'))
+        return False
+    if not isinstance(data["checks"]["post_condition"], dict):
+        LOG.error(_('The post_condition entry within checks is not a '
+                'dictionary.'))
+        return False
+    if not "log_check" in data["checks"]:
+        LOG.error(_('The checks entry expects an object with the name '
+                'log_check'))
+        return False
+    if not isinstance(data["checks"]["log_check"], (str, unicode)):
+        LOG.error(_('The log_check entry within checks is not a string.'))
+        return False
+    if not "on_error" in data["checks"]:
+        LOG.error(_('The checks entry expects an object with the name '
+                'on_error'))
+        return False
+    if not isinstance(data["checks"]["on_error"], (str, unicode)):
+        LOG.error(_('The on_error entry within checks is not a string.'))
         return False
 
     return True

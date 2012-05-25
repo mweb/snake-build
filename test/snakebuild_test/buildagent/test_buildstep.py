@@ -55,6 +55,14 @@ class TestBuildStep(unittest.TestCase):
         self.assertFalse(_is_valid(data))
 
         data['checks'] = {}
+        self.assertFalse(_is_valid(data))
+        data['checks']['pre_condition'] = {}
+        self.assertFalse(_is_valid(data))
+        data['checks']['post_condition'] = {}
+        self.assertFalse(_is_valid(data))
+        data['checks']['log_check'] = "full"
+        self.assertFalse(_is_valid(data))
+        data['checks']['on_error'] = "abort"
         self.assertTrue(_is_valid(data))
 
         # now use wrong types
@@ -83,7 +91,92 @@ class TestBuildStep(unittest.TestCase):
         data['output'] = {}
         self.assertTrue(_is_valid(data))
 
+        data['checks']['pre_condition'] = "test"
+        self.assertFalse(_is_valid(data))
+        data['checks']['pre_condition'] = 12
+        self.assertFalse(_is_valid(data))
+        data['checks']['pre_condition'] = {}
+        self.assertTrue(_is_valid(data))
+        data['checks']['post_condition'] = "gaga"
+        self.assertFalse(_is_valid(data))
+        data['checks']['post_condition'] = 12
+        self.assertFalse(_is_valid(data))
+        data['checks']['post_condition'] = {}
+        self.assertTrue(_is_valid(data))
+        data['checks']['log_check'] = True
+        self.assertFalse(_is_valid(data))
+        data['checks']['log_check'] = 12.12
+        self.assertFalse(_is_valid(data))
+        data['checks']['log_check'] = "no"
+        self.assertTrue(_is_valid(data))
+        data['checks']['on_error'] = {}
+        self.assertFalse(_is_valid(data))
+        data['checks']['on_error'] = 42
+        self.assertFalse(_is_valid(data))
+        data['checks']['on_error'] = "Yes"
+        self.assertTrue(_is_valid(data))
+
+        tmp = data['checks']
         data['checks'] = 12.12
         self.assertFalse(_is_valid(data))
-        data['checks'] = {}
+        data['checks'] = tmp
         self.assertTrue(_is_valid(data))
+
+        # check input variables
+        data['input']['VAR1'] = {}
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['type'] = "str"
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['description'] = "Variable One"
+        self.assertTrue(_is_valid(data))
+        data['input']['VAR1']['default'] = 12
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['default'] = "Value1"
+        self.assertTrue(_is_valid(data))
+        data['input']['VAR1']['type'] = "motorcycle"
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['type'] = "int"
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['default'] = 12
+        self.assertTrue(_is_valid(data))
+        data['input']['VAR1']['description'] = 12
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['description'] = "Variable One"
+        self.assertTrue(_is_valid(data))
+        data['input']['VAR1']['type'] = "float"
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['default'] = 12.12
+        self.assertTrue(_is_valid(data))
+        data['input']['VAR1']['type'] = 12
+        self.assertFalse(_is_valid(data))
+        data['input']['VAR1']['type'] = "float"
+        self.assertTrue(_is_valid(data))
+
+        # check output variables
+        data['output']['VAR1'] = {}
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['type'] = "str"
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['description'] = "Variable One"
+        self.assertTrue(_is_valid(data))
+        data['output']['VAR1']['default'] = "Value1"
+        self.assertTrue(_is_valid(data))
+        data['output']['VAR1']['type'] = "motorcycle"
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['type'] = "int"
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['default'] = 12
+        self.assertTrue(_is_valid(data))
+        data['output']['VAR1']['description'] = 12
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['description'] = "Variable One"
+        self.assertTrue(_is_valid(data))
+        data['output']['VAR1']['type'] = "float"
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['default'] = 12.12
+        self.assertTrue(_is_valid(data))
+        data['output']['VAR1']['type'] = 12
+        self.assertFalse(_is_valid(data))
+        data['output']['VAR1']['type'] = "float"
+        self.assertTrue(_is_valid(data))
+
