@@ -125,24 +125,21 @@ def _is_valid(data):
     if not "type" in data:
         LOG.error(_('The build step object does not have a build type.'))
         return False
-    if not isinstance(data["type"], str) and \
-            not isinstance(data["type"], unicode):
+    if not isinstance(data["type"], (str, unicode)):
         LOG.error(_('The type entry within the build step is not a string.'))
         return False
 
     if not "name" in data:
         LOG.error(_('The build step object does not have a name.'))
         return False
-    if not isinstance(data["name"], str) and \
-            not isinstance(data["name"], unicode):
+    if not isinstance(data["name"], (str, unicode)):
         LOG.error(_('The name entry within the build step is not a string.'))
         return False
 
     if not "script" in data:
         LOG.error(_('The build step object does not have a script entry.'))
         return False
-    if not isinstance(data["script"], str) and \
-            not isinstance(data["script"], unicode):
+    if not isinstance(data["script"], (str, unicode)):
         LOG.error(_('The script entry within the build step is not a string.'))
         return False
 
