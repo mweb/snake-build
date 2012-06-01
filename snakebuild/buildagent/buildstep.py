@@ -19,8 +19,9 @@
 ''' The build steps for the build agent. '''
 
 import json
-import os.path
+import os
 import logging
+import subprocess
 
 from snakebuild.i18n import _
 
@@ -38,7 +39,7 @@ def load_step(filename):
 
         @param filename: The full path of the file to read.
     '''
-    if not os.path.isdir(filename):
+    if not os.path.isfile(filename):
         LOG.error(_('The given build step file does not exist: {0}').
                 format(filename))
         raise BuildStepException('The given build step file does not exist: '
@@ -66,18 +67,133 @@ def load_step(filename):
 
 class BuildStep(object):
     ''' The generic build step defing the interface to use it. '''
+    NOTHING, ILLEGAL_VALUES, ERROR, WARNING, ABORTED, SUCCESS = range(6)
+    NOT_STARTED, STARTING, RUNNING, WAITING, STOPPING, FINISHED = range(6)
 
     def __init__(self, stepdesc):
         ''' Init the build step object from a json encoded file. '''
+        self.name = stepdesc['name']
+        self.description = stepdesc['description']
+        self.script = stepdesc['script']
+        self.input_vars = stepdesc['input']
+        self.output_vars = stepdesc['output']
+
+        # TODO do something more here
+        self.pre_condition = stepdesc['checks']['pre_condition']
+        self.post_condition = stepdesc['checks']['post_condition']
+        self.log_check = stepdesc['checks']['log_check']
+        self.on_error = stepdesc['checks']['on_error']
+
+        self.result_status = self.NOTHING
+        self.run_status = self.NOT_STARTED
+
+    def run(self, values):
+        ''' Run this Build Step. To run it you need to provide a dictionary
+            with all the input variables stored within a dictionary.
+            This method will return a tuple with the result status and the
+            dictionary with the output variables.
+
+            @param values: the dictionary with all the entries for all input
+                    variables.
+            @return: (status, output_dictionary)
+        '''
+        raise BuildStepException('NOT IMPLEMENTED')
 
 
-class ShellBuildStep(object):
+class ShellBuildStep(BuildStep):
     ''' The build step running a shell script. '''
 
+    def __init__(self, data):
+        BuildStep.__init__(self, data)
 
-class PythonBuildStep(object):
+        self.executable = None
+        if 'shell' in data:
+            self.executable = data['shell']
+
+    def run(self, values, log_file_name):
+        ''' Run this Build Step. To run it you need to provide a dictionary
+            with all the input variables stored within a dictionary.
+            This method will return a tuple with the result status and the
+            dictionary with the output variables.
+
+            @param values: the dictionary with all the entries for all input
+                    variables.
+            @param log_file_name: The name of the logfile to create for this
+                    run this has to be the full path. If the file exists it
+                    will be overwritten.
+            @return: (status, output_dictionary)
+        '''
+        self.run_status = BuildStep.STARTING
+        self.result_status = BuildStep.NOTHING
+        self.output_dictionary = {}
+
+        env_values = os.environ.copy()
+        env.values.update(values)
+        for name, description in self.input_vars.itervalues():
+            if not name in values:
+                if 'default' in description:
+                    env_values[name] = description['default']
+                else:
+                    LOG.error(_('Not all required variable names are defined.'
+                            ' Missing: {0}').format(name))
+                    return BuildStep.ILLEGAL_VALUES
+
+        log_checker = None
+        if self.log_check.lower() == 'full':
+            # TODO implementd the log cheker here
+            pass
+
+        # use line buffered mode
+        with open(log_file_name, 'w') as logf:
+            # TODO start the listening socket for the results
+            self.run_status = BuildStep.RUNNING
+            self.result_status = BuildStep.SUCCESS
+
+            worker = subprocess.Popen(self.script, shell=True, bufsize=1,
+                    stderr=subprocess.STDOUT, stdout=logf, env=env_values)
+
+            while worker.returncode is None:
+                if log_checker is not None:
+                    # TODO implementd the log checker here
+                    pass
+
+            self.run_status = FINISHED
+            return (self.result_status, self.output_dictionary)
+
+        LOG.error('could not create the output log file for the build step: '
+                '{0}'.format(log_file_name))
+        self.run_status = BuildStep.FINISHED
+        self.result_status = BuildStep.ERROR
+        return (self.result_status, {})
+
+
+class PythonBuildStep(BuildStep):
     ''' The build step calling python functions. '''
-    pass
+
+    def __init__(self, data):
+        self.BuildStep.__init__(data)
+
+        self.python_version = None
+        if 'python_version' in data:
+            self.python_version = data['python_version']
+
+    def run(self, values):
+        ''' Run this Build Step. To run it you need to provide a dictionary
+            with all the input variables stored within a dictionary.
+            This method will return a tuple with the result status and the
+            dictionary with the output variables.
+
+            @param values: the dictionary with all the entries for all input
+                    variables.
+            @return: (status, output_dictionary)
+        '''
+        pass
+
+
+class Checks(object):
+    ''' The input/output check handler '''
+
+
 def _is_valid_variable(data):
     ''' Check if the given variable type is a valid which means it has at
         least a type and a description key and optional a default value.

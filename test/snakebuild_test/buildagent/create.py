@@ -21,7 +21,7 @@
 import unittest
 
 from test_buildagent import TestBuildAgent
-from test_buildstep import TestBuildStep
+from test_buildstep import TestBuildStep, TestShellBuildStep
 from test_commands import TestCommands
 
 
@@ -29,6 +29,8 @@ def suite():
     ''' Get the test suite for the buildagent classes. '''
     agent = unittest.TestLoader().loadTestsFromTestCase(TestBuildAgent)
     buildstep = unittest.TestLoader().loadTestsFromTestCase(TestBuildStep)
+    shellbuildstep = unittest.TestLoader().loadTestsFromTestCase(
+            TestShellBuildStep)
     commands = unittest.TestLoader().loadTestsFromTestCase(TestCommands)
 
-    return unittest.TestSuite([agent, buildstep, commands])
+    return unittest.TestSuite([agent, buildstep, shellbuildstep, commands])

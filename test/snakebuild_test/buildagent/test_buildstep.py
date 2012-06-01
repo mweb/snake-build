@@ -19,18 +19,17 @@
 ''' The unit test for the build step object and the helper functions. '''
 
 import unittest
+import tempfile
+import json
+import os
+import shutil
 
-from snakebuild.buildagent.buildstep import BuildStep, load_step, _is_valid
+from snakebuild.buildagent.buildstep import ShellBuildStep, load_step, _is_valid
 
 
 class TestBuildStep(unittest.TestCase):
     ''' The unit test for the snake build build step object
     '''
-    def setUp(self):
-        ''' Setup the test case. Create a directory for the test resources. If
-            it allready exists remove it.
-        '''
-        pass
 
     def test_validation_check(self):
         ''' Test the _is_valid function to check if the given dictionary is
@@ -180,3 +179,52 @@ class TestBuildStep(unittest.TestCase):
         data['output']['VAR1']['type'] = "float"
         self.assertTrue(_is_valid(data))
 
+
+class TestShellBuildStep(unittest.TestCase):
+    ''' The unit test for the snake shell build build step object
+    '''
+    def setUp(self):
+        ''' Setup the test case. Create a directory for the test resources. If
+            it allready exists remove it.
+        '''
+        script = ('#!/bin/sh\n'
+            'echo $VAR1')
+        directory = tempfile.mkdtemp()
+        self.script_filename = os.path.join(directory, 'simple.sh')
+        self.step_filename = os.path.join(directory, 'simple.step')
+        buildstep = {
+                'name': 'SimpleTest',
+                'description': 'Simple step for testing',
+                'type': 'shell',
+                'script': self.script_filename,
+                'input': {
+                    'build_type': {
+                        'type': 'str',
+                        'default': 'argone',
+                        'description': ''
+                    }
+                },
+                'output': {},
+                'checks': {
+                    'pre_condition': {},
+                    'post_condition': {},
+                    'log_check': 'none',
+                    'on_error': 'abort'
+                }
+            }
+        print "\n"*10
+        print self.step_filename
+        print "\n"
+        with open(self.script_filename, 'w') as sfl:
+            sfl.write(script)
+        with open(self.step_filename, 'w') as cfl:
+            cfl.write(json.dumps(buildstep))
+
+    def tearDown(self):
+        ''' Remove the temporary directory with all its files. '''
+        if os.path.isdir(os.path.dirname(self.script_filename)):
+            shutil.rmtree(os.path.dirname(self.script_filename))
+
+    def test_shell_buildstep(self):
+        ''' Test the ShellBuildStep class '''
+        step = load_step(self.step_filename)
