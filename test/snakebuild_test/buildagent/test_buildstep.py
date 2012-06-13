@@ -189,7 +189,8 @@ class TestShellBuildStep(unittest.TestCase):
             it allready exists remove it.
         '''
         script = ('#!/bin/sh\n'
-            'echo $VAR1')
+            'echo $VAR1\n'
+            'echo $VAR2')
         directory = tempfile.mkdtemp()
         self.script_filename = os.path.join(directory, 'simple.sh')
         self.step_filename = os.path.join(directory, 'simple.step')
@@ -197,11 +198,17 @@ class TestShellBuildStep(unittest.TestCase):
                 'name': 'SimpleTest',
                 'description': 'Simple step for testing',
                 'type': 'shell',
+                'shell': '/bin/sh',
                 'script': self.script_filename,
                 'input': {
                     'VAR1': {
                         'type': 'str',
                         'default': 'argone',
+                        'description': ''
+                    },
+                    'VAR2': {
+                        'type': 'int',
+                        'default': 12,
                         'description': ''
                     }
                 },
@@ -235,3 +242,4 @@ class TestShellBuildStep(unittest.TestCase):
         self.assertTrue(result[0] == BuildStep.SUCCESS)
         with open(logfile, 'r') as lfl:
             self.assertTrue(lfl.readline().strip() == 'TEST')
+            self.assertTrue(lfl.readline().strip() == '12')

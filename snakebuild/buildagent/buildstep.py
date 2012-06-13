@@ -127,16 +127,10 @@ class ShellBuildStep(BuildStep):
         self.result_status = BuildStep.NOTHING
         self.output_dictionary = {}
 
-        env_values = os.environ.copy()
-        env_values.update(values)
-        for name, description in self.input_vars.iteritems():
-            if not name in values:
-                if 'default' in description:
-                    env_values[name] = description['default']
-                else:
-                    LOG.error(_('Not all required variable names are defined.'
-                            ' Missing: {0}').format(name))
-                    return BuildStep.ILLEGAL_VALUES
+        try:
+            env_values = self._get_env_values(values)
+        except BuildStepException:
+            return BuildStep.ILLEGAL_VALUES
 
         log_checker = None
         if self.log_check.lower() == 'full':
@@ -153,9 +147,7 @@ class ShellBuildStep(BuildStep):
                     bufsize=1, stderr=subprocess.STDOUT, stdout=logf,
                     env=env_values)
 
-            import time
             while worker.poll() is None:
-                time.sleep(0.1)
                 if log_checker is not None:
                     # TODO implementd the log checker here
                     pass
@@ -168,6 +160,59 @@ class ShellBuildStep(BuildStep):
         self.run_status = BuildStep.FINISHED
         self.result_status = BuildStep.ERROR
         return (self.result_status, {})
+
+
+    def _get_env_values(self, values):
+        ''' Get the os environment values and add the required values to run
+            the script.
+
+            @param values: the dictionary with the values to check and add.
+            @return dictionary if everything is ok otherwise throw an
+                    exception.
+        '''
+        env_values = os.environ.copy()
+        env_values.update(values)
+        for name, description in self.input_vars.iteritems():
+            if not name in values:
+                if 'default' in description:
+                    env_values[name] = description['default']
+                else:
+                    LOG.error(_('Not all required variable names are defined.'
+                            ' Missing: {0}').format(name))
+                    raise BuildStepException(_('Not all required variable '
+                            'names are defined. Missing: {0}').format(name))
+
+            if description['type'] == 'int':
+                if not isinstance(env_values[name], int):
+                    try:
+                        int(env_values[name])
+                    except ValueError:
+                        LOG.error(_('The given string for the value {0} is '
+                                'not an int').format(name))
+                        raise BuildStepException(_('The given string for the '
+                                'value {0} is not an int').format(name))
+            elif description['type'] == 'float':
+                if not isinstance(env_values[name], float):
+                    try:
+                        float(env_values[name])
+                    except ValueError:
+                        LOG.error(_('The given string for the value {0} is '
+                                'not a float').format(name))
+                        raise BuildStepException(_('The given string for the '
+                                'value {0} is not a float').format(name))
+            elif description['type'] == 'bool':
+                if not isinstance(env_values[name], bool):
+                    if not env_values[name].lower() in ['true', 'false', 0, 1]:
+                        LOG.error(_('The given string for the value {0} is '
+                                'not a float').format(name))
+                        raise BuildStepException(_('The given string for the '
+                                'value {0} is not a float').format(name))
+                    if env_values[name].lower() in ['true', 1]:
+                        env_values[name] = True
+                    else:
+                        env_values[name] = False
+            env_values[name] = str(env_values[name])
+        return env_values
 
 
 class PythonBuildStep(BuildStep):
