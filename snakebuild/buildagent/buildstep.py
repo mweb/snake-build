@@ -106,7 +106,7 @@ class ShellBuildStep(BuildStep):
     def __init__(self, data):
         BuildStep.__init__(self, data)
 
-        self.executable = None
+        self.executable = '/bin/sh'
         if 'shell' in data:
             self.executable = data['shell']
 
@@ -128,8 +128,8 @@ class ShellBuildStep(BuildStep):
         self.output_dictionary = {}
 
         env_values = os.environ.copy()
-        env.values.update(values)
-        for name, description in self.input_vars.itervalues():
+        env_values.update(values)
+        for name, description in self.input_vars.iteritems():
             if not name in values:
                 if 'default' in description:
                     env_values[name] = description['default']
@@ -149,15 +149,18 @@ class ShellBuildStep(BuildStep):
             self.run_status = BuildStep.RUNNING
             self.result_status = BuildStep.SUCCESS
 
-            worker = subprocess.Popen(self.script, shell=True, bufsize=1,
-                    stderr=subprocess.STDOUT, stdout=logf, env=env_values)
+            worker = subprocess.Popen([self.executable, self.script],
+                    bufsize=1, stderr=subprocess.STDOUT, stdout=logf,
+                    env=env_values)
 
-            while worker.returncode is None:
+            import time
+            while worker.poll() is None:
+                time.sleep(0.1)
                 if log_checker is not None:
                     # TODO implementd the log checker here
                     pass
 
-            self.run_status = FINISHED
+            self.run_status = BuildStep.FINISHED
             return (self.result_status, self.output_dictionary)
 
         LOG.error('could not create the output log file for the build step: '

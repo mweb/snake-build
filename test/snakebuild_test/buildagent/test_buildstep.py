@@ -24,7 +24,8 @@ import json
 import os
 import shutil
 
-from snakebuild.buildagent.buildstep import ShellBuildStep, load_step, _is_valid
+from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
+        load_step, _is_valid
 
 
 class TestBuildStep(unittest.TestCase):
@@ -198,7 +199,7 @@ class TestShellBuildStep(unittest.TestCase):
                 'type': 'shell',
                 'script': self.script_filename,
                 'input': {
-                    'build_type': {
+                    'VAR1': {
                         'type': 'str',
                         'default': 'argone',
                         'description': ''
@@ -212,9 +213,6 @@ class TestShellBuildStep(unittest.TestCase):
                     'on_error': 'abort'
                 }
             }
-        print "\n"*10
-        print self.step_filename
-        print "\n"
         with open(self.script_filename, 'w') as sfl:
             sfl.write(script)
         with open(self.step_filename, 'w') as cfl:
@@ -227,4 +225,13 @@ class TestShellBuildStep(unittest.TestCase):
 
     def test_shell_buildstep(self):
         ''' Test the ShellBuildStep class '''
+        logfile = os.path.join(os.path.dirname(self.step_filename),
+                'shelltest.log')
+
         step = load_step(self.step_filename)
+        result = step.run({'VAR1': 'TEST'}, logfile)
+        self.assertTrue(isinstance(result, tuple))
+        self.assertTrue(len(result) == 2)
+        self.assertTrue(result[0] == BuildStep.SUCCESS)
+        with open(logfile, 'r') as lfl:
+            self.assertTrue(lfl.readline().strip() == 'TEST')
