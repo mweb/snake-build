@@ -25,7 +25,7 @@ import os
 import shutil
 
 from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
-        load_step, _is_valid
+        BuildStepException, load_step, _is_valid, _get_env_values
 
 
 class TestBuildStep(unittest.TestCase):
@@ -179,6 +179,118 @@ class TestBuildStep(unittest.TestCase):
         self.assertFalse(_is_valid(data))
         data['output']['VAR1']['type'] = "float"
         self.assertTrue(_is_valid(data))
+
+    def test_get_env_values(self):
+        ''' Test the generic method to get the environment values filled with
+            the input values.
+        '''
+        test = {'INT1': {
+                    'type': 'int',
+                    'default': 12,
+                    'description': ''
+                },
+                'INT2': {
+                    'type': 'int',
+                    'default': '42',
+                    'description': ''
+                },
+                'INT3': {
+                    'type': 'int',
+                    'default': 33.2,
+                    'description': ''
+                },
+                'FLOAT1': {
+                    'type': 'float',
+                    'default': 32.2,
+                    'description': ''
+                },
+                'FLOAT2': {
+                    'type': 'float',
+                    'default': 33,
+                    'description': ''
+                },
+                'FLOAT3': {
+                    'type': 'float',
+                    'default': '12.12',
+                    'description': ''
+                },
+                'FLOAT4': {
+                    'type': 'float',
+                    'default': '14',
+                    'description': ''
+                },
+                'BOOL1': {
+                    'type': 'bool',
+                    'default': True,
+                    'description': ''
+                },
+                'BOOL2': {
+                    'type': 'bool',
+                    'default': 'True',
+                    'description': ''
+                },
+                'BOOL3': {
+                    'type': 'bool',
+                    'default': '1',
+                    'description': ''
+                },
+                'BOOL4': {
+                    'type': 'bool',
+                    'default': 'False',
+                    'description': ''
+                },
+                'BOOL5': {
+                    'type': 'bool',
+                    'default': False,
+                    'description': ''
+                },
+                'BOOL6': {
+                    'type': 'bool',
+                    'default': '0',
+                    'description': ''
+                },
+                'STR1': {
+                    'type': 'str',
+                    'default': 0,
+                    'description': ''
+                },
+                'STR2': {
+                    'type': 'str',
+                    'default': 'ASDF',
+                    'description': ''
+                },
+                'NO_DEFAULT': {
+                    'type': 'int',
+                    'description': ''
+                }
+            }
+        value = _get_env_values({'NO_DEFAULT': 12}, test)
+        self.assertTrue(value['INT1'] == '12')
+        self.assertTrue(value['INT2'] == '42')
+        self.assertTrue(value['INT3'] == '33')
+        self.assertTrue(value['FLOAT1'] == '32.2')
+        self.assertTrue(value['FLOAT2'] == '33')
+        self.assertTrue(value['FLOAT3'] == '12.12')
+        self.assertTrue(value['FLOAT4'] == '14')
+        self.assertTrue(value['BOOL1'] == 'True')
+        self.assertTrue(value['BOOL2'] == 'True')
+        self.assertTrue(value['BOOL3'] == 'True')
+        self.assertTrue(value['BOOL4'] == 'False')
+        self.assertTrue(value['BOOL5'] == 'False')
+        self.assertTrue(value['BOOL6'] == 'False')
+
+        with self.assertRaises(BuildStepException):
+            value = _get_env_values({'NO_DEFAULT': 'test'}, test)
+        with self.assertRaises(BuildStepException):
+            value = _get_env_values({}, test)
+
+        test['NO_DEFAULT']['type'] = 'float'
+        with self.assertRaises(BuildStepException):
+            value = _get_env_values({'NO_DEFAULT': 'test'}, test)
+        test['NO_DEFAULT']['type'] = 'bool'
+        with self.assertRaises(BuildStepException):
+            value = _get_env_values({'NO_DEFAULT': 'test'}, test)
+
 
 
 class TestShellBuildStep(unittest.TestCase):
