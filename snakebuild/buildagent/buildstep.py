@@ -127,8 +127,10 @@ class ShellBuildStep(BuildStep):
 
         try:
             env_values = _get_env_values(values, self.input_vars)
-        except BuildStepException:
-            return BuildStep.ILLEGAL_VALUES
+        except BuildStepException, x:
+            self.run_status = BuildStep.FINISHED
+            self.result_status = BuildStep.ERROR
+            raise x
 
         log_checker = None
         if self.log_check.lower() == 'full':
@@ -136,25 +138,30 @@ class ShellBuildStep(BuildStep):
             pass
 
         # use line buffered mode
-        with open(log_file_name, 'w') as logf:
-            # TODO start the listening socket for the results
-            self.run_status = BuildStep.RUNNING
-            self.result_status = BuildStep.SUCCESS
+        try:
+            with open(log_file_name, 'w') as logf:
+                # TODO start the listening socket for the results
+                self.run_status = BuildStep.RUNNING
+                self.result_status = BuildStep.SUCCESS
 
-            worker = subprocess.Popen([self.executable, self.script],
-                    bufsize=1, stderr=subprocess.STDOUT, stdout=logf,
-                    env=env_values)
+                worker = subprocess.Popen([self.executable, self.script],
+                        bufsize=1, stderr=subprocess.STDOUT, stdout=logf,
+                        env=env_values)
 
-            while worker.poll() is None:
-                if log_checker is not None:
-                    # TODO implementd the log checker here
-                    pass
+                while worker.poll() is None:
+                    if log_checker is not None:
+                        # TODO implementd the log checker here
+                        pass
 
+                self.run_status = BuildStep.FINISHED
+                return (self.result_status, self.output_dictionary)
+        except IOError, x:
+            LOG.error('could not create the output log file for the build '
+                    'step: {0}:\n{1}'.format(log_file_name, x))
             self.run_status = BuildStep.FINISHED
-            return (self.result_status, self.output_dictionary)
-
-        LOG.error('could not create the output log file for the build step: '
-                '{0}'.format(log_file_name))
+            self.result_status = BuildStep.ERROR
+            raise BuildStepException('could not create the output log file '
+                    'for the build step: {0}:\n{1}'.format(log_file_name, x))
         self.run_status = BuildStep.FINISHED
         self.result_status = BuildStep.ERROR
         return (self.result_status, {})

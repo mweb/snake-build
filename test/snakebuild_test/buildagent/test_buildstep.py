@@ -248,6 +248,7 @@ class TestBuildStep(unittest.TestCase):
                     'description': ''
                 }
             }
+
         value = _get_env_values({'NO_DEFAULT': 12}, test)
         self.assertTrue(value['INT1'] == '12')
         self.assertTrue(value['INT2'] == '42')
@@ -339,3 +340,11 @@ class TestShellBuildStep(unittest.TestCase):
         with open(logfile, 'r') as lfl:
             self.assertTrue(lfl.readline().strip() == 'TEST')
             self.assertTrue(lfl.readline().strip() == '12')
+        with self.assertRaises(BuildStepException):
+            # log file exists already and is a directory --> Error
+            result = step.run({'VAR1': 'TEST'}, 
+                    os.path.dirname(self.step_filename))
+        with self.assertRaises(BuildStepException):
+            # illegal value for VAR2
+            result = step.run({'VAR2': 'TEST'}, 
+                    os.path.dirname(self.step_filename))
