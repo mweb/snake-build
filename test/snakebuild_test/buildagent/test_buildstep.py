@@ -56,10 +56,6 @@ class TestBuildStep(unittest.TestCase):
 
         data['checks'] = {}
         self.assertFalse(_is_valid(data))
-        data['checks']['pre_condition'] = {}
-        self.assertFalse(_is_valid(data))
-        data['checks']['post_condition'] = {}
-        self.assertFalse(_is_valid(data))
         data['checks']['log_check'] = "full"
         self.assertFalse(_is_valid(data))
         data['checks']['on_error'] = "abort"
@@ -91,18 +87,6 @@ class TestBuildStep(unittest.TestCase):
         data['output'] = {}
         self.assertTrue(_is_valid(data))
 
-        data['checks']['pre_condition'] = "test"
-        self.assertFalse(_is_valid(data))
-        data['checks']['pre_condition'] = 12
-        self.assertFalse(_is_valid(data))
-        data['checks']['pre_condition'] = {}
-        self.assertTrue(_is_valid(data))
-        data['checks']['post_condition'] = "gaga"
-        self.assertFalse(_is_valid(data))
-        data['checks']['post_condition'] = 12
-        self.assertFalse(_is_valid(data))
-        data['checks']['post_condition'] = {}
-        self.assertTrue(_is_valid(data))
         data['checks']['log_check'] = True
         self.assertFalse(_is_valid(data))
         data['checks']['log_check'] = 12.12

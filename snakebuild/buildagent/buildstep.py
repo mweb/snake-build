@@ -79,8 +79,6 @@ class BuildStep(object):
         self.output_vars = stepdesc['output']
 
         # TODO do something more here
-        self.pre_condition = stepdesc['checks']['pre_condition']
-        self.post_condition = stepdesc['checks']['post_condition']
         self.log_check = stepdesc['checks']['log_check']
         self.on_error = stepdesc['checks']['on_error']
 
@@ -288,22 +286,6 @@ def _is_valid(data):
         return False
     if not isinstance(data["checks"], dict):
         LOG.error(_('The checks entry within the build step is not a '
-                'dictionary.'))
-        return False
-    if not "pre_condition" in data["checks"]:
-        LOG.error(_('The checks entry expects an object with the name '
-                'pre_condition'))
-        return False
-    if not isinstance(data["checks"]["pre_condition"], dict):
-        LOG.error(_('The pre_condition entry within checks is not a '
-                'dictionary.'))
-        return False
-    if not "post_condition" in data["checks"]:
-        LOG.error(_('The checks entry expects an object with the name '
-                'post_condition'))
-        return False
-    if not isinstance(data["checks"]["post_condition"], dict):
-        LOG.error(_('The post_condition entry within checks is not a '
                 'dictionary.'))
         return False
     if not "log_check" in data["checks"]:
