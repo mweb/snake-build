@@ -277,7 +277,6 @@ class TestBuildStep(unittest.TestCase):
             value = _get_env_values({'NO_DEFAULT': 'test'}, test)
 
 
-
 class TestShellBuildStep(unittest.TestCase):
     ''' The unit test for the snake shell build build step object
     '''
@@ -287,7 +286,8 @@ class TestShellBuildStep(unittest.TestCase):
         '''
         script = ('#!/bin/sh\n'
             'echo $VAR1\n'
-            'echo $VAR2')
+            'echo $VAR2\n'
+            'sb_set VALUE "Test value"')
         directory = tempfile.mkdtemp()
         self.script_filename = os.path.join(directory, 'simple.sh')
         self.step_filename = os.path.join(directory, 'simple.step')
@@ -337,14 +337,19 @@ class TestShellBuildStep(unittest.TestCase):
         self.assertTrue(isinstance(result, tuple))
         self.assertTrue(len(result) == 2)
         self.assertTrue(result[0] == BuildStep.SUCCESS)
+        self.assertTrue('VALUE' in result[1])
+        self.assertTrue(result[1]['VALUE'] == 'Test value')
+        self.assertTrue('VALUE' in step.output_dictionary)
+        self.assertTrue(step.output_dictionary['VALUE'] == 'Test value')
+
         with open(logfile, 'r') as lfl:
             self.assertTrue(lfl.readline().strip() == 'TEST')
             self.assertTrue(lfl.readline().strip() == '12')
         with self.assertRaises(BuildStepException):
             # log file exists already and is a directory --> Error
-            result = step.run({'VAR1': 'TEST'}, 
+            result = step.run({'VAR1': 'TEST'},
                     os.path.dirname(self.step_filename))
         with self.assertRaises(BuildStepException):
             # illegal value for VAR2
-            result = step.run({'VAR2': 'TEST'}, 
+            result = step.run({'VAR2': 'TEST'},
                     os.path.dirname(self.step_filename))

@@ -20,8 +20,10 @@
 
 import json
 import os
+import shutil
 import logging
 import subprocess
+import tempfile
 
 from snakebuild.i18n import _
 
@@ -100,13 +102,20 @@ class BuildStep(object):
 
 class ShellBuildStep(BuildStep):
     ''' The build step running a shell script. '''
+    SHELL_COMMANDS = ('#!/bin/sh\n\n'
+            'echo $1=\\"$2\\" >> $SNAKEBUILD_RETURN')
 
     def __init__(self, data):
         BuildStep.__init__(self, data)
+        self.tmp_storage_dir = tempfile.mkdtemp()
 
         self.executable = '/bin/sh'
         if 'shell' in data:
             self.executable = data['shell']
+
+    def __del__(self):
+        self._clean_up()
+        BuildStep.__del__(self)
 
     def run(self, values, log_file_name):
         ''' Run this Build Step. To run it you need to provide a dictionary
@@ -132,6 +141,8 @@ class ShellBuildStep(BuildStep):
             self.result_status = BuildStep.ERROR
             raise x
 
+        env_values = self._create_tmpfiles(env_values)
+
         log_checker = None
         if self.log_check.lower() == 'full':
             # TODO implementd the log cheker here
@@ -140,7 +151,6 @@ class ShellBuildStep(BuildStep):
         # use line buffered mode
         try:
             with open(log_file_name, 'w') as logf:
-                # TODO start the listening socket for the results
                 self.run_status = BuildStep.RUNNING
                 self.result_status = BuildStep.SUCCESS
 
@@ -154,6 +164,8 @@ class ShellBuildStep(BuildStep):
                         pass
 
                 self.run_status = BuildStep.FINISHED
+                self.output_dictionary = _parse_output_file(
+                        env_values['SNAKEBUILD_RETURN'])
                 return (self.result_status, self.output_dictionary)
         except IOError, x:
             LOG.error('could not create the output log file for the build '
@@ -166,6 +178,35 @@ class ShellBuildStep(BuildStep):
         self.result_status = BuildStep.ERROR
         return (self.result_status, {})
 
+    def _create_tmpfiles(self, env_values):
+        ''' Creates the temporary results directory and the bin directory for
+            the custom commands. The directory will be created on run and
+            will be removed at the end of the run.
+
+            @param env_values: The dictionary with all the env values, the
+                    PATH value will be changed.
+        '''
+        if os.path.isdir(self.tmp_storage_dir):
+            shutil.rmtree(self.tmp_storage_dir)
+
+        return_path = os.path.join(self.tmp_storage_dir, 'return')
+        bin_path = os.path.join(self.tmp_storage_dir, 'bin')
+
+        os.makedirs(return_path)
+        os.makedirs(bin_path)
+
+        with open(os.path.join(bin_path, 'sb_set'), 'w') as sbfile:
+            os.chmod(os.path.join(bin_path, 'sb_set'), 0755)
+            sbfile.write(self.SHELL_COMMANDS)
+
+        env_values['SNAKEBUILD_RETURN'] = os.path.join(return_path, 'answer')
+        env_values['PATH'] = '{0}:{1}'.format(bin_path, env_values['PATH'])
+        return env_values
+
+    def _clean_up(self):
+        ''' clean up all temporary files '''
+        if os.path.isdir(self.tmp_storage_dir):
+            shutil.rmtree(self.tmp_storage_dir)
 
 
 class PythonBuildStep(BuildStep):
@@ -366,3 +407,30 @@ def _get_env_values(new_values, input_vars):
                     env_values[name] = False
         env_values[name] = str(env_values[name])
     return env_values
+
+
+def _parse_output_file(filename):
+    ''' Parse the given output file. The values must be stored as key value
+        pairs. Where as the key and value are seperated with a equal sign.
+        The value might have double quotes to mark the beginning and the end
+        of the value.
+        If the value is stored in one line the double quotes are not
+        necessary.
+
+        @param filename: The file with the key value pairs.
+        @return: a dictionary with the key value pairs.
+    '''
+    if not os.path.isfile(filename):
+        return {}
+    result = {}
+    with open(filename, 'r') as retfile:
+        for line in retfile.readlines():
+            values = line.split('=')
+            if len(values) == 2:
+                value = values[1].strip()
+                if value.startswith('"'):
+                    value = value[1:]
+                if value.endswith('"'):
+                    value = value[:-1]
+                result[values[0].strip()] = value
+    return result
