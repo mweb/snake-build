@@ -25,7 +25,8 @@ import os
 import shutil
 
 from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
-        BuildStepException, load_step, _is_valid, _get_env_values
+        BuildStepException, load_step, _is_valid, _get_env_values, \
+        _check_values, _parse_output_file
 
 
 class TestBuildStep(unittest.TestCase):
@@ -275,6 +276,150 @@ class TestBuildStep(unittest.TestCase):
         test['NO_DEFAULT']['type'] = 'bool'
         with self.assertRaises(BuildStepException):
             value = _get_env_values({'NO_DEFAULT': 'test'}, test)
+
+    def test_parse_output_file(self):
+        ''' Test the parse output file helper function. '''
+        test = {'INT1': {
+                    'type': 'int',
+                    'default': 12,
+                    'description': ''
+                },
+                'INT2': {
+                    'type': 'int',
+                    'description': ''
+                },
+                'INT3': {
+                    'type': 'int',
+                    'description': ''
+                },
+                'FLOAT1': {
+                    'type': 'float',
+                    'default': 32.2,
+                    'description': ''
+                },
+                'FLOAT2': {
+                    'type': 'float',
+                    'description': ''
+                },
+                'FLOAT3': {
+                    'type': 'float',
+                    'description': ''
+                },
+                'FLOAT4': {
+                    'type': 'float',
+                    'description': ''
+                },
+                'BOOL1': {
+                    'type': 'bool',
+                    'default': True,
+                    'description': ''
+                },
+                'BOOL2': {
+                    'type': 'bool',
+                    'description': ''
+                },
+                'BOOL3': {
+                    'type': 'bool',
+                    'description': ''
+                },
+                'BOOL4': {
+                    'type': 'bool',
+                    'description': ''
+                },
+                'BOOL5': {
+                    'type': 'bool',
+                    'description': ''
+                },
+                'STR1': {
+                    'type': 'str',
+                    'default': 'TEST',
+                    'description': ''
+                },
+                'STR2': {
+                    'type': 'str',
+                    'description': ''
+                }
+            }
+        tempfile_name = ''
+        with tempfile.NamedTemporaryFile(delete=False) as resultfile:
+            tempfile_name = resultfile.name
+            resultfile.write('INT2=42\n')
+            resultfile.write('INT3=12\n')
+            resultfile.write('FLOAT2=12.3\n')
+            resultfile.write('FLOAT3=33\n')
+            resultfile.write('FLOAT4=231.111\n')
+            resultfile.write('BOOL2=True\n')
+            resultfile.write('BOOL3=False\n')
+            resultfile.write('BOOL4=1\n')
+            resultfile.write('BOOL5=0\n')
+            resultfile.write('STR2=HELLO\n')
+
+        value = _parse_output_file(tempfile_name, test)
+        self.assertTrue(value['INT1'] == 12)
+        self.assertTrue(value['INT2'] == 42)
+        self.assertTrue(value['INT3'] == 12)
+        self.assertTrue(value['FLOAT1'] == 32.2)
+        self.assertTrue(value['FLOAT2'] == 12.3)
+        self.assertTrue(value['FLOAT3'] == 33)
+        self.assertTrue(value['FLOAT4'] == 231.111)
+        self.assertTrue(value['BOOL1'] == True)
+        self.assertTrue(value['BOOL2'] == True)
+        self.assertTrue(value['BOOL3'] == False)
+        self.assertTrue(value['BOOL4'] == True)
+        self.assertTrue(value['BOOL5'] == False)
+        self.assertTrue(value['STR1'] == 'TEST')
+        self.assertTrue(value['STR2'] == 'HELLO')
+
+        with open(tempfile_name, 'a') as resultfile:
+            resultfile.write('INT2=gg42\n')
+        with self.assertRaises(BuildStepException):
+            value = _parse_output_file(tempfile_name, test)
+
+
+        with open(tempfile_name, 'w') as resultfile:
+            resultfile.write('INT2=42\n')
+        with self.assertRaises(BuildStepException):
+            value = _parse_output_file(tempfile_name, test)
+
+        os.remove(tempfile_name)
+
+    def test_check_values(self):
+        ''' Test the internal _check_values function. '''
+        # int values
+        self.assertTrue(_check_values('12', {'type': 'int'}) == 12)
+        with self.assertRaises(BuildStepException):
+            _check_values('13.2', {'type': 'int'})
+        with self.assertRaises(BuildStepException):
+            _check_values('meta', {'type': 'int'})
+
+        # float values
+        self.assertTrue(_check_values('12', {'type': 'float'}) == 12)
+        self.assertTrue(_check_values('12.123', {'type': 'float'}) == 12.123)
+        with self.assertRaises(BuildStepException):
+            _check_values('meta', {'type': 'float'})
+
+        # boolean values
+        self.assertTrue(_check_values('0', {'type': 'bool'}) == False)
+        self.assertTrue(_check_values('1', {'type': 'bool'}) == True)
+        self.assertTrue(_check_values('False', {'type': 'bool'}) == False)
+        self.assertTrue(_check_values('True', {'type': 'bool'}) == True)
+        self.assertTrue(_check_values('false', {'type': 'bool'}) == False)
+        self.assertTrue(_check_values('true', {'type': 'bool'}) == True)
+        with self.assertRaises(BuildStepException):
+            _check_values('meta', {'type': 'bool'})
+        with self.assertRaises(BuildStepException):
+            _check_values('2', {'type': 'bool'})
+        with self.assertRaises(BuildStepException):
+            _check_values('123.33', {'type': 'bool'})
+
+        # string values
+        self.assertTrue(_check_values('TEST', {'type': 'str'}) == 'TEST')
+        with self.assertRaises(BuildStepException):
+            _check_values(u'äöü', {'type': 'str'})
+
+        # unknown type
+        with self.assertRaises(BuildStepException):
+            _check_values('TEST', {'type': 'UNKNOWN'})
 
 
 class TestShellBuildStep(unittest.TestCase):

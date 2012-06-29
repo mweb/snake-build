@@ -165,7 +165,7 @@ class ShellBuildStep(BuildStep):
 
                 self.run_status = BuildStep.FINISHED
                 self.output_dictionary = _parse_output_file(
-                        env_values['SNAKEBUILD_RETURN'])
+                        env_values['SNAKEBUILD_RETURN'], self.output_vars)
                 return (self.result_status, self.output_dictionary)
         except IOError, x:
             LOG.error('could not create the output log file for the build '
@@ -369,47 +369,33 @@ def _get_env_values(new_values, input_vars):
     for name, description in input_vars.iteritems():
         if not name in new_values:
             if 'default' in description:
-                env_values[name] = description['default']
+                new_values[name] = description['default']
             else:
                 LOG.error(_('Not all required variable names are defined.'
                         ' Missing: {0}').format(name))
                 raise BuildStepException(_('Not all required variable '
                         'names are defined. Missing: {0}').format(name))
 
-        if description['type'] == 'int':
-            if not isinstance(env_values[name], int):
-                try:
-                    env_values[name] = int(env_values[name])
-                except ValueError:
-                    LOG.error(_('The given string for the value {0} is '
-                            'not an int').format(name))
-                    raise BuildStepException(_('The given string for the '
-                            'value {0} is not an int').format(name))
-        elif description['type'] == 'float':
-            if not isinstance(env_values[name], float):
-                try:
-                    float(env_values[name])
-                except ValueError:
-                    LOG.error(_('The given string for the value {0} is '
-                            'not a float').format(name))
-                    raise BuildStepException(_('The given string for the '
-                            'value {0} is not a float').format(name))
-        elif description['type'] == 'bool':
-            if not isinstance(env_values[name], bool):
-                if not env_values[name].lower() in ['true', 'false', '0', '1']:
-                    LOG.error(_('The given string for the value {0} is '
-                            'not a boolean').format(name))
-                    raise BuildStepException(_('The given string for the '
-                            'value {0} is not a boolean').format(name))
-                if env_values[name].lower() in ['true', '1']:
-                    env_values[name] = True
-                else:
-                    env_values[name] = False
+        try:
+            # do not use the returned value since this could change float
+            # values we prefere the string value over the real flota value.
+            result = _check_values(new_values[name], description)
+            if isinstance(result, (int, bool)):
+                # we handle ints and boolean differently to get a consisten
+                # result even for floats (on int) --> casted to int
+                env_values[name] = str(result)
+            else:
+                env_values[name] = str(new_values[name])
+        except BuildStepException, exc:
+            LOG.error('{0} Value: {1}'.format(exc.message, name))
+            raise BuildStepException('{0} Value: {1}'.format(exc.message,
+                    name))
+
         env_values[name] = str(env_values[name])
     return env_values
 
 
-def _parse_output_file(filename):
+def _parse_output_file(filename, output_vars):
     ''' Parse the given output file. The values must be stored as key value
         pairs. Where as the key and value are seperated with a equal sign.
         The value might have double quotes to mark the beginning and the end
@@ -418,19 +404,85 @@ def _parse_output_file(filename):
         necessary.
 
         @param filename: The file with the key value pairs.
+        @param output_vars: The variables
         @return: a dictionary with the key value pairs.
     '''
-    if not os.path.isfile(filename):
-        return {}
     result = {}
-    with open(filename, 'r') as retfile:
-        for line in retfile.readlines():
-            values = line.split('=')
-            if len(values) == 2:
-                value = values[1].strip()
-                if value.startswith('"'):
-                    value = value[1:]
-                if value.endswith('"'):
-                    value = value[:-1]
-                result[values[0].strip()] = value
+    # parse file
+    if os.path.isfile(filename):
+        with open(filename, 'r') as retfile:
+            for line in retfile.readlines():
+                values = line.split('=')
+                if len(values) == 2:
+                    value = values[1].strip()
+                    if value.startswith('"'):
+                        value = value[1:]
+                    if value.endswith('"'):
+                        value = value[:-1]
+                    result[values[0].strip()] = value
+
+    # check with defined output variables
+    for name, description in output_vars.iteritems():
+        if not name in result:
+            if 'default' in description:
+                result[name] = description['default']
+            else:
+                LOG.error(_('Not all required variable names are defined.'
+                        ' Missing: {0}').format(name))
+                raise BuildStepException(_('Not all required variable '
+                        'names are defined. Missing: {0}').format(name))
+
+        try:
+            result[name] = _check_values(result[name], description)
+        except BuildStepException, exc:
+            LOG.error('{0} Value: {1}'.format(exc.message, name))
+            raise BuildStepException('{0} Value: {1}'.format(exc.message,
+                    name))
+
     return result
+
+
+def _check_values(value, description):
+    ''' Check if a given value matches the description.
+
+        @param value
+        @param description
+        @return the input value (or the default value) as the expressed type
+    '''
+    if description['type'] == 'int':
+        if not isinstance(value, int):
+            try:
+                return int(value)
+            except ValueError:
+                raise BuildStepException(_('The given string for the '
+                        'value is not an int'))
+        return value
+    elif description['type'] == 'float':
+        if not isinstance(value, float):
+            try:
+                return float(value)
+            except ValueError:
+                raise BuildStepException(_('The given string for the value '
+                        'is not a float'))
+        return value
+    elif description['type'] == 'bool':
+        if not isinstance(value, bool):
+            if not value.lower() in ['true', 'false', '0', '1']:
+                raise BuildStepException(_('The given string for the value '
+                        'is not a boolean'))
+            if value.lower() in ['true', '1']:
+                return True
+            else:
+                return False
+        return value
+    elif description['type'] == 'str':
+        if not isinstance(value, str):
+            try:
+                return str(value)
+            except ValueError:
+                raise BuildStepException(_('The given value could not be '
+                        'transformed to a string.'))
+        return value
+
+    raise BuildStepException(_('The given type is not supported: "{0}"').
+            format(description['type']))
