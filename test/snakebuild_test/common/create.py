@@ -23,6 +23,7 @@ import unittest
 from test_config import TestConfig
 from test_output import TestOutput
 from test_appdirs import TestAppdirs
+from test_filetools import TestFileTools
 from test_versioneddir import TestVersionedDir
 
 
@@ -31,6 +32,7 @@ def suite():
     conf = unittest.TestLoader().loadTestsFromTestCase(TestConfig)
     out = unittest.TestLoader().loadTestsFromTestCase(TestOutput)
     app = unittest.TestLoader().loadTestsFromTestCase(TestAppdirs)
+    ftools = unittest.TestLoader().loadTestsFromTestCase(TestFileTools)
     verd = unittest.TestLoader().loadTestsFromTestCase(TestVersionedDir)
 
-    return unittest.TestSuite([conf, out, app, verd])
+    return unittest.TestSuite([conf, out, app, ftools, verd])
