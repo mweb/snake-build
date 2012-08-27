@@ -25,8 +25,9 @@ import os
 import shutil
 
 from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
-        BuildStepException, load_step, _is_valid, _get_env_values, \
-        _check_values, _parse_output_file
+        BuildStepException, load_step
+from snakebuild.buildagent.buildstep.buildstep import _is_valid, \
+        _get_env_values, _check_values, _parse_output_file
 
 
 class TestBuildStep(unittest.TestCase):
