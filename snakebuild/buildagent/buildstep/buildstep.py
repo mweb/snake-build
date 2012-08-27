@@ -51,8 +51,10 @@ def load_step(filename):
     data = json.load(bsf)
     if _is_valid(data):
         if data["type"] == "shell":
+            from shellbuildstep import ShellBuildStep
             return ShellBuildStep(data)
         elif data["type"] == "python":
+            from pythonbuildstep import PythonBuildStep
             return PythonBuildStep(data)
         else:
             LOG.error(_('The given build type for the build step is not '
@@ -98,138 +100,6 @@ class BuildStep(object):
             @return: (status, output_dictionary)
         '''
         raise BuildStepException('NOT IMPLEMENTED')
-
-
-class ShellBuildStep(BuildStep):
-    ''' The build step running a shell script. '''
-    SHELL_COMMANDS = ('#!/bin/sh\n\n'
-            'echo $1=\\"$2\\" >> $SNAKEBUILD_RETURN')
-
-    def __init__(self, data):
-        BuildStep.__init__(self, data)
-        self.tmp_storage_dir = tempfile.mkdtemp()
-
-        self.executable = '/bin/sh'
-        if 'shell' in data:
-            self.executable = data['shell']
-
-    def __del__(self):
-        self._clean_up()
-        BuildStep.__del__(self)
-
-    def run(self, values, log_file_name):
-        ''' Run this Build Step. To run it you need to provide a dictionary
-            with all the input variables stored within a dictionary.
-            This method will return a tuple with the result status and the
-            dictionary with the output variables.
-
-            @param values: the dictionary with all the entries for all input
-                    variables.
-            @param log_file_name: The name of the logfile to create for this
-                    run this has to be the full path. If the file exists it
-                    will be overwritten.
-            @return: (status, output_dictionary)
-        '''
-        self.run_status = BuildStep.STARTING
-        self.result_status = BuildStep.NOTHING
-        self.output_dictionary = {}
-
-        try:
-            env_values = _get_env_values(values, self.input_vars)
-        except BuildStepException, x:
-            self.run_status = BuildStep.FINISHED
-            self.result_status = BuildStep.ERROR
-            raise x
-
-        env_values = self._create_tmpfiles(env_values)
-
-        log_checker = None
-        if self.log_check.lower() == 'full':
-            # TODO implementd the log cheker here
-            pass
-
-        # use line buffered mode
-        try:
-            with open(log_file_name, 'w') as logf:
-                self.run_status = BuildStep.RUNNING
-                self.result_status = BuildStep.SUCCESS
-
-                worker = subprocess.Popen([self.executable, self.script],
-                        bufsize=1, stderr=subprocess.STDOUT, stdout=logf,
-                        env=env_values)
-
-                while worker.poll() is None:
-                    if log_checker is not None:
-                        # TODO implementd the log checker here
-                        pass
-
-                self.run_status = BuildStep.FINISHED
-                self.output_dictionary = _parse_output_file(
-                        env_values['SNAKEBUILD_RETURN'], self.output_vars)
-                return (self.result_status, self.output_dictionary)
-        except IOError, x:
-            LOG.error('could not create the output log file for the build '
-                    'step: {0}:\n{1}'.format(log_file_name, x))
-            self.run_status = BuildStep.FINISHED
-            self.result_status = BuildStep.ERROR
-            raise BuildStepException('could not create the output log file '
-                    'for the build step: {0}:\n{1}'.format(log_file_name, x))
-        self.run_status = BuildStep.FINISHED
-        self.result_status = BuildStep.ERROR
-        return (self.result_status, {})
-
-    def _create_tmpfiles(self, env_values):
-        ''' Creates the temporary results directory and the bin directory for
-            the custom commands. The directory will be created on run and
-            will be removed at the end of the run.
-
-            @param env_values: The dictionary with all the env values, the
-                    PATH value will be changed.
-        '''
-        if os.path.isdir(self.tmp_storage_dir):
-            shutil.rmtree(self.tmp_storage_dir)
-
-        return_path = os.path.join(self.tmp_storage_dir, 'return')
-        bin_path = os.path.join(self.tmp_storage_dir, 'bin')
-
-        os.makedirs(return_path)
-        os.makedirs(bin_path)
-
-        with open(os.path.join(bin_path, 'sb_set'), 'w') as sbfile:
-            os.chmod(os.path.join(bin_path, 'sb_set'), 0755)
-            sbfile.write(self.SHELL_COMMANDS)
-
-        env_values['SNAKEBUILD_RETURN'] = os.path.join(return_path, 'answer')
-        env_values['PATH'] = '{0}:{1}'.format(bin_path, env_values['PATH'])
-        return env_values
-
-    def _clean_up(self):
-        ''' clean up all temporary files '''
-        if os.path.isdir(self.tmp_storage_dir):
-            shutil.rmtree(self.tmp_storage_dir)
-
-
-class PythonBuildStep(BuildStep):
-    ''' The build step calling python functions. '''
-
-    def __init__(self, data):
-        self.BuildStep.__init__(data)
-
-        self.python_version = None
-        if 'python_version' in data:
-            self.python_version = data['python_version']
-
-    def run(self, values):
-        ''' Run this Build Step. To run it you need to provide a dictionary
-            with all the input variables stored within a dictionary.
-            This method will return a tuple with the result status and the
-            dictionary with the output variables.
-
-            @param values: the dictionary with all the entries for all input
-                    variables.
-            @return: (status, output_dictionary)
-        '''
-        pass
 
 
 class Checks(object):
@@ -373,8 +243,8 @@ def _get_env_values(new_values, input_vars):
             else:
                 LOG.error(_('Not all required variable names are defined.'
                         ' Missing: {0}').format(name))
-                raise BuildStepException(_('Not all required variable '
-                        'names are defined. Missing: {0}').format(name))
+                raise BuildStepException('Not all required variable '
+                        'names are defined. Missing: {0}'.format(name))
 
         try:
             # do not use the returned value since this could change float
@@ -429,8 +299,8 @@ def _parse_output_file(filename, output_vars):
             else:
                 LOG.error(_('Not all required variable names are defined.'
                         ' Missing: {0}').format(name))
-                raise BuildStepException(_('Not all required variable '
-                        'names are defined. Missing: {0}').format(name))
+                raise BuildStepException('Not all required variable '
+                        'names are defined. Missing: {0}'.format(name))
 
         try:
             result[name] = _check_values(result[name], description)
@@ -454,22 +324,22 @@ def _check_values(value, description):
             try:
                 return int(value)
             except ValueError:
-                raise BuildStepException(_('The given string for the '
-                        'value is not an int'))
+                raise BuildStepException('The given string for the '
+                        'value is not an int')
         return value
     elif description['type'] == 'float':
         if not isinstance(value, float):
             try:
                 return float(value)
             except ValueError:
-                raise BuildStepException(_('The given string for the value '
-                        'is not a float'))
+                raise BuildStepException('The given string for the value '
+                        'is not a float')
         return value
     elif description['type'] == 'bool':
         if not isinstance(value, bool):
             if not value.lower() in ['true', 'false', '0', '1']:
-                raise BuildStepException(_('The given string for the value '
-                        'is not a boolean'))
+                raise BuildStepException('The given string for the value '
+                        'is not a boolean')
             if value.lower() in ['true', '1']:
                 return True
             else:
@@ -480,9 +350,9 @@ def _check_values(value, description):
             try:
                 return str(value)
             except ValueError:
-                raise BuildStepException(_('The given value could not be '
-                        'transformed to a string.'))
+                raise BuildStepException('The given value could not be '
+                        'transformed to a string.')
         return value
 
-    raise BuildStepException(_('The given type is not supported: "{0}"').
+    raise BuildStepException('The given type is not supported: "{0}"'.
             format(description['type']))

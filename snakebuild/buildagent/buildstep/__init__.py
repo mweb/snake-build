@@ -19,4 +19,6 @@
 ''' The snakebuild build step package. '''
 
 from snakebuild.buildagent.buildstep.buildstep import BuildStep, \
-        PythonBuildStep, ShellBuildStep, BuildStepException, load_step
+        BuildStepException, load_step
+from snakebuild.buildagent.buildstep.pythonbuildstep import PythonBuildStep
+from snakebuild.buildagent.buildstep.shellbuildstep import ShellBuildStep
