@@ -24,8 +24,7 @@ import json
 import os
 import shutil
 
-from snakebuild.buildagent.buildstep import BuildStep, \
-        BuildStepException, load_step
+from snakebuild.buildagent.buildstep import BuildStepException, load_step
 from snakebuild.buildagent.buildstep.buildstep import _is_valid, \
         _get_env_values, _check_value, _parse_output_file, _check_input_values
 
@@ -33,6 +32,50 @@ from snakebuild.buildagent.buildstep.buildstep import _is_valid, \
 class TestBuildStep(unittest.TestCase):
     ''' The unit test for the snake build build step object
     '''
+
+    def setUp(self):
+        ''' Setup the test case. Create a directory for the test resources.
+            If it allready exists remove it.
+        '''
+        script = ('#!/bin/sh\n'
+            'echo $VAR1\n')
+        directory = tempfile.mkdtemp()
+        self.script_filename = os.path.join(directory, 'simple.sh')
+        self.step_filename = os.path.join(directory, 'simple.step')
+        self.invalid_step_filename = os.path.join(directory, 'invalid.step')
+        buildstep = {
+                'name': 'SimpleTest',
+                'description': 'Simple step for testing',
+                'type': 'undefined',
+                'script': self.script_filename,
+                'input': {
+                },
+                'output': {},
+                'checks': {
+                    'log_check': 'none',
+                    'on_error': 'abort'
+                }
+            }
+        invalid_buildstep = {
+                'description': 'Simple step for testing',
+                'script': self.script_filename,
+                'output': {},
+                'checks': {
+                    'log_check': 'none',
+                    'on_error': 'abort'
+                }
+            }
+        with open(self.script_filename, 'w') as sfl:
+            sfl.write(script)
+        with open(self.step_filename, 'w') as cfl:
+            cfl.write(json.dumps(buildstep))
+        with open(self.invalid_step_filename, 'w') as cfl:
+            cfl.write(json.dumps(invalid_buildstep))
+
+    def tearDown(self):
+        ''' Remove the temporary directory with all its files. '''
+        if os.path.isdir(os.path.dirname(self.script_filename)):
+            shutil.rmtree(os.path.dirname(self.script_filename))
 
     def test_validation_check(self):
         ''' Test the _is_valid function to check if the given dictionary is
@@ -165,6 +208,16 @@ class TestBuildStep(unittest.TestCase):
         self.assertFalse(_is_valid(data))
         data['output']['VAR1']['type'] = "float"
         self.assertTrue(_is_valid(data))
+
+    def test_load_step(self):
+        ''' Test the load_step function with illegal values. '''
+        with self.assertRaises(BuildStepException):
+            load_step(os.path.join(os.path.dirname(self.step_filename),
+                    'nothing'))
+        with self.assertRaises(BuildStepException):
+            load_step(self.step_filename)
+        with self.assertRaises(BuildStepException):
+            load_step(self.invalid_step_filename)
 
     def test_get_env_values(self):
         ''' Test the generic method to get the environment values filled with
@@ -535,81 +588,3 @@ class TestBuildStep(unittest.TestCase):
         # unknown type
         with self.assertRaises(BuildStepException):
             _check_value('TEST', {'type': 'UNKNOWN'})
-
-
-class TestShellBuildStep(unittest.TestCase):
-    ''' The unit test for the snake shell build build step object
-    '''
-    def setUp(self):
-        ''' Setup the test case. Create a directory for the test resources. If
-            it allready exists remove it.
-        '''
-        script = ('#!/bin/sh\n'
-            'echo $VAR1\n'
-            'echo $VAR2\n'
-            'sb_set VALUE "Test value"')
-        directory = tempfile.mkdtemp()
-        self.script_filename = os.path.join(directory, 'simple.sh')
-        self.step_filename = os.path.join(directory, 'simple.step')
-        buildstep = {
-                'name': 'SimpleTest',
-                'description': 'Simple step for testing',
-                'type': 'shell',
-                'shell': '/bin/sh',
-                'script': self.script_filename,
-                'input': {
-                    'VAR1': {
-                        'type': 'str',
-                        'default': 'argone',
-                        'description': ''
-                    },
-                    'VAR2': {
-                        'type': 'int',
-                        'default': 12,
-                        'description': ''
-                    }
-                },
-                'output': {},
-                'checks': {
-                    'pre_condition': {},
-                    'post_condition': {},
-                    'log_check': 'none',
-                    'on_error': 'abort'
-                }
-            }
-        with open(self.script_filename, 'w') as sfl:
-            sfl.write(script)
-        with open(self.step_filename, 'w') as cfl:
-            cfl.write(json.dumps(buildstep))
-
-    def tearDown(self):
-        ''' Remove the temporary directory with all its files. '''
-        if os.path.isdir(os.path.dirname(self.script_filename)):
-            shutil.rmtree(os.path.dirname(self.script_filename))
-
-    def test_shell_buildstep(self):
-        ''' Test the ShellBuildStep class '''
-        logfile = os.path.join(os.path.dirname(self.step_filename),
-                'shelltest.log')
-
-        step = load_step(self.step_filename)
-        result = step.run({'VAR1': 'TEST'}, logfile)
-        self.assertTrue(isinstance(result, tuple))
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(result[0] == BuildStep.SUCCESS)
-        self.assertTrue('VALUE' in result[1])
-        self.assertTrue(result[1]['VALUE'] == 'Test value')
-        self.assertTrue('VALUE' in step.output_dictionary)
-        self.assertTrue(step.output_dictionary['VALUE'] == 'Test value')
-
-        with open(logfile, 'r') as lfl:
-            self.assertTrue(lfl.readline().strip() == 'TEST')
-            self.assertTrue(lfl.readline().strip() == '12')
-        with self.assertRaises(BuildStepException):
-            # log file exists already and is a directory --> Error
-            result = step.run({'VAR1': 'TEST'},
-                    os.path.dirname(self.step_filename))
-        with self.assertRaises(BuildStepException):
-            # illegal value for VAR2
-            result = step.run({'VAR2': 'TEST'},
-                    os.path.dirname(self.step_filename))
