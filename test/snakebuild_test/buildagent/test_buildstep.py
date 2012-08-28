@@ -24,10 +24,10 @@ import json
 import os
 import shutil
 
-from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
+from snakebuild.buildagent.buildstep import BuildStep, \
         BuildStepException, load_step
 from snakebuild.buildagent.buildstep.buildstep import _is_valid, \
-        _get_env_values, _check_value, _parse_output_file
+        _get_env_values, _check_value, _parse_output_file, _check_input_values
 
 
 class TestBuildStep(unittest.TestCase):
@@ -278,6 +278,121 @@ class TestBuildStep(unittest.TestCase):
         with self.assertRaises(BuildStepException):
             value = _get_env_values({'NO_DEFAULT': 'test'}, test)
 
+    def test_check_input_values(self):
+        ''' Test the generic method to test all the input value against
+            the expected input values.
+        '''
+        test = {'INT1': {
+                    'type': 'int',
+                    'default': 12,
+                    'description': ''
+                },
+                'INT2': {
+                    'type': 'int',
+                    'default': '42',
+                    'description': ''
+                },
+                'INT3': {
+                    'type': 'int',
+                    'default': 33.2,
+                    'description': ''
+                },
+                'FLOAT1': {
+                    'type': 'float',
+                    'default': 32.2,
+                    'description': ''
+                },
+                'FLOAT2': {
+                    'type': 'float',
+                    'default': 33,
+                    'description': ''
+                },
+                'FLOAT3': {
+                    'type': 'float',
+                    'default': '12.12',
+                    'description': ''
+                },
+                'FLOAT4': {
+                    'type': 'float',
+                    'default': '14',
+                    'description': ''
+                },
+                'BOOL1': {
+                    'type': 'bool',
+                    'default': True,
+                    'description': ''
+                },
+                'BOOL2': {
+                    'type': 'bool',
+                    'default': 'True',
+                    'description': ''
+                },
+                'BOOL3': {
+                    'type': 'bool',
+                    'default': '1',
+                    'description': ''
+                },
+                'BOOL4': {
+                    'type': 'bool',
+                    'default': 'False',
+                    'description': ''
+                },
+                'BOOL5': {
+                    'type': 'bool',
+                    'default': False,
+                    'description': ''
+                },
+                'BOOL6': {
+                    'type': 'bool',
+                    'default': '0',
+                    'description': ''
+                },
+                'STR1': {
+                    'type': 'str',
+                    'default': 0,
+                    'description': ''
+                },
+                'STR2': {
+                    'type': 'str',
+                    'default': 'ASDF',
+                    'description': ''
+                },
+                'NO_DEFAULT': {
+                    'type': 'int',
+                    'description': ''
+                }
+            }
+
+        value = _check_input_values({'NO_DEFAULT': 12}, test)
+        self.assertTrue(value['INT1'] == 12)
+        self.assertTrue(value['INT2'] == 42)
+        self.assertTrue(value['INT3'] == 33)
+        self.assertTrue(value['FLOAT1'] == 32.2)
+        self.assertTrue(value['FLOAT2'] == 33)
+        self.assertTrue(value['FLOAT3'] == 12.12)
+        self.assertTrue(value['FLOAT4'] == 14)
+        self.assertTrue(value['BOOL1'] is True)
+        self.assertTrue(value['BOOL2'] is True)
+        self.assertTrue(value['BOOL3'] is True)
+        self.assertTrue(value['BOOL4'] is False)
+        self.assertTrue(value['BOOL5'] is False)
+        self.assertTrue(value['BOOL6'] is False)
+        self.assertTrue(value['STR1'] == '0')
+        self.assertTrue(value['STR2'] == 'ASDF')
+        self.assertTrue(value['NO_DEFAULT'] == 12)
+
+        with self.assertRaises(BuildStepException):
+            value = _check_input_values({}, test)
+        with self.assertRaises(BuildStepException):
+            value = _check_input_values({'NO_DEFAULT': 'test'}, test)
+
+        test['NO_DEFAULT']['type'] = 'int'
+        with self.assertRaises(BuildStepException):
+            value = _check_input_values({'NO_DEFAULT': 'test'}, test)
+        test['NO_DEFAULT']['type'] = 'bool'
+        with self.assertRaises(BuildStepException):
+            value = _check_input_values({'NO_DEFAULT': 'test'}, test)
+
     def test_parse_output_file(self):
         ''' Test the parse output file helper function. '''
         test = {'INT1': {
@@ -363,11 +478,11 @@ class TestBuildStep(unittest.TestCase):
         self.assertTrue(value['FLOAT2'] == 12.3)
         self.assertTrue(value['FLOAT3'] == 33)
         self.assertTrue(value['FLOAT4'] == 231.111)
-        self.assertTrue(value['BOOL1'] == True)
-        self.assertTrue(value['BOOL2'] == True)
-        self.assertTrue(value['BOOL3'] == False)
-        self.assertTrue(value['BOOL4'] == True)
-        self.assertTrue(value['BOOL5'] == False)
+        self.assertTrue(value['BOOL1'] is True)
+        self.assertTrue(value['BOOL2'] is True)
+        self.assertTrue(value['BOOL3'] is False)
+        self.assertTrue(value['BOOL4'] is True)
+        self.assertTrue(value['BOOL5'] is False)
         self.assertTrue(value['STR1'] == 'TEST')
         self.assertTrue(value['STR2'] == 'HELLO')
 
@@ -375,7 +490,6 @@ class TestBuildStep(unittest.TestCase):
             resultfile.write('INT2=gg42\n')
         with self.assertRaises(BuildStepException):
             value = _parse_output_file(tempfile_name, test)
-
 
         with open(tempfile_name, 'w') as resultfile:
             resultfile.write('INT2=42\n')
@@ -400,12 +514,12 @@ class TestBuildStep(unittest.TestCase):
             _check_value('meta', {'type': 'float'})
 
         # boolean values
-        self.assertTrue(_check_value('0', {'type': 'bool'}) == False)
-        self.assertTrue(_check_value('1', {'type': 'bool'}) == True)
-        self.assertTrue(_check_value('False', {'type': 'bool'}) == False)
-        self.assertTrue(_check_value('True', {'type': 'bool'}) == True)
-        self.assertTrue(_check_value('false', {'type': 'bool'}) == False)
-        self.assertTrue(_check_value('true', {'type': 'bool'}) == True)
+        self.assertTrue(_check_value('0', {'type': 'bool'}) is False)
+        self.assertTrue(_check_value('1', {'type': 'bool'}) is True)
+        self.assertTrue(_check_value('False', {'type': 'bool'}) is False)
+        self.assertTrue(_check_value('True', {'type': 'bool'}) is True)
+        self.assertTrue(_check_value('false', {'type': 'bool'}) is False)
+        self.assertTrue(_check_value('true', {'type': 'bool'}) is True)
         with self.assertRaises(BuildStepException):
             _check_value('meta', {'type': 'bool'})
         with self.assertRaises(BuildStepException):

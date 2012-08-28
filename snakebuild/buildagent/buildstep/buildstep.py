@@ -20,6 +20,7 @@
 
 import json
 import os
+import copy
 import shutil
 import logging
 import subprocess
@@ -267,6 +268,28 @@ def _get_env_values(new_values, input_vars):
         env_values[name] = str(env_values[name])
     return env_values
 
+
+def _check_input_values(values, input_vars):
+    ''' Check the given values dictionary if it contains all the expected
+        input values.
+
+        @param values: The dictionary with the values to check if all required
+                are available
+        @param input_vars: The input value dictionary with all the types and
+                default value informations.
+    '''
+    result = copy.deepcopy(values)
+    for name, description in input_vars.iteritems():
+        if not name in values:
+            if 'default' in description:
+                result[name] = description['default']
+            else:
+                LOG.error(_('Not all reuired variable names are defined. '
+                        'Missing: {0}').format(name))
+                raise BuildStepException('Not all required variable '
+                        'names are defined. Missing: {0}'.format(name))
+        result[name] = _check_value(result[name], description)
+    return result
 
 def _parse_output_file(filename, output_vars):
     ''' Parse the given output file. The values must be stored as key value
