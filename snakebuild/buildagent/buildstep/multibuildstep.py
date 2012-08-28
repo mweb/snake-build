@@ -43,4 +43,19 @@ class MultiBuildStep(BuildStep):
                     variables.
             @return: (status, output_dictionary)
         '''
-        pass
+        self.run_status = BuildStep.STARTING
+        self.result_status = BuildStep.NOTHING
+        self.output_dictionary = {}
+
+        try:
+            values = _check_input_values(values, self.input_vars)
+        except BuildStepException, x:
+            self.run_status = BuildStep.FINISHED
+            self.result_status = BuildStep.ERROR
+            raise x
+
+        # TODO run now!!!
+        self.run_status = BuildStep.FINISHED
+        self.result_status = BuildStep.ERROR
+
+        return self.result_status, self.output_dictionary
