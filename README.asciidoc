@@ -3,7 +3,7 @@ Snake-Build
 
 Snake build has the goal to provide a simple build server which should be
 configurable and usable from the shell and from a web interface. The difference
-to existing solutions should be that all configuration and build informations
+to existing solutions should be that all configuration and build information
 should be stored with a VCS. With this it must be possible to rebuild old
 builds with the same configuration as it was build originally.
 
@@ -31,7 +31,7 @@ v0.1;;
 
 v0.2;;
   This version should provide the possibility to build software with simple
-  build scripts. All the build scripts should be stroed within a VCS.
+  build scripts. All the build scripts should be stored within a VCS.
 
 v0.3;;
   Better build scripts and support for build libraries. Integration of test
