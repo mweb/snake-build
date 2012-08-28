@@ -27,7 +27,7 @@ import shutil
 from snakebuild.buildagent.buildstep import ShellBuildStep, BuildStep, \
         BuildStepException, load_step
 from snakebuild.buildagent.buildstep.buildstep import _is_valid, \
-        _get_env_values, _check_values, _parse_output_file
+        _get_env_values, _check_value, _parse_output_file
 
 
 class TestBuildStep(unittest.TestCase):
@@ -384,43 +384,43 @@ class TestBuildStep(unittest.TestCase):
 
         os.remove(tempfile_name)
 
-    def test_check_values(self):
-        ''' Test the internal _check_values function. '''
+    def test_check_value(self):
+        ''' Test the internal _check_value function. '''
         # int values
-        self.assertTrue(_check_values('12', {'type': 'int'}) == 12)
+        self.assertTrue(_check_value('12', {'type': 'int'}) == 12)
         with self.assertRaises(BuildStepException):
-            _check_values('13.2', {'type': 'int'})
+            _check_value('13.2', {'type': 'int'})
         with self.assertRaises(BuildStepException):
-            _check_values('meta', {'type': 'int'})
+            _check_value('meta', {'type': 'int'})
 
         # float values
-        self.assertTrue(_check_values('12', {'type': 'float'}) == 12)
-        self.assertTrue(_check_values('12.123', {'type': 'float'}) == 12.123)
+        self.assertTrue(_check_value('12', {'type': 'float'}) == 12)
+        self.assertTrue(_check_value('12.123', {'type': 'float'}) == 12.123)
         with self.assertRaises(BuildStepException):
-            _check_values('meta', {'type': 'float'})
+            _check_value('meta', {'type': 'float'})
 
         # boolean values
-        self.assertTrue(_check_values('0', {'type': 'bool'}) == False)
-        self.assertTrue(_check_values('1', {'type': 'bool'}) == True)
-        self.assertTrue(_check_values('False', {'type': 'bool'}) == False)
-        self.assertTrue(_check_values('True', {'type': 'bool'}) == True)
-        self.assertTrue(_check_values('false', {'type': 'bool'}) == False)
-        self.assertTrue(_check_values('true', {'type': 'bool'}) == True)
+        self.assertTrue(_check_value('0', {'type': 'bool'}) == False)
+        self.assertTrue(_check_value('1', {'type': 'bool'}) == True)
+        self.assertTrue(_check_value('False', {'type': 'bool'}) == False)
+        self.assertTrue(_check_value('True', {'type': 'bool'}) == True)
+        self.assertTrue(_check_value('false', {'type': 'bool'}) == False)
+        self.assertTrue(_check_value('true', {'type': 'bool'}) == True)
         with self.assertRaises(BuildStepException):
-            _check_values('meta', {'type': 'bool'})
+            _check_value('meta', {'type': 'bool'})
         with self.assertRaises(BuildStepException):
-            _check_values('2', {'type': 'bool'})
+            _check_value('2', {'type': 'bool'})
         with self.assertRaises(BuildStepException):
-            _check_values('123.33', {'type': 'bool'})
+            _check_value('123.33', {'type': 'bool'})
 
         # string values
-        self.assertTrue(_check_values('TEST', {'type': 'str'}) == 'TEST')
+        self.assertTrue(_check_value('TEST', {'type': 'str'}) == 'TEST')
         with self.assertRaises(BuildStepException):
-            _check_values(u'äöü', {'type': 'str'})
+            _check_value(u'äöü', {'type': 'str'})
 
         # unknown type
         with self.assertRaises(BuildStepException):
-            _check_values('TEST', {'type': 'UNKNOWN'})
+            _check_value('TEST', {'type': 'UNKNOWN'})
 
 
 class TestShellBuildStep(unittest.TestCase):

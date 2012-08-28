@@ -56,6 +56,9 @@ def load_step(filename):
         elif data["type"] == "python":
             from pythonbuildstep import PythonBuildStep
             return PythonBuildStep(data)
+        elif data["type"] == "multi":
+            from multibuildstep import MultiBuildStep
+            return MultiBuildStep(data)
         else:
             LOG.error(_('The given build type for the build step is not '
                     'supported: {0} ({1})').format(data["type"], filename))
@@ -249,7 +252,7 @@ def _get_env_values(new_values, input_vars):
         try:
             # do not use the returned value since this could change float
             # values we prefere the string value over the real flota value.
-            result = _check_values(new_values[name], description)
+            result = _check_value(new_values[name], description)
             if isinstance(result, (int, bool)):
                 # we handle ints and boolean differently to get a consisten
                 # result even for floats (on int) --> casted to int
@@ -303,7 +306,7 @@ def _parse_output_file(filename, output_vars):
                         'names are defined. Missing: {0}'.format(name))
 
         try:
-            result[name] = _check_values(result[name], description)
+            result[name] = _check_value(result[name], description)
         except BuildStepException, exc:
             LOG.error('{0} Value: {1}'.format(exc.message, name))
             raise BuildStepException('{0} Value: {1}'.format(exc.message,
@@ -312,7 +315,7 @@ def _parse_output_file(filename, output_vars):
     return result
 
 
-def _check_values(value, description):
+def _check_value(value, description):
     ''' Check if a given value matches the description.
 
         @param value
