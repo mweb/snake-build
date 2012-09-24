@@ -37,11 +37,12 @@ from snakebuild.common import create_logger, Config, \
         set_logging_to_config_values, AppDirs, output, tmp_data_dir
 from snakebuild import __version__
 from snakebuild.resourceserver import parse_command_line, start_server
+from snakebuild.commands import register_argument_parsers
 
 LOG = logging.getLogger('snakebuild.resourceserver')
 
 if __name__ == '__main__':
-    options, args = parse_command_line()
+    args = parse_command_line(register_argument_parsers, __version__)
     AppDirs().init('snakebuild')
     config = Config()
     config.init_default_config(AppDirs().get_shared_data_file(
@@ -49,24 +50,20 @@ if __name__ == '__main__':
     create_logger(config, 'ResourceServer')
 
     config.load_default()
-    if options.configfile is not None:
-        if os.path.isfile(options.configfile.strip()):
-            config.load(options.configfile)
+    if args.configfile is not None:
+        if os.path.isfile(args.configfile.strip()):
+            config.load(args.configfile)
         else:
             output.error(_("The specified config file does not exist: \n"
-                    "{0}").format(options.configfile))
+                    "{0}").format(args.configfile))
             exit(-1)
 
     set_logging_to_config_values(config, 'ResourceServer')
     LOG.debug(_('Config file loaded start the server.'))
 
-    if options.version:
-        print _('SnakeBuild-ResrouceServer: {0}').format(__version__)
-        sys.exit(0)
-
     if not os.path.exists(os.path.join(tmp_data_dir(), 'snakebuild')):
         os.mkdir(os.path.join(tmp_data_dir(), 'snakebuild'))
 
-    start_server(options, args, config)
+    start_server(args, config)
 
     LOG.debug(_('finished'))

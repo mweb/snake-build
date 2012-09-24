@@ -26,24 +26,22 @@ from snakebuild.i18n import _
 from snakebuild.resourceclient.clientcmds import *
 
 
-def run_client(options, arguments, config):
+def run_client(args, config):
     ''' Start the client command and see what the user wants.
 
-        @param options: the options set via the command line parameters
-        @param arguments: the arguments for the command the first argument
-                within this list is always the command it self.
+        @param args: the arguments given to the command.
         @param config: The loaded config object
         @return true or false depends on success or failure
     '''
-    if options.username is not None:
-        config.set('ResourceClient', 'clientname', options.username)
-    if options.server is not None:
-        config.set('ResourceClient', 'hostname', options.server)
-    if options.port is not None:
-        config.set('ResourceClient', 'port', options.port)
+    if args.username is not None:
+        config.set('ResourceClient', 'clientname', args.username)
+    if args.server is not None:
+        config.set('ResourceClient', 'hostname', args.server)
+    if args.port is not None:
+        config.set('ResourceClient', 'port', args.port)
 
     try:
-        return handle_cmd(arguments, options, config)
+        return handle_cmd(args, config)
     except KeyboardInterrupt:
         output.error(_('Abort by Keyboard Interrupt.'))
         return False

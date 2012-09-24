@@ -28,19 +28,21 @@ from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.remote.resourceserver import ResourceServerRemoteError
 
 
-@command('details')
-def details(options, config, name):
+@command('details', (
+    (('name',), {'help': _('The name of the resource to get the details '
+            'for')}),
+    ))
+def details(args, config):
     ''' Get the details about one resource.
 
-        @param options: The options provided to this command call
+        @param args: The arguments provided with the command
         @param config: The config object to use
-        @param name: The name of the resource to get the details for
 
         @return True on success, False on error and nothing on wrong usage.
     '''
     srvr = get_resource_server(config)
     try:
-        answer = srvr.get_resource_details(name)
+        answer = srvr.get_resource_details(args.name)
     except ResourceServerRemoteError, exc:
         output.error(_("Got error while talking with the server:\n "
                 "{0}").format(exc))

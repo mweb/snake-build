@@ -18,30 +18,27 @@
 # along with Snake-Build.  If not, see <http://www.gnu.org/licenses/>
 ''' The command line parser of the sb-resourceserver application. '''
 
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 from snakebuild.i18n import _
 
 
-def parse_command_line():
+def parse_command_line(regiser_func, version):
     ''' Read the command line and parse it. All command line arguments are
         specified within this method.
-    '''
-    usage = _('usage: %prog [OPTIONS]\n')
 
-    parser = OptionParser(usage)
-    parser.add_option('-f', '--configfile', dest='configfile', metavar='FILE',
+        @param regiser_func: the function to call to register all the
+                subparsers
+        @param version: The version string to show.
+        @return: the parsed arguments
+    '''
+    parser = ArgumentParser(description=_('The resourceserver to ask for '
+            'build or test resources.'), version=version)
+    parser.add_argument('--configfile', '-f',
         help=_('The configfile to load. This will be the last file to be '
         'loaded and it will be overwritten for storing a new '
         'configuration.'), default=None)
-    parser.add_option('--background', dest='background', action='store_true',
-            help=_("Run the server in background"),
-            default=False)
-    parser.add_option('-v', '--version', dest='version', action='store_true',
-            help=_('Ask for the version.'), default=False)
-    parser.add_option('--tag', dest='tag', help='Use the config file from the '
-            'given tag or branch instead of master', default=None)
 
-    (options, args) = parser.parse_args()
+    regiser_func(parser)
 
-    return options, args
+    return parser.parse_args()

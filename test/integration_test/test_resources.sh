@@ -87,16 +87,16 @@ function main {
 # run the server with the given version of the config
 function run_server {
     if [ $# -eq 2 ]; then
-        PARAMS="--background --configfile=$1 --tag $2"
+        PARAMS="--background --tag $2"
     else
-        PARAMS="--background --configfile=$1"
+        PARAMS="--background"
     fi
 
     if [ ${COVERAGE} -eq 0 ]; then
         python ../../bin/sb-resourceserver start ${PARAMS}
     else
         cd server
-        python-coverage run -a ../../../bin/sb-resourceserver start ${PARAMS}
+        python-coverage run -a ../../../bin/sb-resourceserver --configfile=$1 start ${PARAMS}
         cd -
     fi
 }
@@ -120,10 +120,10 @@ function check_resources {
     expected_count=$(($2+1))
 
     if [ ${COVERAGE} -eq 0 ]; then
-        count=`python ../../bin/sb-resourceclient status --configfile=$1 | wc -l`
+        count=`python ../../bin/sb-resourceclient --configfile=$1 status | wc -l`
     else
         cd client
-        count=`python-coverage run -a ../../../bin/sb-resourceclient status --configfile=$1 | wc -l`
+        count=`python-coverage run -a ../../../bin/sb-resourceclient --configfile=$1 status | wc -l`
         cd -
     fi
 

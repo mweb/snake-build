@@ -64,9 +64,9 @@ class TestCommands(unittest.TestCase):
         self.assertTrue('status' in SHELL_COMMANDS)
         self.assertTrue(
                 SHELL_COMMANDS['status'][0](None, self.config) == False)
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
         self.assertTrue(SHELL_COMMANDS['status'][0](None, self.config) \
                 == True)
@@ -79,9 +79,9 @@ class TestCommands(unittest.TestCase):
         self.assertTrue('details' in SHELL_COMMANDS)
         self.assertFalse(SHELL_COMMANDS['details'][0](None, self.config,
                 'Test1'))
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
         self.assertTrue(SHELL_COMMANDS['details'][0](None, self.config,
                 'Test1'))
@@ -101,9 +101,9 @@ class TestCommands(unittest.TestCase):
         self.assertFalse(SHELL_COMMANDS['release'][0](_Options(), self.config,
                 'Test1'))
 
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
 
         # normal acquire release

@@ -62,9 +62,9 @@ class TestResourceServer(unittest.TestCase):
         with self.assertRaises(ClientCommunicationException):
             rsrc_srvr.get_status_list()
 
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
 
         self.assertTrue(type(rsrc_srvr.get_status_list()) == list)
@@ -81,9 +81,9 @@ class TestResourceServer(unittest.TestCase):
         with self.assertRaises(ResourceServerIllegalParameterError):
             rsrc_srvr.get_resource_details(12)
 
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
 
         self.assertTrue(type(rsrc_srvr.get_resource_details('Test1')) == dict)
@@ -119,9 +119,9 @@ class TestResourceServer(unittest.TestCase):
             rsrc_srvr.release_resource('mytest', 'test1', 12)
 
         # now do the tests with the server running
-        self.assertTrue(0 == subprocess.call([self.server_bin, 'start',
-                '--background', '-f',
-                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf'))]))
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
         time.sleep(0.2)
         with self.assertRaises(ResourceServerIllegalParameterError):
             rsrc_srvr.acquire_resource(12.2, 'test1', False)

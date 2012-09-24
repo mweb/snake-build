@@ -28,16 +28,18 @@ from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.remote.resourceserver import ResourceServerRemoteError
 
 
-@command('acquire')
-def acquire(options, config, tag, exclusive=False):
+@command('acquire', (
+    (('--exclusive',), {'action': 'store_true', 'help': _('Set this flag to '
+            'get a resource fro exclusive usage.'), 'default': False}),
+    (('tag',), {'help': _('The tag to search for in a resource or a resource '
+            'name.')})
+    ))
+def acquire(args, config):
     ''' Acquire a resource with a given tag. The tag is either a tag defined
         by one or multiple resources or a name of a resource to get.
 
-        @param options: The options provided to this command call
+        @param args: The arguments provided to this command
         @param config: The config object to use
-        @param tag: The tag to search for in a resource or a resource name
-        @param exclusive: Set this flag to True to get a resource for
-            exclusive usage.
 
         @return True on success, False on error and nothing on wrong usage.
     '''
@@ -45,24 +47,8 @@ def acquire(options, config, tag, exclusive=False):
 
     name = config.get_s('ResourceClient', 'clientname')
 
-    if type(exclusive) is not bool:
-        if type(exclusive) is str or type(exclusive) is unicode:
-            if exclusive.lower() == "true" or exclusive.lower() == "exclusive":
-                exclusive = True
-            elif exclusive.lower() == "false":
-                exclusive = False
-            else:
-                output.error(_("The value for the exclusive flag has to be "
-                        "either true, exclusive or false, everything else is "
-                        "invalid."))
-                return False
-        else:
-            output.error(_("The given value for the exclusive flag could not "
-                    "be parsed"))
-            return False
-
     try:
-        answer = srvr.acquire_resource(name, tag, exclusive)
+        answer = srvr.acquire_resource(name, args.tag, args.exclusive)
     except ResourceServerRemoteError, exc:
         output.error(_("Got error while talking with the server:\n "
                 "{0}").format(exc))

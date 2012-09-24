@@ -32,7 +32,7 @@ import snakebuild.buildagent.agentcmds
 LOG = logging.getLogger('snakebuild.buildagent.agent')
 
 
-def run_agent(options, arguments, config):
+def run_agent(arguments, config):
     ''' Start the build agent.
 
         @param options: The parsed commandline options.
@@ -42,31 +42,39 @@ def run_agent(options, arguments, config):
         @return true or false depends on success or failure
     '''
     try:
-        return handle_cmd(arguments, options, config)
+        return handle_cmd(arguments, config)
     except KeyboardInterrupt:
         output.error(_('Abort by keyboard interrupt.'))
         return False
 
 
-@command('stop')
-def stop_agent(options, config, name="snakebuild"):
+@command('stop', (
+    (('--name',), {'help': _('The name of the agent to stop.'), 
+        'default': 'snakebuildagent'}),
+    ))
+def stop_agent(args, config):
     ''' Stop the agent that is running in the background.
 
-        @param options: The options provided to this command call
+        @param args: The arguments given with the command.
         @param config: The config object to use
-        @param name: The name of the agent to stop.
         @return True on success, False on error and nothing on wrong usage.
     '''
     host = config.get_s('buildagent', 'hostname')
     port = config.get_s('buildagent', 'port')
-    name = "ba_{0}".format(name.lower())
+    name = "ba_{0}".format(args.name.lower())
 
     Daemon(Server(host, port, name), Daemon.STOP)
     return True
 
 
-@command('start')
-def start_agent(options, config, name="SnakeBuild"):
+@command('start', (
+    (('--background',), {'action': 'store_true',
+        'help': _('Run the build agent as a daemon (background)'),
+        'default': False}),
+    (('--name',), {'help': _('The name of the agent to start. This name '
+        'has to be unique on one server.'), 'default': 'snakebuildagent'})
+    ))
+def start_agent(args, config):
     ''' Start the build agent.
 
         By specifing the name it is possible to run multiple build agent
@@ -74,13 +82,11 @@ def start_agent(options, config, name="SnakeBuild"):
 
         @param options: The options provided to this command call
         @param config: The config object to use
-        @param name: The name to use for the build agent. This name has to be
-                unique on one server.
         @return True on success, False on error and nothing on wrong usage.
     '''
     host = config.get_s('buildagent', 'hostname')
     port = config.get_s('buildagent', 'port')
-    name = "ba_{0}".format(name.lower())
+    name = "ba_{0}".format(args.name.lower())
 
 #    agent = BuildAgent()
     agent = None

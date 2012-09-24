@@ -28,12 +28,12 @@ from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.remote.resourceserver import ResourceServerRemoteError
 
 
-@command('status')
+@command('status', ())
 def status(options, config):
     ''' This is the command to get a list with information about all the
         resources.
 
-        @param options: The options provided to this command call
+        @param args: The arguments provided to this command
         @param config: The config object to use.
 
         @return True on success, False on error and nothing on wrong usage.

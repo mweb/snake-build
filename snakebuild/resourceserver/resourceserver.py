@@ -36,43 +36,53 @@ from snakebuild.resourceserver.resource import ResourceManager
 LOG = logging.getLogger('snakebuild.resourceserver.resourceserver')
 
 
-def start_server(options, arguments, config):
+def start_server(arguments, config):
     ''' Start the resource server.
 
-        @param options: the options set via the command line parameters
         @param config: the global configuration to use for starting the server
-        @param arguments: the arguments for the command the first argument
-                within this list is always the command it self.
+        @param arguments: the arguments given to the command.
         @return true or false depends on success or failure
     '''
     try:
-        return handle_cmd(arguments, options, config)
+        return handle_cmd(arguments, config)
     except KeyboardInterrupt:
         output.error(_('Abort by keyboard interrupt.'))
         return False
 
 
-@command('stop')
-def stop_server(options, config):
-    ''' Stop the resource server running on this machine.
+@command('stop', (
+    (('--name',), {'help': _('The name of the resourceserver to stop.'),
+        'default': 'resourceserver'}),
+    ))
+def stop_server(args, config):
+    ''' Stop the resource server.
 
+        @param args: The arguments provided with the command
         @param config: The config object to use
-        @param name: The name of the agent to stop.
+
+        @return true or false depends on success or failure
     '''
     host = config.get_s('resourceserver', 'hostname')
     port = config.get_s('resourceserver', 'port')
-    name = 'resourceserver'
 
-    Daemon(Server(host, port, name), Daemon.STOP)
+    Daemon(Server(host, port, args.name), Daemon.STOP)
     return True
 
 
-@command('start')
-def start_server_now(options, config):
+@command('start', (
+    (('--background',), {'action': 'store_true',
+        'help': _('Run the build agent as a daemon (background)'),
+        'default': False}),
+    (('--tag',), {'default': 'master', 'help': _('specify the git tag to use '
+        'to read the config of the server.')}),
+    (('--name',), {'help': _('The name of the agent to start. This name '
+        'has to be unique on one server.'), 'default': 'snakebuildagent'})
+    ))
+def start_server_now(args, config):
     ''' Start the resource server.
 
+        @param args: The arguments provided with the command
         @param config: The config object to use
-        @param name: The name of the agent to stop.
 
         @return true or false depends on success or failure
     '''
@@ -101,14 +111,14 @@ def start_server_now(options, config):
         clone_repo(repos_name, path, repos_config)
         versioned_dir = get_versioned_directory(path)
 
-    if options.tag is not None:
-        versioned_dir.update(options.tag)
+    if args.tag is not None:
+        versioned_dir.update(args.tag)
     else:
         # if nothing is specified always go for the master
         versioned_dir.update("master")
 
     resourcemanager = ResourceManager(versioned_dir)
-    if options.background:
+    if args.background:
         Daemon(Server(host, port, name, resourcemanager),
                 Daemon.START)
     else:

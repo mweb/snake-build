@@ -28,15 +28,17 @@ from snakebuild.resourceclient.clientcmds.common import get_resource_server
 from snakebuild.remote.resourceserver import ResourceServerRemoteError
 
 
-@command('release')
-def release(options, config, name, exclusive=False):
+@command('release', (
+    (('name',), {'help': _('The name of the resource to release')}),
+    (('--exclusive',), {'action': 'store_true', 'help': _('Set this flag to '
+            'release the exclusive flag from a resource and receive a '
+            '"normal" lock'), 'default': False}),
+    ))
+def release(args, config):
     ''' Release a previsously acquired resource.
 
-        @param options: The options provided to this command call
+        @param args: The arguments provided to this command
         @param config: The config object to use
-        @param name: The name of the resource to release.
-        @param exclusive: Set this flag to True to release the exclusive usage
-            of a resource but keep one "normal" lock of the resource.
 
         @return True on success, False on error and nothing on wrong usage.
     '''
@@ -44,24 +46,8 @@ def release(options, config, name, exclusive=False):
 
     username = config.get_s('ResourceClient', 'clientname')
 
-    if type(exclusive) is not bool:
-        if type(exclusive) is str or type(exclusive) is unicode:
-            if exclusive.lower() == "true" or exclusive.lower() == "exclusive":
-                exclusive = True
-            elif exclusive.lower() == "false":
-                exclusive = False
-            else:
-                output.error(_("The value for the exclusive flag has to be "
-                        "either true, exclusive or false, everything else is "
-                        "invalid."))
-                return False
-        else:
-            output.error(_("The given value for the exclusive flag could not "
-                    "be parsed"))
-            return False
-
     try:
-        answer = srvr.release_resource(username, name, exclusive)
+        answer = srvr.release_resource(username, args.name, args.exclusive)
     except ResourceServerRemoteError, exc:
         output.error(_("Got error while talking with the server:\n "
                 "{0}").format(exc))

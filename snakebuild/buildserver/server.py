@@ -24,12 +24,11 @@ import logging
 LOG = logging.getLogger('snakebuild.buildserver.server')
 
 
-def run_server(options, arguments, config):
+def run_server(arguments, config):
     ''' Start the build server.
 
-        @param options: The parsed commandline options.
+        @param arguments: the arguments given to the command.
         @param config: The config object loaded during start.
-        @param arguments: the arguments for the command.
 
         @return true or false depends on success or failure
     '''

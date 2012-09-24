@@ -19,9 +19,9 @@
 ''' The unit test for the output functions '''
 
 import unittest
+import argparse
 
-from snakebuild.commands import handle_cmd, command
-from snakebuild.common import Config
+from snakebuild.commands import handle_cmd, command, register_argument_parsers
 
 
 class TestHandler(unittest.TestCase):
@@ -31,86 +31,102 @@ class TestHandler(unittest.TestCase):
         ''' Setup the test case. '''
         pass
 
-    def test_help_commands(self):
-        ''' Test the handle_cmd with the help command.
-        '''
-        self.assertTrue(handle_cmd(['help'], None, None))
-        self.assertFalse(handle_cmd(['help', 'other'], None, None))
-        self.assertTrue(handle_cmd(['help', 'test1'], None, None))
-        self.assertTrue(handle_cmd(['help', 'help'], None, None))
-
-        config = Config()
-        self.assertTrue(handle_cmd(['help', 'configfile'], None, config))
-        self.assertTrue(handle_cmd([], None, None))
-        self.assertFalse(handle_cmd(['ping'], None, None))
-
     def test_handle_cmd(self):
         ''' Test the handle_cmd for the common command handling.
         '''
-        self.assertTrue(handle_cmd(['test1'], None, None))
-        self.assertFalse(handle_cmd(['test1', 'param1'], None, None))
+        parser = argparse.ArgumentParser()
+        register_argument_parsers(parser)
 
-        self.assertFalse(handle_cmd(['test2'], None, None))
-        self.assertTrue(handle_cmd(['test2', 'param1'], None, None))
-        self.assertFalse(handle_cmd(['test2', 'param1', 'param3'], None, None))
+        args = parser.parse_args(['test1'])
+        self.assertTrue(handle_cmd(args, None))
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test1', 'param1'])
 
-        self.assertTrue(handle_cmd(['test3'], None, None))
-        self.assertTrue(handle_cmd(['test3', 'param1'], None, None))
-        self.assertFalse(handle_cmd(['test3', 'param1', 'param3'], None, None))
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test2'])
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test2', 'param1', 'param2'])
+        args = parser.parse_args(['test2', 'param1'])
+        self.assertTrue(handle_cmd(args, None))
 
-        self.assertFalse(handle_cmd(['test4'], None, None))
-        self.assertTrue(handle_cmd(['test4', 'param1'], None, None))
-        self.assertTrue(handle_cmd(['test4', 'param1', 'param3'], None, None))
+        args = parser.parse_args(['test3'])
+        self.assertTrue(handle_cmd(args, None))
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test3', 'param1', 'param2'])
+        args = parser.parse_args(['test3', '--param1', 'value1'])
+        self.assertTrue(handle_cmd(args, None))
 
-        self.assertFalse(handle_cmd(['test5', 'param1'], None, None))
-        self.assertFalse(handle_cmd(['test5', 12], None, None))
-        self.assertFalse(handle_cmd(['test5', 12], 11, None))
-        self.assertTrue(handle_cmd(['test5', 12], 11, 10))
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test4'])
+        args = parser.parse_args(['test4', 'param1'])
+        self.assertTrue(handle_cmd(args, None))
+        args = parser.parse_args(['test4', 'param1', '--param2', 'value2'])
+        self.assertTrue(handle_cmd(args, None))
+
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test5'])
+        with self.assertRaises(SystemExit):
+            args = parser.parse_args(['test5', 'param1'])
+        args = parser.parse_args(['test5', '12'])
+        self.assertFalse(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(args, 10))
 
 
-@command('test1')
+@command('test1', ())
 def _test1(options, config):
     ''' The first test call
     '''
     return True
 
 
-@command('test2')
-def _test2(options, config, param1):
+@command('test2', (
+        (('param1',), {'help': 'The description of the first parameter'}),
+    ))
+def _test2(args, config):
     ''' The second test call with one parameter
-        @param param1: The description of the first parameter
     '''
+    if args.param1 is None:
+        raise Exception()
     return True
 
 
-@command('test3')
-def _test3(options, config, param1=12):
-    ''' The third test call with one optional parameter 
+@command('test3', (
+        (('--param1',), {'help': 'The description of the first parameter',
+            'default': 12}),
+    ))
+def _test3(args, config):
+    ''' The third test call with one optional parameter
         @param param1: The description of the first parameter
     '''
+    if args.param1 is None:
+        raise Exception()
     return True
 
 
-@command('test4')
-def _test4(options, config, param1, param2=12):
-    ''' The fourth test call with two parameters one is optional 
-        @param param1: The description of the first parameter
-        @param param2: The description of the second parameter
+@command('test4', (
+        (('param1',), {'help': 'The description of the first parameter'}),
+        (('--param2',), {'help': 'The description of the second parameter',
+            'default': 12})
+    ))
+def _test4(args, config):
+    ''' The fourth test call with two parameters one is optional
     '''
+    if args.param1 is None or args.param2 is None:
+        raise Exception()
     return True
 
 
-@command('test5')
-def _test5(options, config, param1):
+@command('test5', (
+        (('param1',), {'help': 'The description of the first parameter',
+            'type': int}),
+    ))
+def _test5(args, config):
     ''' The fifth test call with one parameter. This call is special since
         it check the parameter 1 the options and config values.
         @param param1: The description of the first parameter
     '''
-    if not param1 == 12:
+    if not args.param1 == 12:
         return False
-
-    if not options == 11:
-        return
 
     if not config == 10:
         return False
