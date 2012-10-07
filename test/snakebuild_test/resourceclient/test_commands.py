@@ -76,30 +76,37 @@ class TestCommands(unittest.TestCase):
     def test_details_cmd(self):
         ''' Test the status command function.
         '''
+        args = _Options()
+        args.name = 'Test1'
+        args.exclusive = False
+
         self.assertTrue('details' in SHELL_COMMANDS)
-        self.assertFalse(SHELL_COMMANDS['details'][0](None, self.config,
-                'Test1'))
+        self.assertFalse(SHELL_COMMANDS['details'][0](args, self.config))
         self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
                 'start', '--background']))
         time.sleep(0.2)
-        self.assertTrue(SHELL_COMMANDS['details'][0](None, self.config,
-                'Test1'))
+        self.assertTrue(SHELL_COMMANDS['details'][0](args, self.config))
 
         # ask for a not existing resource
-        self.assertFalse(SHELL_COMMANDS['details'][0](None, self.config,
-                'Test11'))
+        args.name = 'Test11'
+        self.assertFalse(SHELL_COMMANDS['details'][0](args, self.config))
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
     def test_acquire_release_cmd(self):
         ''' Test the acquire and the release command functions.
         '''
-        self.assertTrue('details' in SHELL_COMMANDS)
-        self.assertFalse(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1'))
-        self.assertFalse(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1'))
+        args = _Options()
+        args.tag = 'Test1'
+        args.name = 'Test1'
+        args.exclusive = False
+
+        self.assertTrue('acquire' in SHELL_COMMANDS)
+        self.assertTrue('release' in SHELL_COMMANDS)
+
+        self.assertFalse(SHELL_COMMANDS['acquire'][0](args, self.config))
+        self.assertFalse(SHELL_COMMANDS['release'][0](args, self.config))
 
         self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
@@ -107,49 +114,21 @@ class TestCommands(unittest.TestCase):
         time.sleep(0.2)
 
         # normal acquire release
-        self.assertTrue(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1'))
-        self.assertTrue(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1'))
+        self.assertTrue(SHELL_COMMANDS['acquire'][0](args, self.config))
+        self.assertTrue(SHELL_COMMANDS['release'][0](args, self.config))
 
         # exclusive acquire, release
-        self.assertTrue(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1', 'True'))
-        self.assertTrue(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1', 'exclusive'))
-        self.assertTrue(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1'))
-
-        # non exclusive acquire, release (explicitly specified)
-        self.assertTrue(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1', 'false'))
-        self.assertTrue(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1', 'FALSE'))
-
-        # illegal paramter for exclusive
-        self.assertFalse(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1', 'gogogo'))
-        self.assertFalse(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test1', 12))
-        self.assertFalse(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1', 'help'))
-        self.assertFalse(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test1', 14.5))
+        args.exclusive = True
+        self.assertTrue(SHELL_COMMANDS['acquire'][0](args, self.config))
+        self.assertTrue(SHELL_COMMANDS['release'][0](args, self.config))
+        args.exclusive = False
+        self.assertTrue(SHELL_COMMANDS['release'][0](args, self.config))
 
         # acquire, release (of not existing resource)
-        self.assertFalse(SHELL_COMMANDS['acquire'][0](_Options(), self.config,
-                'Test11'))
-        self.assertFalse(SHELL_COMMANDS['release'][0](_Options(), self.config,
-                'Test11'))
-
-        # use a specific username
-        opt = _Options()
-        opt.username = "gaga"
-        self.assertTrue(SHELL_COMMANDS['acquire'][0](opt, self.config,
-                'Test1'))
-        self.assertTrue(SHELL_COMMANDS['release'][0](opt, self.config,
-                'Test1'))
-        # TODO check username
+        args.tag = 'Test11'
+        args.name = 'Test11'
+        self.assertFalse(SHELL_COMMANDS['acquire'][0](args, self.config))
+        self.assertFalse(SHELL_COMMANDS['release'][0](args, self.config))
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
