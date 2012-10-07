@@ -37,12 +37,11 @@ from snakebuild.common import create_logger, Config, \
         set_logging_to_config_values, AppDirs, tmp_data_dir
 from snakebuild import __version__
 from snakebuild.buildagent import parse_command_line, run_agent
-from snakebuild.commands import register_argument_parsers
 
 LOG = logging.getLogger('snakebuild.buildagent')
 
 if __name__ == '__main__':
-    args = parse_command_line(register_argument_parsers, __version__)
+    args = parse_command_line(sys.argv[1:], __version__)
     AppDirs().init('snakebuild')
     config = Config()
     config.init_default_config(AppDirs().get_shared_data_file(

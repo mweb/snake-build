@@ -21,14 +21,14 @@
 from argparse import ArgumentParser
 
 from snakebuild.i18n import _
+from snakebuild.commands import register_argument_parsers
 
 
-def parse_command_line(regiser_func, version):
+def parse_command_line(args, version):
     ''' Read the command line and parse it. All command line arguments are
         specified within this method.
 
-        @param regiser_func: the function to call to register all the
-                subparsers
+        @param args: The arguments string/list to parse
         @param version: The version string to show.
         @return: the parsed arguments
     '''
@@ -39,6 +39,6 @@ def parse_command_line(regiser_func, version):
         'loaded and it will be overwritten for storing a new '
         'configuration.'), default=None)
 
-    regiser_func(parser)
+    register_argument_parsers(parser)
 
-    return parser.parse_args()
+    return parser.parse_args(args)
