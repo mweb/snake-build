@@ -46,7 +46,7 @@ def parse_command_line(args, version):
         'specified seperatly.'), default=None)
     parser.add_argument('--port', help=_('Specify the network port the server'
         ' is listening. If nothing is specified the port from the config file '
-        'is taken.'), default=None)
+        'is taken.'), type=int, default=None)
 
     register_argument_parsers(parser)
 
