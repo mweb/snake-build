@@ -27,10 +27,11 @@ from snakebuild.common import Daemon, output
 from snakebuild.common.versioneddir import VersionedDirException, \
         ReposConfig, remote_repo_existing, create_new_repo, clone_repo, \
         get_versioned_directory
-from snakebuild.commands import command, handle_cmd
+from snakebuild.commands import handle_cmd
 from snakebuild.communication import Server
 from snakebuild.resourceserver.servercmds import *
 from snakebuild.resourceserver.resource import ResourceManager
+from snakebuild.resourceserver.commandlineparser import command, SHELL_COMMANDS
 
 
 LOG = logging.getLogger('snakebuild.resourceserver.resourceserver')
@@ -44,7 +45,7 @@ def start_server(arguments, config):
         @return true or false depends on success or failure
     '''
     try:
-        return handle_cmd(arguments, config)
+        return handle_cmd(SHELL_COMMANDS, arguments, config)
     except KeyboardInterrupt:
         output.error(_('Abort by keyboard interrupt.'))
         return False
@@ -76,7 +77,7 @@ def stop_server(args, config):
     (('--tag',), {'default': 'master', 'help': _('specify the git tag to use '
         'to read the config of the server.')}),
     (('--name',), {'help': _('The name of the agent to start. This name '
-        'has to be unique on one server.'), 'default': 'snakebuildagent'})
+        'has to be unique on one server.'), 'default': 'resourceserver'})
     ))
 def start_server_now(args, config):
     ''' Start the resource server.

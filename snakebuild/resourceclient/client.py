@@ -20,10 +20,11 @@
 '''
 
 from snakebuild.common import output
-from snakebuild.commands import handle_cmd
+from snakebuild.commands import handle_cmd, shell_command_register
 from snakebuild.i18n import _
 
 from snakebuild.resourceclient.clientcmds import *
+from snakebuild.resourceclient.commandlineparser import SHELL_COMMANDS
 
 
 def run_client(args, config):
@@ -41,7 +42,7 @@ def run_client(args, config):
         config.set('ResourceClient', 'port', args.port)
 
     try:
-        return handle_cmd(args, config)
+        return handle_cmd(SHELL_COMMANDS, args, config)
     except KeyboardInterrupt:
         output.error(_('Abort by Keyboard Interrupt.'))
         return False

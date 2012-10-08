@@ -26,7 +26,7 @@ import time
 import json
 
 from snakebuild.resourceclient.clientcmds import *
-from snakebuild.commands.handler import SHELL_COMMANDS
+from snakebuild.resourceclient.commandlineparser import SHELL_COMMANDS
 from snakebuild.common import Config
 from test_helpers.versioneddir_helper import create_versioned_dir_all
 

@@ -27,7 +27,7 @@ from snakebuild.common import output
 
 
 CMD_FUNCTION, CMD_DESCRIPTION, CMD_PARAM_LIST = range(3)
-SHELL_COMMANDS = {}
+#SHELL_COMMANDS = {}
 
 
 class HandleCmdException(BaseException):
@@ -85,25 +85,26 @@ def _get_documentation(doc):
     return desc
 
 
-def register_argument_parsers(parser):
+def register_argument_parsers(parser, table):
     ''' Register all the commands within the given argument parser.
 
         @param parser: The argument parser to add all the subcommands
+        @param table: The shell comannd table
     '''
     subparsers = parser.add_subparsers(help=_('Commands'), dest='command')
 
-    for cmd, values in SHELL_COMMANDS.iteritems():
+    for cmd, values in table.iteritems():
         cparser = subparsers.add_parser(cmd, help=values[CMD_DESCRIPTION])
         for names, parameters in values[CMD_PARAM_LIST]:
             cparser.add_argument(*names, **parameters)
 
 
-def handle_cmd(args, config):
+def handle_cmd(table, args, config):
     ''' Handle the given command.
 
         To register a new command use the function decorator @command like
         this:
-        @param('mycall', _('DESCRIPTION'), (
+        @command('mycall', _('DESCRIPTION'), (
                 (('--back',), (action='store_true', help=_('background')))
             ))
         def mycall(args, config):
@@ -113,17 +114,21 @@ def handle_cmd(args, config):
             '
             TODO
 
+        The command decorator must be defined before in a local environment.
+
+        command = shell_command_register(SHELL_COMMANDS)
+
         @param args: The command including all the arguments
         @param config: The configuration instance
 
         @return: True if everything went fine False on error
     '''
     cmd = args.command
-    if cmd in SHELL_COMMANDS:
-        return SHELL_COMMANDS[cmd][CMD_FUNCTION](args, config)
+    if cmd in table:
+        return table[cmd][CMD_FUNCTION](args, config)
     else:
         output.error(_('Unknown command: {0}').format(cmd))
         return False
 
 
-command = shell_command_register(SHELL_COMMANDS)
+#command = shell_command_register(SHELL_COMMANDS)

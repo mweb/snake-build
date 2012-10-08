@@ -23,6 +23,7 @@ import unittest
 from test_resource import TestResource
 from test_resourcemanager import TestResourceManager
 from test_commands import TestCommands
+from test_argumentparser import TestArgumentParser
 
 
 def suite():
@@ -30,5 +31,6 @@ def suite():
     res = unittest.TestLoader().loadTestsFromTestCase(TestResource)
     res_mgr = unittest.TestLoader().loadTestsFromTestCase(TestResourceManager)
     commands = unittest.TestLoader().loadTestsFromTestCase(TestCommands)
+    parser = unittest.TestLoader().loadTestsFromTestCase(TestArgumentParser)
 
-    return unittest.TestSuite([res, res_mgr, commands])
+    return unittest.TestSuite([res, res_mgr, commands, parser])

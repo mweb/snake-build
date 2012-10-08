@@ -21,7 +21,11 @@
 from argparse import ArgumentParser
 
 from snakebuild.i18n import _
-from snakebuild.commands import register_argument_parsers
+from snakebuild.commands import register_argument_parsers, \
+        shell_command_register
+
+SHELL_COMMANDS = {}
+command = shell_command_register(SHELL_COMMANDS)
 
 
 def parse_command_line(args, version):
@@ -48,6 +52,6 @@ def parse_command_line(args, version):
         ' is listening. If nothing is specified the port from the config file '
         'is taken.'), type=int, default=None)
 
-    register_argument_parsers(parser)
+    register_argument_parsers(parser, SHELL_COMMANDS)
 
     return parser.parse_args(args)

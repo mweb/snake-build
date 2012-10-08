@@ -21,7 +21,11 @@
 import unittest
 import argparse
 
-from snakebuild.commands import handle_cmd, command, register_argument_parsers
+from snakebuild.commands import handle_cmd, register_argument_parsers, \
+        shell_command_register
+
+SHELL_COMMAND = {}
+command = shell_command_register(SHELL_COMMAND)
 
 
 class TestHandler(unittest.TestCase):
@@ -35,10 +39,10 @@ class TestHandler(unittest.TestCase):
         ''' Test the handle_cmd for the common command handling.
         '''
         parser = argparse.ArgumentParser()
-        register_argument_parsers(parser)
+        register_argument_parsers(parser, SHELL_COMMAND)
 
         args = parser.parse_args(['test1'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test1', 'param1'])
 
@@ -47,29 +51,29 @@ class TestHandler(unittest.TestCase):
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test2', 'param1', 'param2'])
         args = parser.parse_args(['test2', 'param1'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
 
         args = parser.parse_args(['test3'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test3', 'param1', 'param2'])
         args = parser.parse_args(['test3', '--param1', 'value1'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
 
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test4'])
         args = parser.parse_args(['test4', 'param1'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
         args = parser.parse_args(['test4', 'param1', '--param2', 'value2'])
-        self.assertTrue(handle_cmd(args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, None))
 
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test5'])
         with self.assertRaises(SystemExit):
             args = parser.parse_args(['test5', 'param1'])
         args = parser.parse_args(['test5', '12'])
-        self.assertFalse(handle_cmd(args, None))
-        self.assertTrue(handle_cmd(args, 10))
+        self.assertFalse(handle_cmd(SHELL_COMMAND, args, None))
+        self.assertTrue(handle_cmd(SHELL_COMMAND, args, 10))
 
 
 @command('test1', ())

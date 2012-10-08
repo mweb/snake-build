@@ -23,11 +23,12 @@ import logging
 from snakebuild.common import output
 from snakebuild.common import Daemon
 from snakebuild.i18n import _
-from snakebuild.commands import command, handle_cmd
+from snakebuild.commands import handle_cmd
 from snakebuild.communication import Server
 # this needs to be imported to fill the REMOTE_COMMANDS
 import snakebuild.buildagent.agentcmds
 #from snakebuild.buildagent.buildagent import BuildAgent
+from snakebuild.resourceclient.commandlineparser import SHELL_COMMANDS, command
 
 LOG = logging.getLogger('snakebuild.buildagent.agent')
 
@@ -42,14 +43,14 @@ def run_agent(arguments, config):
         @return true or false depends on success or failure
     '''
     try:
-        return handle_cmd(arguments, config)
+        return handle_cmd(SHELL_COMMANDS, arguments, config)
     except KeyboardInterrupt:
         output.error(_('Abort by keyboard interrupt.'))
         return False
 
 
 @command('stop', (
-    (('--name',), {'help': _('The name of the agent to stop.'), 
+    (('--name',), {'help': _('The name of the agent to stop.'),
         'default': 'snakebuildagent'}),
     ))
 def stop_agent(args, config):

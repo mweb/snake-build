@@ -71,7 +71,6 @@ class TestArgumentParser(unittest.TestCase):
         self.assertTrue(result.server == 'remote')
         self.assertTrue(result.port == 1234)
 
-
     def test_arguments_acquire(self):
         ''' Test the argumentparser for the acquire command of the client.
         '''
@@ -116,7 +115,6 @@ class TestArgumentParser(unittest.TestCase):
         self.assertTrue(result.username == 'Arther')
         self.assertTrue(result.server == 'remote')
         self.assertTrue(result.port == 1234)
-
 
     def test_arguments_release(self):
         ''' Test the argumentparser for the release command of the client.

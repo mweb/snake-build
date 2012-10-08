@@ -20,5 +20,5 @@
     command line tools.
 '''
 
-from snakebuild.commands.handler import handle_cmd, command,\
-        register_argument_parsers
+from snakebuild.commands.handler import handle_cmd, register_argument_parsers,\
+        shell_command_register
