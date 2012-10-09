@@ -97,14 +97,14 @@ def init_resource_from_obj(obj):
             'keywords' in obj and 'parameters' in obj):
         raise ResourceException('Not all requiered keys available.')
 
-    if type(obj['name']) is str or type(obj['name']) is unicode:
+    if type(obj['name']) in (str, unicode):
         resource = Resource(obj['name'])
     else:
         raise ResourceException(_('The name type must be a string. Got: '
                 '{0}').format(obj['name']))
     if type(obj['keywords']) is list:
         for key in obj['keywords']:
-            if type(key) is str or type(key) is unicode:
+            if type(key) in (str, unicode):
                 if key.lower() in resource.keywords:
                     LOG.warning(_('Duplicated keywords ({0}) for resource '
                             '({0})').format(key, resource.name))
