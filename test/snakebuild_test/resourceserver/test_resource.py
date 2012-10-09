@@ -20,8 +20,8 @@
 
 import unittest
 
-from snakebuild.resourceserver.resource import Resource, \
-        init_resource_from_string, ResourceException
+from snakebuild.resourceserver.resource import init_resource_from_string, \
+        init_resource_from_obj, ResourceException
 
 
 class TestResource(unittest.TestCase):
@@ -33,16 +33,122 @@ class TestResource(unittest.TestCase):
     def test_resource_creation(self):
         ''' Test the resource creation methods.
         '''
+        # from a json string
         demo = '''{ "name": "Test1",
                     "parallel_count" : 2,
                     "keywords": ["myTest", "build"],
                     "parameters": { "value1" : "arther" }
                   }
                 '''
+
         res = init_resource_from_string(demo)
         self.assertTrue(res.name == "Test1")
         self.assertTrue(res.parallel_count == 2)
         self.assertTrue(res.current_count == 2)
+        self.assertTrue('mytest' in res.keywords)
+        self.assertTrue('build' in res.keywords)
+        self.assertTrue('test1' in res.keywords)
+        self.assertTrue(res.parameters['value1'] == 'arther')
+
+        # from object now
+        demo_obj = {'name': 'Test1',
+                'parallel_count': 3,
+                'keywords': ['myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+
+        res = init_resource_from_obj(demo_obj)
+        self.assertTrue(res.name == "Test1")
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue('mytest' in res.keywords)
+        self.assertTrue('build' in res.keywords)
+        self.assertTrue('test1' in res.keywords)
+        self.assertTrue(res.parameters['value1'] == 'arther')
+
+        # from a json string (incomplete)
+        demo = '''{ "name": "Test1",
+                    "keywords": ["myTest", "build"],
+                    "parameters": { "value1" : "arther" }
+                  }
+                '''
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_string(demo)
+
+        # from object now (incomplete)
+        demo_obj = {'name': 'Test1',
+                'parallel_count': 3,
+                'keywords': ['myTest', 'build'],
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        demo_obj = {'name': 'Test1',
+                'parallel_count': 3,
+                'parameters': {'value1': 'arther'}
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        demo_obj = {'parallel_count': 3,
+                'keywords': ['myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        # from object now (illegal name)
+        demo_obj = {'name': 123,
+                'parallel_count': 3,
+                'keywords': ['myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        # from object now (count as string)
+        demo_obj = {'name': "Test1",
+                'parallel_count': "3",
+                'keywords': ['myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+        res = init_resource_from_obj(demo_obj)
+        self.assertTrue(res.name == "Test1")
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 3)
+        self.assertTrue('mytest' in res.keywords)
+        self.assertTrue('build' in res.keywords)
+        self.assertTrue('test1' in res.keywords)
+        self.assertTrue(res.parameters['value1'] == 'arther')
+
+        # from object now (count as string an not a number)
+        demo_obj = {'name': "Test1",
+                'parallel_count': "three",
+                'keywords': ['myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        # from object now (paramerters not as a dictionary)
+        demo_obj = {'name': "Test1",
+                'parallel_count': 3,
+                'keywords': ['myTest', 'build'],
+                'parameters': ['value1', 'arther']
+                }
+        with self.assertRaises(ResourceException):
+            res = init_resource_from_obj(demo_obj)
+
+        # from object now (with a duplicate key name)
+        demo_obj = {'name': "Test1",
+                'parallel_count': 3,
+                'keywords': ['build', 'test1', 'myTest', 'build'],
+                'parameters': {'value1': 'arther'}
+                }
+        res = init_resource_from_obj(demo_obj)
+        self.assertTrue(res.name == "Test1")
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 3)
         self.assertTrue('mytest' in res.keywords)
         self.assertTrue('build' in res.keywords)
         self.assertTrue('test1' in res.keywords)
