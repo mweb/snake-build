@@ -172,6 +172,8 @@ class Resource(object):
     def parallel_count(self, value):
         ''' The setter method for the parallel count value. take care if the
             current count must be increased as well or not.
+            The value of 0 is special since this allows an infinit number of
+            normal user but offers the possiblity to have exclusive access.
 
             @param value: The new value to set
         '''
@@ -180,10 +182,9 @@ class Resource(object):
                     'be an integer. Got: {0} ({1})').format(value,
                     type(value)))
 
-        if value <= 0:
+        if value < 0:
             raise ResourceException(_('Illegal value for parallel count must '
-                    'be >0. Got: {0:d}').format(value))
-            self._parallel_count = value
+                    'be >=0. Got: {0:d}').format(value))
 
         self.count_lock.acquire()
         # if no resource are in use then set the current count to the same
@@ -219,7 +220,8 @@ class Resource(object):
         '''
         while self.run:
             self.count_lock.acquire()
-            if (self._current_count <= 0 or
+            if ((self._current_count <= 0 and self._parallel_count > 0) or
+                    (self.exclusive and self._parallel_count == 0) or
                     (self.wait_for_exclusive and not exclusive) or
                     (exclusive and
                         self._current_count != self._parallel_count)):

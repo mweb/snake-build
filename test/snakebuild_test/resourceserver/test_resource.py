@@ -19,6 +19,7 @@
 ''' The unit test for the resource object '''
 
 import unittest
+from threading import Thread
 
 from snakebuild.resourceserver.resource import init_resource_from_string, \
         init_resource_from_obj, ResourceException
@@ -183,6 +184,23 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 0)
 
+        # test a infinit resource
+        res.parallel_count = 0
+        self.assertTrue(res.parallel_count == 0)
+        self.assertTrue(res.current_count == -4)
+        for i in range(100):
+            self.assertTrue(res.acquire('unit_test', False, False))
+            self.assertTrue(res.current_count == (-5 - i))
+        tobj = ThreadExclusiveWaiter(res, 'unit_test_ex')
+        tobj.start()
+        self.assertTrue(tobj.is_alive())
+        self.assertFalse(res.acquire('unit_test', False, False))
+        for i in range(104):
+            self.assertTrue(res.release('unit_test', False))
+            self.assertTrue(res.current_count == (-103 + i))
+        tobj.join(1.0)
+        self.assertFalse(tobj.is_alive())
+
     def test_release_command(self):
         ''' Test the release method if it sets the counters correctly.
         '''
@@ -290,6 +308,36 @@ class TestResource(unittest.TestCase):
         self.assertTrue(res.release('unit_test', False))
         self.assertTrue(res.parallel_count == 1)
         self.assertTrue(res.current_count == -1)
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.current_count == 1)
+
+        # set parallel count with an exclusive lock on
+        res.parallel_count = 2
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 2)
+        self.assertTrue(res.acquire('unit_test', True, True))
+        self.assertTrue(res.parallel_count == 2)
+        self.assertTrue(res.current_count == 0)
+        res.parallel_count = 3
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 0)
+        self.assertTrue(res.release('unit_test', False))
+        self.assertTrue(res.parallel_count == 3)
+        self.assertTrue(res.current_count == 3)
+
+        # illegal value string
+        with self.assertRaises(ResourceException):
+            res.parallel_count = "Test"
+        # illegal value float
+        with self.assertRaises(ResourceException):
+            res.parallel_count = 12.43
+        # illegal value boolean
+        with self.assertRaises(ResourceException):
+            res.parallel_count = False
+        # illegal value negative integer
+        with self.assertRaises(ResourceException):
+            res.parallel_count = -12
 
     def test_shutdown_command(self):
         ''' Test the shutdown command
@@ -317,3 +365,21 @@ class TestResource(unittest.TestCase):
         self.assertTrue(not res.acquire('unit_test', False, False))
         self.assertTrue(res.parallel_count == 4)
         self.assertTrue(res.current_count == 4)
+
+
+class ThreadExclusiveWaiter(Thread):
+    ''' This is a helper class which tries to acquire a resource exclusivly
+        and waits till it gets the resource.
+    '''
+    def __init__(self, resource, username):
+        ''' CTor
+            @param resource: The resource to acquire
+            @param username: The username to use for the acquire
+        '''
+        Thread.__init__(self)
+        self.resource = resource
+        self.username = username
+
+    def run(self):
+        ''' Wait for the resource to be available for the exclusive job. '''
+        self.resource.acquire('unit_test', True, True)
