@@ -33,7 +33,7 @@ def create_versioned_dir_all(name):
         directories will be created within the tmp directory. One for the
         bare repository and one for the checked out repos.
 
-        @param: The name of the repository to use.
+        @param name: The name of the repository to use.
         @return: A tuple with the versioneddir object ready to use and the
                 bare repos path
     '''
@@ -52,12 +52,36 @@ def create_versioned_dir_all(name):
 
     return repo, base_dir
 
+
+def remove_versioned_dir_all(name):
+    ''' Remove a previously created versioned directory
+        (create_versioned_dir_all)
+
+        @param name: The name of the repository to remove.
+    '''
+    base_dir = os.path.join(tmp_data_dir(), 'snakebuild_{0}_bare'.format(name))
+    repos_dir = os.path.join(tmp_data_dir(), 'snakebuild_{0}'.format(name))
+    if os.path.isdir(base_dir):
+        shutil.rmtree(base_dir)
+    if os.path.isdir(repos_dir):
+        shutil.rmtree(repos_dir)
+
+
 def create_versioned_dir(name):
     ''' Create a new versioned directory with the given name. Two new
         directories will be created within the tmp directory. One for the
         bare repository and one for the checked out repos.
 
-        @param: The name of the repository to use.
+        @param name: The name of the repository to use.
         @return: The versioneddir object ready to use.
     '''
     return create_versioned_dir_all(name)[0]
+
+
+def remove_versioned_dir(name):
+    ''' Remove up a versioned directory, which was created with
+        create_versioned_dir-
+
+        @param name: The name of the repository to remove.
+    '''
+    return remove_versioned_dir_all(name)
