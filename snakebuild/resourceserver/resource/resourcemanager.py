@@ -35,10 +35,10 @@ LOG = logging.getLogger('snakebuild.resourceserver.resource.resourcemanager')
 
 
 class ResourceManager(object):
-    ''' The resourcemanager class. This class manages a list of resources. An
+    ''' The resource manager class. This class manages a list of resources. An
         instance of this class will handle all the request for resources. This
-        includes getting a new resource or releaseing a resource. In addition
-        it provides an interface to get informations about the resources.
+        includes getting a new resource or releasing a resource. In addition
+        it provides an interface to get information about the resources.
     '''
 
     def __init__(self, resource_repo):
@@ -70,7 +70,7 @@ class ResourceManager(object):
                     if name in self.keywords[keyword]:
                         # it is already here why?
                         LOG.warning(_('A dupplicate keyword, resource name, '
-                                'this should not happend. Ignore it: '
+                                'this should not happen. Ignore it: '
                                 'Keyword={0}, ResoruceName={1}').format(
                                 keyword, name))
                         continue
@@ -82,7 +82,7 @@ class ResourceManager(object):
         ''' Shut down the resource manager. If there are any request waiting
             wake up the given thread and decline all questions for resources.
         '''
-        LOG.info(_('Recieved shutdown signal.'))
+        LOG.info(_('Received shutdown signal.'))
         self.run = False
         self.release_listener.set()
         for resource in self.resources.itervalues():
@@ -93,12 +93,12 @@ class ResourceManager(object):
             method will block if no resource for the given keyword is
             available.
 
-            @param uname: The username to use as the user of the resource
+            @param uname: The user name to use as the user of the resource
             @param keyword: The keyword to search for the resource
             @param exclusive: Boolean value if set to True then the user will
-                usethe resource exclusiv no one else should be using it.
+                use the resource exclusive no one else should be using it.
 
-            @return: The name of the resource aquired or None if not available.
+            @return: The name of the resource acquired or None if not available.
         '''
         keyword = keyword.lower()
         if not keyword in self.keywords:
@@ -117,7 +117,7 @@ class ResourceManager(object):
 
     def release(self, resourcename, uname, exclusive):
         ''' Release a given resource. If the resource wasn't locked by the
-            given user nothin will happen.
+            given user nothing will happen.
 
             The exclusive boolean is to release the exclusive lock from a
             resource. The user will keep a normal lock of the resource till he
