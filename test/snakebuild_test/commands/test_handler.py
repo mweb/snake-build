@@ -75,6 +75,10 @@ class TestHandler(unittest.TestCase):
         self.assertFalse(handle_cmd(SHELL_COMMAND, args, None))
         self.assertTrue(handle_cmd(SHELL_COMMAND, args, 10))
 
+        # call with an illegal command this should never happen thanks to the
+        # parserS
+        self.assertFalse(handle_cmd(SHELL_COMMAND, DummyArgs('arther'), None))
+
 
 @command('test1', ())
 def _test1(options, config):
@@ -136,3 +140,10 @@ def _test5(args, config):
         return False
 
     return True
+
+
+class DummyArgs(object):
+    ''' A dummy class simulating a parsed object to start the handle_command
+    '''
+    def __init__(self, cname):
+        self.command = cname
