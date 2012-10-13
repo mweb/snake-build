@@ -19,6 +19,7 @@
 ''' The unit test for the resource object '''
 
 import unittest
+import time
 from threading import Thread
 
 from snakebuild.resourceserver.resource import init_resource_from_string, \
@@ -194,6 +195,9 @@ class TestResource(unittest.TestCase):
         tobj = ThreadExclusiveWaiter(res, 'unit_test_ex')
         tobj.start()
         self.assertTrue(tobj.is_alive())
+        # wait quickly to be sure that the new thread has asked for the
+        # resource
+        time.sleep(.1)
         self.assertFalse(res.acquire('unit_test', False, False))
         for i in range(104):
             self.assertTrue(res.release('unit_test', False))
