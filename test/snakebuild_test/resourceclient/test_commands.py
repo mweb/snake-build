@@ -62,14 +62,12 @@ class TestCommands(unittest.TestCase):
         ''' Test the status command function.
         '''
         self.assertTrue('status' in SHELL_COMMANDS)
-        self.assertTrue(
-                SHELL_COMMANDS['status'][0](None, self.config) == False)
+        self.assertFalse(SHELL_COMMANDS['status'][0](None, self.config))
         self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
                 '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
                 'start', '--background']))
         time.sleep(0.2)
-        self.assertTrue(SHELL_COMMANDS['status'][0](None, self.config) \
-                == True)
+        self.assertTrue(SHELL_COMMANDS['status'][0](None, self.config))
 
         self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
 
