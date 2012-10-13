@@ -33,14 +33,19 @@ def tail(ofile, lines=10, bufsize=1024):
     ofile.seek(0, os.SEEK_END)
     size_bytes = ofile.tell()
     result_lines = []
-    while len(result_lines) < lines and size_bytes > 0:
+    while len(result_lines) <= lines and size_bytes > 0:
         if (size_bytes - bufsize > 0):
             # go back the size of the buffer
             ofile.seek(-bufsize, os.SEEK_CUR)
-            data = ofile.read(bufsize)
-            ofile.seek(-bufsize, os.SEEK_CUR)
         else:
+            # go to the beginning of the file
             ofile.seek(0, os.SEEK_SET)
+        data = ofile.read(bufsize)
+        ofile.seek(-len(data), os.SEEK_CUR)
+
+        # check if the previous read line was complete
+        if not data[-1] == '\n' and len(result_lines) > 0:
+            data += result_lines.pop(0)
         result_lines = data.splitlines() + result_lines
         size_bytes -= bufsize
 

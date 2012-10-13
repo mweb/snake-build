@@ -72,4 +72,44 @@ class TestFileTools(unittest.TestCase):
         ''' Test the tail function. This function allows getting the last
             few lines of a file. Depending on your configuration.
         '''
-        pass
+        lines = ['Test line One', 'Test line Two', 'Test line Three',
+                'Test line Four', 'Test line Five', 'Test line Six']
+        wfile = open(os.path.join(self.tmpdir, 'tail.txt'), 'w')
+        for line in lines:
+            wfile.write("{0}\n".format(line))
+        wfile.flush()
+
+        rfile = open(os.path.join(self.tmpdir, 'tail.txt'), 'r')
+        read_lines = filetools.tail(rfile, 3)
+        self.assertTrue(len(read_lines) == 3)
+        self.assertTrue(read_lines[0] == lines[3])
+        self.assertTrue(read_lines[1] == lines[4])
+        self.assertTrue(read_lines[2] == lines[5])
+
+        wfile.write('Test')
+        wfile.flush()
+        read_lines = filetools.tail(rfile, 3)
+        self.assertTrue(len(read_lines) == 3)
+        self.assertTrue(read_lines[0] == lines[4])
+        self.assertTrue(read_lines[1] == lines[5])
+        self.assertTrue(read_lines[2] == 'Test')
+
+        # test windows file endings
+        lines = ['Test line One', 'Test line Two', 'Test line Three',
+                'Test line Four', 'Test line Five', 'Test line Six']
+        for line in lines:
+            wfile.write("{0}\r\n".format(line))
+        wfile.flush()
+        read_lines = filetools.tail(rfile, 3)
+        self.assertTrue(len(read_lines) == 3)
+        self.assertTrue(read_lines[0] == lines[3])
+        self.assertTrue(read_lines[1] == lines[4])
+        self.assertTrue(read_lines[2] == lines[5])
+
+        # now try reading with a buffer size going onto a new line
+        read_lines = filetools.tail(rfile, 3, 13)
+        self.assertTrue(len(read_lines) == 3)
+        self.assertTrue(read_lines[0] == lines[3])
+        self.assertTrue(read_lines[1] == lines[4])
+        self.assertTrue(read_lines[2] == lines[5])
+
