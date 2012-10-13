@@ -20,6 +20,8 @@
 
 import unittest
 import json
+import tempfile
+import shutil
 import os.path
 
 from snakebuild.common import Config, AppDirs
@@ -30,8 +32,7 @@ class TestConfig(unittest.TestCase):
     ''' The unit test for the snake build common Config class. '''
     def setUp(self):
         AppDirs().init('snakebuild_test')
-        self.config_dir = os.path.join(os.path.dirname(__file__), '..', '..',
-                'data')
+        self.config_dir = tempfile.mkdtemp()
         data = {"application_name": 'snakebuild_test',
                 "Client": {
                     "first": {"default": "Start", "type": "str",
@@ -54,9 +55,17 @@ class TestConfig(unittest.TestCase):
                     "forth": {"default": 3.3333, "type": "float",
                         "description": "Dolphins"},
                     "fifth": {"default": False, "type": "bool",
-                        "description": "G'Gugvunnts and Vl'hurgs"}}}
+                        "description": "G'Gugvunnts and Vl'hurgs"}},
+                "hidden": {
+                    "one": {"default": "password", "type": "str",
+                        "description": "The hidden password"}}}
         dfd = open(os.path.join(self.config_dir, 'test_data.txt'), 'w')
         dfd.write(json.dumps(data))
+
+    def tearDown(self):
+        ''' Remove temporary files '''
+        if os.path.isdir(self.config_dir):
+            shutil.rmtree(self.config_dir)
 
     def test_init_config(self):
         ''' Initialize the config object with default values and check values.
@@ -95,12 +104,16 @@ class TestConfig(unittest.TestCase):
     def test_save_default_config(self):
         ''' Test the save functionality of the config module '''
         config = Config()
-#        config.init_default_config(os.path.join(self.config_dir,
-#                'test_data.txt'))
+        config.init_default_config(os.path.join(self.config_dir,
+                'test_data.txt'))
 
         config.save(os.path.join(self.config_dir, 'test_default_output.txt'))
         config.save(os.path.join(self.config_dir,
                 'test_default_output_verbose.txt'), True)
+        # with directory
+        config.save(os.path.join(self.config_dir, 'step',
+                'test_default_output.txt'))
+
         config.set('client', 'first', 42)
         config.set('client', 'second', 42)
         config.set('server', 'first', 42)
@@ -108,6 +121,36 @@ class TestConfig(unittest.TestCase):
         config.save(os.path.join(self.config_dir, 'test_save_output.txt'))
         config.save(os.path.join(self.config_dir,
                 'test_save_output_verbose.txt'), True)
+
+        # read the generated default output file (only two sections expected
+        # nothing else should be in here since we haven't changed one value.
+        sections, values, comments = \
+                self._parse_config_file('test_default_output.txt')
+        self.assertTrue(sections == 2)
+        self.assertTrue(values == 0)
+        self.assertTrue(comments == 0)
+
+        # search the verbose file with 3 lines of comment for each entry
+        sections, values, comments = \
+                self._parse_config_file('test_default_output_verbose.txt')
+        self.assertTrue(sections == 2)
+        self.assertTrue(values == 0)
+        self.assertTrue(comments == 30)
+
+        # read the config file after two value for each section where set
+        sections, values, comments = \
+                self._parse_config_file('test_save_output.txt')
+        self.assertTrue(sections == 2)
+        self.assertTrue(values == 4)
+        self.assertTrue(comments == 0)
+
+        # search the verbose file with 3 lines of comment for each entry and
+        # some value where set with a none standard value
+        sections, values, comments = \
+                self._parse_config_file('test_save_output_verbose.txt')
+        self.assertTrue(sections == 2)
+        self.assertTrue(values == 4)
+        self.assertTrue(comments == 30)
 
     def test_set_config(self):
         ''' Test seting and getting values from the config object '''
@@ -152,6 +195,23 @@ class TestConfig(unittest.TestCase):
         config.set('client', 'fifth', False)
         self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
                 True, False)
+        # the same with a string
+        config.set('client', 'fifth', "False")
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
+                True, False)
+        config.set('client', 'fifth', "True")
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
+                True, True)
+        # the same with numbers
+        config.set('client', 'fifth', 0)
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
+                True, False)
+        config.set('client', 'fifth', 1)
+        self._check_value(config, 'client', 'fifth', 'Belcerebons', bool,
+                True, True)
+        # with illegal value
+        with self.assertRaises(ConfigValueException):
+            config.set('client', 'fifth', 'no')
 
         config.set('server', 'first', True)
         self._check_value(config, 'server', 'first', 'Betelgeusians', str,
@@ -168,6 +228,98 @@ class TestConfig(unittest.TestCase):
         config.set('server', 'fifth', True)
         self._check_value(config, 'server', 'fifth',
                 "G'Gugvunnts and Vl'hurgs", bool, False, True)
+
+    def test_get_description_illegal_values(self):
+        ''' Test what happens if illegal or not existing values are being
+            tried to be accessed.
+        '''
+        config = Config()
+        config.init_default_config(os.path.join(self.config_dir,
+                'test_data.txt'))
+
+        # try to access a value that does not exist
+        with self.assertRaises(ConfigValueException):
+            config.get_description('server', 'alpha')
+
+        # set a new value with no description and access it.
+        config.set('server', 'alpha', "12")
+        desc, ctype, default = config.get_description('server', 'alpha')
+        self.assertTrue(desc == '')
+        self.assertTrue(default == '')
+        self.assertTrue(ctype == str)
+
+        # access section which does not exist
+        with self.assertRaises(ConfigValueException):
+            config.get_description('sunrise', 'alpha')
+
+        # set value of a not existing section and access it again
+        config.set('sunrise', 'alpha', 12)
+        desc, ctype, default = config.get_description('sunrise', 'alpha')
+        self.assertTrue(desc == '')
+        self.assertTrue(default == '')
+        self.assertTrue(ctype == str)
+
+    def test_loading_illegal_config_description_files(self):
+        ''' Test the mechanism to load config description files with illegal
+            values.
+        '''
+        # read simple config description file with missing value (default
+        # value)
+        data = {"application_name": 'snakebuild_test',
+                "Client": {
+                    "fifth": {"type": "bool",
+                        "description": "Belcerebons"}}}
+        dfd = open(os.path.join(self.config_dir, 'test_data2.txt'), 'w')
+        dfd.write(json.dumps(data))
+        dfd.close()
+
+        with self.assertRaises(ConfigValueException):
+            config = Config()
+            config.init_default_config(os.path.join(self.config_dir,
+                    'test_data2.txt'))
+
+        # read simple config description file with missing value (type
+        # value)
+        data = {"application_name": 'snakebuild_test',
+                "Client": {
+                    "fifth": {"default": True,
+                        "description": "Belcerebons"}}}
+        dfd = open(os.path.join(self.config_dir, 'test_data2.txt'), 'w')
+        dfd.write(json.dumps(data))
+        dfd.close()
+
+        with self.assertRaises(ConfigValueException):
+            config = Config()
+            config.init_default_config(os.path.join(self.config_dir,
+                    'test_data2.txt'))
+
+        # read simple config description file with missing value (description
+        # value)
+        data = {"application_name": 'snakebuild_test',
+                "Client": {
+                    "fifth": {"default": True, "type": 'bool'}}}
+        dfd = open(os.path.join(self.config_dir, 'test_data2.txt'), 'w')
+        dfd.write(json.dumps(data))
+        dfd.close()
+
+        with self.assertRaises(ConfigValueException):
+            config = Config()
+            config.init_default_config(os.path.join(self.config_dir,
+                    'test_data2.txt'))
+
+        # read simple config description file with an unsuproted type
+        data = {"application_name": 'snakebuild_test',
+                "Client": {
+                    "fifth": {"default": True, "type": 'value',
+                        "description": "Belcerebons"}}}
+        dfd = open(os.path.join(self.config_dir, 'test_data2.txt'), 'w')
+        dfd.write(json.dumps(data))
+        dfd.close()
+
+        with self.assertRaises(ConfigValueException):
+            config = Config()
+            config.init_default_config(os.path.join(self.config_dir,
+                    'test_data2.txt'))
 
     def _check_value(self, config, section, key, edesc, etype, edefault,
             evalue):
@@ -187,3 +339,24 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(default == edefault)
         self.assertTrue(desc == edesc)
         self.assertTrue(ctype == etype)
+
+    def _parse_config_file(self, filename):
+        ''' parse a config file and count the number of sections, values and
+            comments.
+
+            @param filename: The name of the config file to read
+            @return #section, #values, #comments
+        '''
+        cfl = open(os.path.join(self.config_dir, filename))
+        sections = 0
+        values = 0
+        comments = 0
+        for line in cfl.readlines():
+            line = line.strip()
+            if line.startswith('[') and line.endswith(']'):
+                sections += 1
+            elif line.startswith('#'):
+                comments += 1
+            elif len(line.split('=')) == 2:
+                values += 1
+        return sections, values, comments

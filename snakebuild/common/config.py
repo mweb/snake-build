@@ -174,19 +174,17 @@ class Config(object, ConfigParser.SafeConfigParser):
 
         if value_type != type(value):
             if value_type == bool:
-                try:
-                    if (value.lower() == 'true' or value.lower() == 't' or
-                            int(value) > 0):
-                        value = True
-                    elif (value.lower() == 'false' or value.lower() == 'f' or
-                            int(value) == 0):
-                        value = False
-                    else:
-                        raise ConfigValueException(_('Could not convert '
-                                'boolean type: {0}').format(value))
-                except:
-                    raise ConfigValueException(_('Could not convert {0} to '
-                            'type boolean').format(value))
+                if ((type(value) in (str, unicode) and
+                        value.lower() in ('true', 't')) or
+                        (type(value) == int and value > 0)):
+                    value = True
+                elif ((type(value) in (str, unicode) and
+                        value.lower() in ('false', 'f')) or
+                        (type(value) == int and value == 0)):
+                    value = False
+                else:
+                    raise ConfigValueException(_('Could not convert '
+                            'boolean type: {0}').format(value))
             else:
                 value = value_type(value)
 
@@ -233,7 +231,6 @@ class Config(object, ConfigParser.SafeConfigParser):
             self.remove_section('hidden')
 
         cfp = open(filename, 'w')
-#        self.write(cfp)
         self._write_config(cfp, verbose)
 
         if hidden is not None:
@@ -256,7 +253,7 @@ class Config(object, ConfigParser.SafeConfigParser):
         '''
         desc = []
         for section in self.sections():
-            if section.lower() == '' or section.lower() == 'hidden':
+            if section.lower() in ('', 'hidden'):
                 continue
             desc.append("")
             desc.append('[{0}]'.format(section))
@@ -267,7 +264,8 @@ class Config(object, ConfigParser.SafeConfigParser):
                     desc.append("# Type: [{0}]".format(str(value_type)))
                     desc.append("# {0}={1}".format(key, default))
                 if not self.get_s(section, key) == default:
-                    desc.append('{0}={1}'.format(key, self.get_s(section, key)))
+                    desc.append('{0}={1}'.format(key,
+                        self.get_s(section, key)))
                 if verbose:
                     desc.append("")
 
@@ -293,7 +291,7 @@ class Config(object, ConfigParser.SafeConfigParser):
             key = key.lower()
             if not ('default' in value and 'type' in value and
                     'description' in value):
-                raise ConfigValueException(_('For the given key no all '
+                raise ConfigValueException(_('For the given key not all '
                         'required values are defined.'))
             if not self.has_option(section, key):
                 self.set(section, key, value['default'])
