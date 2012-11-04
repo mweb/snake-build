@@ -32,6 +32,12 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_client_send(self):
+        ''' Test the Client object send command. '''
+        cli = Client('localhost', 9999)
+        with self.assertRaises(ClientCommunicationException):
+            cli.send(4, 'test', 12)
+
     def test_parse_sjson_data(self):
         ''' Test the private method _parse_sjson_data.
 
@@ -105,6 +111,7 @@ class TestClient(unittest.TestCase):
             This method expects a socket to receive the data. With this test
             we provide a dummy socket that provides the expected data.
         '''
+        # receive a valid message
         data = {'cmd': 'test', 'parameters': {'list': [1, 2, 3], 'element': 12,
             'others': 'Elephant'}}
 
@@ -119,6 +126,53 @@ class TestClient(unittest.TestCase):
         cmd, param = _receive(dummy_sock)
         self.assertTrue(cmd == data['cmd'])
         self.assertTrue(param == data['parameters'])
+
+        # receive empty message (raises exception)
+        message_string = ""
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        with self.assertRaises(ClientCommunicationException):
+            cmd, param = _receive(dummy_sock)
+
+        # receive incomplete message (header incomplete (lenght))
+        length = len(msg)
+        message_string = ('a' + chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256))
+
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        with self.assertRaises(ClientCommunicationException):
+            cmd, param = _receive(dummy_sock)
+
+        # receive a message without cmd (illegal)
+        data = {'cmmd': 'test', 'parameters': {'list': [1, 2, 3],
+                'element': 12, 'others': 'Elephant'}}
+
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = ('a' + chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        with self.assertRaises(ClientCommunicationException):
+            cmd, param = _receive(dummy_sock)
+
+        # receive a message without parameters (illegal)
+        data = {'cmd': 'test', 'parammeters': {'list': [1, 2, 3],
+                'element': 12, 'others': 'Elephant'}}
+
+        msg = json.dumps(data)
+        length = len(msg)
+        message_string = ('a' + chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        dummy_sock = DummySocket()
+        dummy_sock.add_data(message_string)
+        with self.assertRaises(ClientCommunicationException):
+            cmd, param = _receive(dummy_sock)
 
     def test_receive_unknown(self):
         ''' Test the private method _receive. Receive a unknown type.

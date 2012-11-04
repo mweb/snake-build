@@ -19,8 +19,16 @@
 ''' The unit test for the resource client run command. '''
 
 import unittest
+import os.path
+import shutil
+import subprocess
+import time
 
 from snakebuild.resourceclient.client import run_client
+from snakebuild.common import Config
+
+from test_commands import _create_resource_configs, _create_client_config,\
+        _create_server_config
 
 
 class TestClient(unittest.TestCase):
@@ -29,9 +37,57 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         ''' Setup the test case. Nothing to do here.
         '''
-        pass
+        self.config_dir = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..',
+                'data', 'client_tests'))
+        if os.path.isdir(self.config_dir):
+            shutil.rmtree(os.path.join(self.config_dir))
+        os.makedirs(os.path.join(self.config_dir))
+
+        config_data_file = os.path.join(os.path.dirname(__file__), '..', '..',
+                '..', 'data', 'resourceclient.conf')
+        self.server_bin = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..',
+                '..', 'bin', 'sb-resourceserver'))
+
+        resource_config = _create_resource_configs()
+        _create_server_config(self.config_dir, resource_config)
+        config_file = _create_client_config(self.config_dir)
+
+        self.config = Config()
+        self.config.init_default_config(config_data_file)
+        self.config.load(config_file)
 
     def test_run_cmd(self):
         ''' Test the run command of the client.
         '''
-        self.assertTrue(True)
+        self.assertTrue(0 == subprocess.call([self.server_bin, '-f',
+                '{0:s}'.format(os.path.join(self.config_dir, 'server.conf')),
+                'start', '--background']))
+        time.sleep(0.2)
+
+        args = DummyArgs(None, None, None)
+        args.command = 'status'
+        self.assertTrue(run_client(args, self.config))
+
+        args = DummyArgs('fritz', None, None)
+        args.command = 'status'
+        self.assertTrue(run_client(args, self.config))
+
+        args = DummyArgs(None, 'other.local', None)
+        args.command = 'status'
+        self.assertFalse(run_client(args, self.config))
+
+        args = DummyArgs(None, None, 9898)
+        args.command = 'status'
+        self.assertFalse(run_client(args, self.config))
+
+        self.assertTrue(0 == subprocess.call([self.server_bin, 'stop']))
+
+
+class DummyArgs(object):
+    ''' Dummy object to run the commands '''
+    def __init__(self, username, server, port):
+        self.username = username
+        self.server = server
+        self.port = port

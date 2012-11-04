@@ -35,11 +35,11 @@ def run_client(args, config):
         @return true or false depends on success or failure
     '''
     if args.username is not None:
-        config.set('ResourceClient', 'clientname', args.username)
+        config.set('resourceclient', 'clientname', args.username)
     if args.server is not None:
-        config.set('ResourceClient', 'hostname', args.server)
+        config.set('resourceclient', 'hostname', args.server)
     if args.port is not None:
-        config.set('ResourceClient', 'port', args.port)
+        config.set('resourceclient', 'port', args.port)
 
     try:
         return handle_cmd(SHELL_COMMANDS, args, config)
