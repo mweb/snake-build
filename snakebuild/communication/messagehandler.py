@@ -130,8 +130,7 @@ def _handle_cmd(cmd, parameters, commands, data, signed):
         return _call_cmd(commands[cmd], cmd, parameters, data, signed)
     else:
         cmd_list = dict((k.lower(), v) for k, v in commands.iteritems())
-        if cmd.lower() in cmd_list:
-            cmd = cmd.lower()
+        if cmd in cmd_list:
             return _call_cmd(cmd_list[cmd], cmd, parameters, data, signed)
         else:
             return prepare_error(_('The requested command is not supported '
