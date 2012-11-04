@@ -19,6 +19,7 @@
 
 import unittest
 import json
+import os
 
 from snakebuild.communication.messagehandler import MessageHandler, _handle_cmd
 from snakebuild.communication.commandstructure import prepare_answer, \
@@ -26,12 +27,20 @@ from snakebuild.communication.commandstructure import prepare_answer, \
 
 from test_helpers.dummysocket import DummySocket
 from test_helpers.dummycontainer import DummyContainer
+from test_helpers.logfile_helper import prepare_log_file, check_log_file
 
 
 class TestMessageHandler(unittest.TestCase):
     ''' The unit test for the snake build communication Server class. '''
     def setUp(self):
+        self.logfile = prepare_log_file()
+
         self.got_handled = {'cmd': None, 'parameters': None}
+
+    def tearDown(self):
+        ''' remove log file '''
+        if os.path.isfile(self.logfile):
+            os.remove(self.logfile)
 
     def test_handle_request(self):
         ''' Test the handle method of the message handler. '''
@@ -80,6 +89,66 @@ class TestMessageHandler(unittest.TestCase):
         self.assertTrue(self.got_handled['Test'] == [1, 2])
         self.assertTrue(self.got_handled['Other'] == 'Quack')
         self.assertTrue(self.got_handled['data'] == 16.7)
+
+    def test_parse_sjson_request_illegal(self):
+        ''' Test the private method _parse_sjson_request with illegal
+            requests.
+        '''
+        length = 10
+        # do not send enough bytes for the lenght
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256))
+
+        dummy = DummySocket()
+
+        hdlr = MessageHandler(dummy, None, None)
+        hdlr.server = DummyContainer()
+        hdlr.server.commands = {'test': (self._handle_call_back,
+                ['Test', 'Other'], False)}
+        hdlr.server.data = 16.7
+        dummy.add_data(message_string)
+        hdlr._parse_sjson_request()
+        self.assertTrue(check_log_file(self.logfile, "The message received "
+                "did not return 4 bytes for the length of the message: Got "
+                "only: 3"))
+
+        length = 10
+        msg = "123"
+        # do not send the right of bytes after the length
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        dummy = DummySocket()
+
+        hdlr = MessageHandler(dummy, None, None)
+        hdlr.server = DummyContainer()
+        hdlr.server.commands = {'test': (self._handle_call_back,
+                ['Test', 'Other'], False)}
+        hdlr.server.data = 16.7
+        dummy.add_data(message_string)
+        hdlr._parse_sjson_request()
+        self.assertTrue(check_log_file(self.logfile, "Wrong length of data "
+                "received: Expected 10 but got 3"))
+
+        length = 5
+        msg = "{12345"
+        # do not send a json string
+        message_string = (chr((length >> 24) % 256) +
+                chr((length >> 16) % 256) + chr((length >> 8) % 256) +
+                chr(length % 256)) + msg
+
+        dummy = DummySocket()
+
+        hdlr = MessageHandler(dummy, None, None)
+        hdlr.server = DummyContainer()
+        hdlr.server.commands = {'test': (self._handle_call_back,
+                ['Test', 'Other'], False)}
+        hdlr.server.data = 16.7
+        dummy.add_data(message_string)
+        hdlr._parse_sjson_request()
+        self.assertTrue(check_log_file(self.logfile, "Could not parse the "
+                "received data. Not a valid json string."))
 
     def test_handle_cmd(self):
         ''' Test the private method of the message handler class. '''

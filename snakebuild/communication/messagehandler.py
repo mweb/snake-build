@@ -67,7 +67,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         length_data = self.request.recv(4)
         if not len(length_data) == 4:
             LOG.error(_('The message received did not return 4 bytes for the '
-                    'length of th message: Only got: {0:d}').format(
+                    'length of the message: Got only: {0:d}').format(
                     len(length_data)))
             return
         length = ((ord(length_data[0]) << 24) + (ord(length_data[1]) << 16) +
@@ -76,7 +76,7 @@ class MessageHandler(SocketServer.BaseRequestHandler):
         data = self.request.recv(length)
         if not len(data) == length:
             LOG.error(_('Wrong length of data received: Expected {0:d} but '
-                    'got {0:d}').format(length, len(data)))
+                    'got {1:d}').format(length, len(data)))
             return
         try:
             cmd = json.loads(data)
